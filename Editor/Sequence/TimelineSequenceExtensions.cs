@@ -1,0 +1,105 @@
+using System;
+using System.IO;
+using System.Linq;
+using UnityEditor.Recorder;
+using UnityEngine;
+using UnityEngine.Sequences;
+using UnityEngine.Sequences.Timeline;
+
+namespace UnityEditor.Sequences
+{
+    public static class TimelineSequenceExtensions
+    {
+        public static void Save(this TimelineSequence clip, string folder = null)
+        {
+            folder = folder ?? GetParentSequencePath(clip);
+
+            if (clip.timeline != null)
+            {
+                string timelinePath = null;
+                if (SequencesAssetDatabase.LoadAsset(clip.timeline) == null)
+                    timelinePath = SequencesAssetDatabase.GenerateUniqueMasterSequencePath(clip.timeline.name, folder, ".playable");
+
+                SequencesAssetDatabase.SaveAsset(clip.timeline, timelinePath);
+            }
+        }
+
+        public static void Rename(this TimelineSequence clip, string newName)
+        {
+            if (TimelineSequence.IsNullOrEmpty(clip) || !SequencesAssetDatabase.IsRenameValid(clip.name, newName))
+                return;
+
+            SequencesAssetDatabase.RenameAsset(clip.timeline, newName + "_Timeline");
+
+            // Parent track hold the name of the editorial clip.
+            // This makes sure the rename gets reported to this asset.
+            if (clip.editorialClip != null)
+                EditorUtility.SetDirty(clip.editorialClip.GetParentTrack());
+
+            clip.name = newName;
+        }
+
+        public static void Delete(this TimelineSequence clip)
+        {
+            if (TimelineSequence.IsNullOrEmpty(clip))
+                return;
+
+            SequencesAssetDatabase.DeleteAsset(clip.timeline);
+        }
+
+        /// <summary>
+        /// Records a TimelineSequence using its start/end time, FPS values and name to set up the recorder settings.
+        /// </summary>
+        /// <param name="clip">The TimelineSequence to record.</param>
+        /// <param name="recordAs">True to open the RecorderWindow and allow manual parameterization before recording,
+        /// false to launch a record with current settings.</param>
+        public static void Record(this TimelineSequence clip, bool recordAs = false)
+        {
+            var controllerSettings = RecorderControllerSettings.GetGlobalSettings();
+
+            clip.GetRecordFrameStartAndEnd(out var frameStart, out var frameEnd);
+            controllerSettings.SetRecordModeToFrameInterval(frameStart, frameEnd);
+            controllerSettings.FrameRate = clip.fps;
+
+            // TODO: It would be best to use Recorder token to set the path (could be by adding a <MasterSequence> token)
+            foreach (var recorderSettings in controllerSettings.RecorderSettings)
+                recorderSettings.FileNameGenerator.Leaf = Path.Combine("Recordings", SequencesAssetDatabase.GetSequenceContextPath(clip));
+
+            // TODO: When Recorder will allow to start a record without opening the RecorderWindow, this code will need
+            //       to be refactored to not open the RecorderWindow when not needed (i.e. recordAs is false and at
+            //       least one recorder exist and is enabled).
+            var recorderWindow = EditorWindow.GetWindow<RecorderWindow>();
+            recorderWindow.titleContent = new GUIContent($"Record {clip.name}");
+            recorderWindow.SetRecorderControllerSettings(controllerSettings);
+
+            var settings = controllerSettings.RecorderSettings.ToList();
+            if (recorderWindow != null && !recordAs && settings.Count > 0 && settings.Any(item => item.Enabled))
+            {
+                // Start the recording immediately if recordAs is false and if there is at least one enabled recorder.
+                recorderWindow.StartRecording();
+            }
+        }
+
+        /// <summary>
+        /// Get the right frame start and end to setup records.
+        /// </summary>
+        /// <param name="clip">The TimelineSequence to record and used to compute start and end frames.</param>
+        /// <param name="frameStart">The computed start frame number (as an integer).</param>
+        /// <param name="frameEnd">The computed end frame number (as an integer).</param>
+        /// <remarks>This conversion is mainly used to workaround the fact that if we provide time in second to
+        /// recorder, then the output record contains 1 extra frame at the end that is not wanted.</remarks>
+        internal static void GetRecordFrameStartAndEnd(this TimelineSequence clip, out int frameStart, out int frameEnd)
+        {
+            frameStart = (int)Math.Ceiling(clip.start * clip.fps);
+            frameEnd = (int)Math.Ceiling(clip.end * clip.fps) - 1;
+        }
+
+        static string GetParentSequencePath(this Sequence clip)
+        {
+            if (clip.parent == null) return "";
+
+            var path = clip.parent != null ? GetParentSequencePath(clip.parent as TimelineSequence) : "";
+            return Path.Combine(path, clip.parent.name);
+        }
+    }
+}

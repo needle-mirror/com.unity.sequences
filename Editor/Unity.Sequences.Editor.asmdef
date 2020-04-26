@@ -1,0 +1,21 @@
+{
+    "name": "Unity.Sequences.Editor",
+    "references": [
+        "Unity.Sequences",
+        "Unity.Timeline.Editor",
+        "Unity.Timeline",
+        "Unity.Settings.Editor",
+        "Unity.Recorder.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
