@@ -12,6 +12,10 @@ namespace UnityEditor.Sequences
 
         static VersionValidator()
         {
+            // Do not run this if we are in a secondary process such as the Standalone Profiler process.
+            if (!PackageUtility.IsRunningInMainEditorInstance())
+                return;
+
             EditorApplication.delayCall += ValidateVersion;
         }
 

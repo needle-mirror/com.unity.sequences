@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.Sequences;
@@ -49,7 +50,6 @@ namespace UnityEditor.Sequences
         /// <returns>The newly created MasterSequence asset.</returns>
         public static MasterSequence CreateMasterSequence(string name, float fps = 24.0f)
         {
-            Undo.IncrementCurrentGroup();
             Undo.SetCurrentGroupName("Create Master Sequence");
             var groupIndex = Undo.GetCurrentGroup();
 
@@ -73,7 +73,6 @@ namespace UnityEditor.Sequences
         /// <returns>The newly created TimelineSequence.</returns>
         public static TimelineSequence CreateSequence(string name, MasterSequence masterSequence, TimelineSequence parent = null)
         {
-            Undo.IncrementCurrentGroup();
             Undo.SetCurrentGroupName("Create Sequence");
             var groupIndex = Undo.GetCurrentGroup();
 
@@ -98,17 +97,20 @@ namespace UnityEditor.Sequences
         /// <param name="masterSequence">The MasterSequence to remove the Sequence from.</param>
         public static void DeleteSequence(TimelineSequence sequence, MasterSequence masterSequence)
         {
-            Undo.IncrementCurrentGroup();
             Undo.SetCurrentGroupName("Delete Sequence");
             var groupIndex = Undo.GetCurrentGroup();
 
             if (TimelineEditor.selectedClip == sequence.editorialClip)
                 TimelineEditor.selectedClip = null;
 
+            var sequenceFolderPath = SequencesAssetDatabase.GetSequenceFolder(sequence);
             foreach (var removedSequence in masterSequence.RemoveSequence(sequence))
             {
                 removedSequence.Delete();
             }
+
+            if (!string.IsNullOrEmpty(sequenceFolderPath) && SequencesAssetDatabase.IsEmpty(sequenceFolderPath, true))
+                AssetDatabase.DeleteAsset(sequenceFolderPath);
 
             masterSequence.Save();
             sequenceDeleted?.Invoke();

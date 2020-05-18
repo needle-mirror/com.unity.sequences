@@ -6,6 +6,7 @@ namespace UnityEngine.Sequences.Timeline
 {
     public static class TrackAssetExtensions
     {
+        // This function is only used in tests.
         public static T GetOrCreateSubTrackByName<T>(this TrackAsset asset, string name)
             where T : TrackAsset, new()
         {
@@ -17,6 +18,7 @@ namespace UnityEngine.Sequences.Timeline
             return asset.timelineAsset.CreateTrack<T>(asset, name);
         }
 
+        // This function is only used in tests.
         public static T GetOrCreateFirstAssetClipOfType<T>(this TrackAsset track)
             where T : PlayableAsset
         {

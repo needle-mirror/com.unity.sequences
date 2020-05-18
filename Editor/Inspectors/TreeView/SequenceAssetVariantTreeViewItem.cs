@@ -28,7 +28,7 @@ namespace UnityEditor.Sequences
 
         public override bool ValidateCreation(string newName)
         {
-            throw new System.NotImplementedException();
+            return true;
         }
 
         public void SetSequenceAssetVariant(GameObject variant)

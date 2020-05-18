@@ -17,7 +17,21 @@ namespace UnityEditor.Sequences
             public GameObject[] variants = new GameObject[0];
         }
 
-        internal static event Action indexerChanged;
+        /// <summary>
+        /// Event triggered when a new Sequence Asset or Sequence Asset Variant has been imported.
+        /// </summary>
+        internal static event Action<GameObject> sequenceAssetImported;
+
+        /// <summary>
+        /// Event triggered when a Sequence Asset or Sequence Asset Variant has been deleted from the
+        /// asset database.
+        /// </summary>
+        internal static event Action sequenceAssetDeleted;
+
+        /// <summary>
+        /// Event triggered when a Sequence Asset has been renamed or moved into another folder.
+        /// </summary>
+        internal static event Action<GameObject> sequenceAssetUpdated;
 
         // TODO: Use ISerializationCallbackReceiver to build a data structure easier and faster to access.
         [SerializeField] Index[] m_Indexes = new Index[0];
@@ -39,7 +53,13 @@ namespace UnityEditor.Sequences
                 AddSequenceAssetVariant(source, prefab);
             }
 
-            IndexerChanged();
+            sequenceAssetImported?.Invoke(prefab);
+            Save();
+        }
+
+        public void UpdateSequenceAsset(GameObject prefab)
+        {
+            sequenceAssetUpdated?.Invoke(prefab);
         }
 
         public void PruneDeletedSequenceAsset()
@@ -65,13 +85,15 @@ namespace UnityEditor.Sequences
             }
 
             if (isIndexerChanged)
-                IndexerChanged();
+            {
+                sequenceAssetDeleted?.Invoke();
+                Save();
+            }
         }
 
-        public void IndexerChanged()
+        public void Save()
         {
             instance.Save(true);
-            indexerChanged?.Invoke();
         }
 
         public int GetIndexOf(GameObject prefab)
@@ -117,10 +139,10 @@ namespace UnityEditor.Sequences
                 if (!SequenceAssetUtility.IsSequenceAsset(prefab))
                     continue;
 
-                // Moved assets.
+                // Moved or renamed assets.
                 if (ArrayUtility.Contains(movedAssets, path))
                 {
-                    SequenceAssetIndexer.instance.IndexerChanged();
+                    SequenceAssetIndexer.instance.UpdateSequenceAsset(prefab);
                     continue;
                 }
 

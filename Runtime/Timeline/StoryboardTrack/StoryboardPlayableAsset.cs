@@ -48,7 +48,6 @@ namespace UnityEngine.Sequences.Timeline
         // TODO: Add blending
         public ClipCaps clipCaps => ClipCaps.None;
 
-        /// <inheritdoc cref="PlayableAsset.CreatePlayable"/>
         public override Playable CreatePlayable(PlayableGraph graph, GameObject owner)
         {
             var playable = ScriptPlayable<StoryboardPlayableBehaviour>.Create(graph);

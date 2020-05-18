@@ -5,7 +5,7 @@ using UnityEngine.Timeline;
 
 namespace UnityEngine.Sequences.Timeline
 {
-    public static class TimelineAssetExtensions
+    public static partial class TimelineAssetExtensions
     {
         public static T GetTrack<T>(this TimelineAsset asset, string name) where T : TrackAsset
         {

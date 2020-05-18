@@ -1,17 +1,61 @@
-using System;
-using System.Reflection;
 using UnityEditor.Timeline;
-using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Sequences;
+#if !UNITY_2021_2_0_A18_OR_NEWER
+using System;
+using System.Reflection;
+using UnityEditorInternal;
+#endif
 
 namespace UnityEditor.Sequences.Startup
 {
-    //TODO: UnityEditor.DragAndDropService is used here to setup a custom drag and drop for MasterSequence assets.
-    //This API is not yet public but will be in future Unity release. Make sure to update this code as soon as this API is officially public and released.
     [InitializeOnLoad]
     class SetupMasterSequenceDragAndDrop
     {
+#if UNITY_2021_2_0_A18_OR_NEWER
+        static SetupMasterSequenceDragAndDrop()
+        {
+            DragAndDrop.AddDropHandler(HierarchyDropHandler);
+            MasterSequence.sequenceAdded += RefreshTimelineEditor;
+            MasterSequence.sequenceRemoved += RefreshTimelineEditor;
+        }
+
+        static DragAndDropVisualMode HierarchyDropHandler(int dropTargetInstanceID,
+            HierarchyDropFlags dropFlags, Transform parentForDraggedObjects, bool perform)
+        {
+            MasterSequence masterSequence = null;
+            foreach (var objectReference in DragAndDrop.objectReferences)
+            {
+                if (objectReference is MasterSequence)
+                {
+                    masterSequence = objectReference as MasterSequence;
+                    break;
+                }
+            }
+
+            if (masterSequence == null)
+                return DragAndDropVisualMode.None;
+
+            if (perform)
+            {
+                SequenceFilter[] sequenceFilters = GameObject.FindObjectsOfType<SequenceFilter>();
+                foreach (var sequenceFilter in sequenceFilters)
+                {
+                    if (sequenceFilter.masterSequence == masterSequence)
+                    {
+                        Debug.Log("MasterSequence \"" + masterSequence.name + "\" already exists in the scene.");
+                        return DragAndDropVisualMode.Generic;
+                    }
+                }
+                // parentForDraggedObjects is always null in this call. We expect it to vary when the cinemactic is dragged and dropped under
+                // different objects in the hierarchy. It will remain for now, but make sure to double-check it when te API releases.
+                SequenceFilter.GenerateSequenceRepresentation(masterSequence, masterSequence.rootSequence, parentForDraggedObjects);
+            }
+
+            return DragAndDropVisualMode.Generic;
+        }
+
+#else
         static SetupMasterSequenceDragAndDrop()
         {
             Assembly editor = typeof(UnityEditor.Editor).Assembly;
@@ -62,6 +106,8 @@ namespace UnityEditor.Sequences.Startup
 
             return DragAndDropVisualMode.Generic;
         }
+
+#endif
 
         static void RefreshTimelineEditor(MasterSequence masterSequence, Sequence sequence)
         {

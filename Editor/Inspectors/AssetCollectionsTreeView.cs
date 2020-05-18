@@ -13,10 +13,16 @@ namespace UnityEditor.Sequences
         VisualElement m_VisualElementContainer;
         List<TreeViewItem> m_Items;
 
-        TreeViewItem m_RootTreeViewItem;
-
         // Keep an indexer to assign unique ID to new TreeViewItem.
         int m_IndexGenerator;
+
+        bool isCreatingNewItem
+        {
+            get
+            {
+                return m_Items.Exists(treeviewItem => (treeviewItem as TreeViewItemBase).state == TreeViewItemBase.State.Creation);
+            }
+        }
 
         public AssetCollectionsTreeView(TreeViewState state, VisualElement container)
             : base(state)
@@ -24,14 +30,118 @@ namespace UnityEditor.Sequences
             m_VisualElementContainer = container;
             m_Items = new List<TreeViewItem>();
 
-            m_IndexGenerator = 0;
-            m_RootTreeViewItem = new TreeViewItem { id = GetNextId(), depth = -1, displayName = "Root" };
-            SetupParentsAndChildrenFromDepths(m_RootTreeViewItem, m_Items);
+            /// ID starts at 1 as the root item's ID is 0.
+            m_IndexGenerator = 1;
             Reload();
 
             getNewSelectionOverride = OnNewSelection;
 
-            SequenceAssetIndexer.indexerChanged += RefreshData;
+            SequenceAssetIndexer.sequenceAssetImported += OnSequenceAssetImported;
+            SequenceAssetIndexer.sequenceAssetDeleted += OnSequenceAssetDeleted;
+            SequenceAssetIndexer.sequenceAssetUpdated += OnSequenceAssetUpdated;
+        }
+
+        public void Unload()
+        {
+            SequenceAssetIndexer.sequenceAssetImported -= OnSequenceAssetImported;
+            SequenceAssetIndexer.sequenceAssetDeleted -= OnSequenceAssetDeleted;
+            SequenceAssetIndexer.sequenceAssetUpdated -= OnSequenceAssetUpdated;
+        }
+
+        /// <summary>
+        /// Listens for new import of Sequence Assets from the AssetDatabase.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        void OnSequenceAssetImported(GameObject gameObject)
+        {
+            // Case 1. Sequence Asset is created from the Sequence Window.
+            if (isCreatingNewItem)
+                return;
+
+            // Case 2. Duplicated Prefab or Prefab variant created from the Project View.
+            if (SequenceAssetUtility.IsSource(gameObject))
+            {
+                if (GetSequenceAssetItemFrom(gameObject) != null)
+                    return;
+
+                string type = SequenceAssetUtility.GetType(gameObject);
+                var root = GetCollectionAssetItemFrom(type);
+
+                CreateSequenceAssetTreeViewItem(gameObject, root as CollectionTypeTreeViewItem);
+            }
+            else if (SequenceAssetUtility.IsVariant(gameObject))
+            {
+                if (GetSequenceAssetVariantItemFrom(gameObject) != null)
+                    return;
+
+                GameObject baseObject = SequenceAssetUtility.GetSource(gameObject);
+                TreeViewItem root = GetSequenceAssetItemFrom(baseObject);
+                CreateSequenceAssetVariantTreeViewItem(gameObject, root as SequenceAssetTreeViewItem);
+            }
+
+            Reload();
+        }
+
+        /// <summary>
+        /// Listens for deletion of Sequence Assets in the AssetDatabse.
+        /// It detaches TreeView items affected by this deletion.
+        /// </summary>
+        /// <param name="gameObject"></param>
+        void OnSequenceAssetDeleted()
+        {
+            // Deletion from the asset database.
+            // Go over all the items and delete the ones with an invalid prefab reference.
+            for (int i = m_Items.Count - 1; i > 0; --i)
+            {
+                var sequenceAssetItem = m_Items[i] as SequenceAssetTreeViewItem;
+                if (sequenceAssetItem != null && sequenceAssetItem.asset == null)
+                {
+                    Detach(sequenceAssetItem);
+                    continue;
+                }
+
+                var sequenceAssetVariant = m_Items[i] as SequenceAssetVariantTreeViewItem;
+                if (sequenceAssetVariant != null && sequenceAssetVariant.asset == null)
+                    Detach(sequenceAssetVariant);
+            }
+        }
+
+        void OnSequenceAssetUpdated(GameObject sequenceAsset)
+        {
+            TreeViewItem item = null;
+
+            if (SequenceAssetUtility.IsSource(sequenceAsset))
+                item = GetSequenceAssetItemFrom(sequenceAsset);
+            else if (SequenceAssetUtility.IsVariant(sequenceAsset))
+                item = GetSequenceAssetVariantItemFrom(sequenceAsset);
+
+            if (item != null)
+                item.displayName = sequenceAsset.name;
+        }
+
+        TreeViewItem GetCollectionAssetItemFrom(string type)
+        {
+            return m_Items.Find(treeviewItem =>
+            {
+                return (treeviewItem.depth == 0) && (treeviewItem as CollectionTypeTreeViewItem).collectionType == type;
+            });
+        }
+
+        TreeViewItem GetSequenceAssetItemFrom(GameObject gameObject)
+        {
+            return m_Items.Find(treeviewItem =>
+            {
+                return (treeviewItem.depth == 1) && (treeviewItem as SequenceAssetTreeViewItem).asset == gameObject;
+            });
+        }
+
+        TreeViewItem GetSequenceAssetVariantItemFrom(GameObject gameObject)
+        {
+            return m_Items.Find((treeviewItem) =>
+            {
+                var variantItem = treeviewItem as SequenceAssetVariantTreeViewItem;
+                return variantItem != null && variantItem.asset == gameObject;
+            });
         }
 
         void GenerateTreeFromData(GameObject[] sequenceAssets)
@@ -71,24 +181,11 @@ namespace UnityEditor.Sequences
             {
                 if (evt.isKey && evt.type == EventType.KeyUp && evt.keyCode == KeyCode.Delete)
                 {
-                    RemoveSelection(GetSelection());
+                    DeleteItems(GetSelection());
                 }
             }
 
             OnGUI(m_VisualElementContainer.contentRect);
-        }
-
-        internal void RefreshData()
-        {
-            m_Items.Clear();
-            SetupParentsAndChildrenFromDepths(m_RootTreeViewItem, m_Items);
-            Reload();
-
-            GameObject[] sequenceAssets = SequenceAssetUtility.FindAllSources().ToArray();
-            GenerateTreeFromData(sequenceAssets);
-
-            Reload();
-            ExpandAll();
         }
 
         internal void CreateSequenceAssetInContext(string collectionType)
@@ -116,8 +213,33 @@ namespace UnityEditor.Sequences
 
         internal void CreateSequenceAssetVariantInContext(GameObject source)
         {
-            SequenceAssetUtility.CreateVariant(source);
-            RefreshData();
+            // This methods runs differently from other TreeViewItems.
+            // UX: The user cannot set a custom name to a new Asset Variant.
+            // However, we want the creation process to follow the same rules as the others TreeViewItems.
+            // This is done in three steps.
+
+            var root = GetSequenceAssetItemFrom(source);
+            int newId = GetNextId();
+
+            // 1.Create an empty TreeViewItem for the new variant.
+            // Let its internal state set to State.Creation.
+            SequenceAssetVariantTreeViewItem newItem = new SequenceAssetVariantTreeViewItem() { id = newId, depth = 2 };
+            newItem.owner = this;
+            m_Items.Add(newItem);
+            root.AddChild(newItem);
+
+            // 2. Request the creation of an Asset Variant.
+            GameObject variant = SequenceAssetUtility.CreateVariant(source);
+
+            // 3. Assign the new Asset Variant to the empty TreeViewItem.
+            // Internal state then becomes State.Ok.
+            newItem.SetSequenceAssetVariant(variant);
+            newItem.displayName = variant.name;
+
+            // Repaint the view.
+            Reload();
+
+            SetSelection(new int[] { newItem.id }, TreeViewSelectionOptions.RevealAndFrame);
         }
 
         CollectionTypeTreeViewItem CreateAssetCollectionTreeViewItem(string name)
@@ -128,7 +250,6 @@ namespace UnityEditor.Sequences
             newItem.SetCollectionType(name);
             newItem.owner = this;
             m_Items.Add(newItem);
-            rootItem.AddChild(newItem);
 
             return newItem;
         }
@@ -150,7 +271,7 @@ namespace UnityEditor.Sequences
         {
             int newId = GetNextId();
 
-            SequenceAssetVariantTreeViewItem newItem = new SequenceAssetVariantTreeViewItem() { id = newId, depth = 1, displayName = prefab.name };
+            SequenceAssetVariantTreeViewItem newItem = new SequenceAssetVariantTreeViewItem() { id = newId, depth = 2, displayName = prefab.name };
             newItem.SetSequenceAssetVariant(prefab);
             newItem.owner = this;
             m_Items.Add(newItem);
@@ -191,22 +312,21 @@ namespace UnityEditor.Sequences
                 {
                     if (item.ValidateCreation(args.newName))
                     {
-                        RefreshData();
+                        Reload();
                     }
                     else
-                        RemoveSelection(new int[] { args.itemID });
+                        DeleteItems(new int[] { args.itemID });
                 }
                 else if (item.state == TreeViewItemBase.State.Ok)
                 {
                     item.Rename(args.newName);
-                    // TODO: only rebuild the children as opposed to the full tree view
-                    RefreshData();
+                    Reload();
                 }
             }
             else
             {
                 if (item.state == TreeViewItemBase.State.Creation)
-                    RemoveSelection(new int[] { args.itemID });
+                    Detach(item);
             }
         }
 
@@ -215,7 +335,12 @@ namespace UnityEditor.Sequences
             return false;
         }
 
-        void RemoveSelection(IList<int> ids)
+        /// <summary>
+        /// Trigger a delete action request on each item from the given parameter.
+        /// Item's implementation is responsible for validating the request.
+        /// </summary>
+        /// <param name="ids"></param>
+        void DeleteItems(IList<int> ids)
         {
             foreach (int id in ids)
             {
@@ -224,7 +349,6 @@ namespace UnityEditor.Sequences
                 if (item is object)
                     item.Delete();
             }
-            RefreshData();
         }
 
         TreeViewItemBase GetItem(int id)
@@ -239,8 +363,24 @@ namespace UnityEditor.Sequences
 
         protected override TreeViewItem BuildRoot()
         {
-            SetupDepthsFromParentsAndChildren(m_RootTreeViewItem);
-            return m_RootTreeViewItem;
+            var root = new TreeViewItem()
+            {
+                depth = -1
+            };
+
+            if (m_Items.Count == 0)
+            {
+                GameObject[] sequenceAssets = SequenceAssetUtility.FindAllSources().ToArray();
+                GenerateTreeFromData(sequenceAssets);
+            }
+
+            foreach (var item in m_Items)
+            {
+                if (item.depth == 0)
+                    root.AddChild(item);
+            }
+
+            return root;
         }
 
         protected override void DoubleClickedItem(int id)
@@ -270,6 +410,19 @@ namespace UnityEditor.Sequences
             EditorGUI.indentLevel = args.item.depth + 1;
             EditorGUI.LabelField(args.rowRect, gui, itemStyle);
             EditorGUI.indentLevel = indentLevel;
+        }
+
+        /// <summary>
+        /// Detaches the given item from the TreeView without action on the assigned item.
+        /// </summary>
+        /// <param name="item"></param>
+        public void Detach(TreeViewItem item)
+        {
+            item.parent.children.Remove(item);
+            item.parent = null;
+            m_Items.Remove(item);
+
+            Reload();
         }
     }
 }

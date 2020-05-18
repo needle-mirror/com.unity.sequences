@@ -177,15 +177,11 @@ namespace UnityEngine.Sequences.Timeline
         protected virtual void OnCreateClip(UnityEngine.Timeline.TimelineClip clip);
     }
 
-    [System.Runtime.CompilerServices.Extension] public static class TimelineAssetExtension
-    {
-        [System.Runtime.CompilerServices.Extension] public static System.Collections.Generic.IReadOnlyCollection<string> GetScenes(UnityEngine.Timeline.TimelineAsset timeline);
-    }
-
     [System.Runtime.CompilerServices.Extension] public static class TimelineAssetExtensions
     {
         [System.Runtime.CompilerServices.Extension] public static UnityEngine.Playables.PlayableDirector FindDirector(UnityEngine.Timeline.TimelineAsset timeline);
         [System.Runtime.CompilerServices.Extension] public static T GetOrCreateTrack<T>(UnityEngine.Timeline.TimelineAsset asset, string name) where T : UnityEngine.Timeline.TrackAsset, new();
+        [System.Runtime.CompilerServices.Extension] public static System.Collections.Generic.IReadOnlyCollection<string> GetScenes(UnityEngine.Timeline.TimelineAsset timeline);
         [System.Runtime.CompilerServices.Extension] public static T GetTrack<T>(UnityEngine.Timeline.TimelineAsset asset, string name) where T : UnityEngine.Timeline.TrackAsset;
     }
 

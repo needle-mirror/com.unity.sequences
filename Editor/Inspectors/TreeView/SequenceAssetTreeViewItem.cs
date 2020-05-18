@@ -19,6 +19,7 @@ namespace UnityEditor.Sequences
 
             var sequenceAsset = SequenceAssetUtility.CreateSource(newName, collectionType);
             SetSequenceAsset(sequenceAsset);
+            displayName = sequenceAsset.name;
 
             return true;
         }
@@ -39,7 +40,6 @@ namespace UnityEditor.Sequences
                 return;
 
             SequenceAssetUtility.DeleteSourceAsset(asset);
-            (owner as AssetCollectionsTreeView).RefreshData();
         }
 
         public override void Rename(string newName)

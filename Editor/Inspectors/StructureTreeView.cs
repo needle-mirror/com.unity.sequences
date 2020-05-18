@@ -18,10 +18,20 @@ namespace UnityEditor.Sequences
         VisualElement m_VisualElementContainer;
         List<TreeViewItem> m_Items;
 
-        TreeViewItem m_RootTreeViewItem;
-
         // Keep an indexer to assign unique ID to new TreeViewItem.
         int m_IndexGenerator;
+
+        /// <summary>
+        /// Tells if TreeView is in the process of creating a new item.
+        /// <seealso cref="TreeViewItemBase.state"/>
+        /// </summary>
+        bool isCreatingNewItem
+        {
+            get
+            {
+                return m_Items.Exists(treeviewItem => (treeviewItem as TreeViewItemBase).state == TreeViewItemBase.State.Creation);
+            }
+        }
 
         public StructureTreeView(TreeViewState state, VisualElement container)
             : base(state)
@@ -29,26 +39,79 @@ namespace UnityEditor.Sequences
             m_VisualElementContainer = container;
             m_Items = new List<TreeViewItem>();
 
-            m_IndexGenerator = 0;
-            m_RootTreeViewItem = new TreeViewItem { id = GetNextId(), depth = -1, displayName = "Root" };
-            SetupParentsAndChildrenFromDepths(m_RootTreeViewItem, m_Items);
+            /// ID starts at 1 as the root item's ID is 0.
+            m_IndexGenerator = 1;
             Reload();
 
             getNewSelectionOverride = OnNewSelection;
             SelectionUtility.sequenceSelectionChanged += OnSequenceSelectionChanged;
-            SequenceUtility.sequenceCreated += OnSequenceUpdate;
+            SequenceUtility.sequenceCreated += OnSequenceCreated;
             SequenceUtility.sequenceDeleted += OnSequenceDeleted;
             Sequence.sequenceRenamed += OnSequenceRenamed;
         }
 
-        void OnSequenceUpdate(TimelineSequence sequence, MasterSequence masterSequence)
+        public void Unload()
         {
-            RefreshData();
+            SelectionUtility.sequenceSelectionChanged -= OnSequenceSelectionChanged;
+            SequenceUtility.sequenceCreated -= OnSequenceCreated;
+            SequenceUtility.sequenceDeleted -= OnSequenceDeleted;
+            Sequence.sequenceRenamed -= OnSequenceRenamed;
         }
 
+        /// <summary>
+        /// Listens for creation of a new Sequence from the API then create a new TreeViewItem when it's necessary.
+        /// </summary>
+        /// <param name="sequence"></param>
+        /// <param name="masterSequence"></param>
+        /// <remarks>
+        /// There are three ways to create a Sequence (regardless its level in the hierarchy):
+        /// 1. From the Sequences Window.
+        /// 2. From the Hierarchy Window.
+        /// 3. Directly from the API.
+        ///
+        /// When this is triggered because of 1., skip this event as the corresponding TreeViewItem is already created.
+        /// </remarks>
+        void OnSequenceCreated(TimelineSequence sequence, MasterSequence masterSequence)
+        {
+            // Case 1.
+            if (isCreatingNewItem)
+                return;
+
+            // Case 2 and 3.
+            if (sequence == masterSequence.rootSequence)
+            {
+                // A MasterSequence asset has been created.
+                var masterSequenceItem = CreateNewMasterSequenceFrom(masterSequence);
+                rootItem.AddChild(masterSequenceItem);
+            }
+            else if (sequence.parent == masterSequence.rootSequence)
+            {
+                // A Sequence asset has been created.
+                var masterSequenceItem = GetMasterSequenceItemFrom(masterSequence);
+                var sequenceItem = CreateNewSequenceFrom(sequence, masterSequenceItem, masterSequence);
+            }
+            else
+            {
+                // A SubSequence asset has been created.
+                var sequenceItem = GetSequenceTreeViewItemFrom(sequence.parent as TimelineSequence);
+                var subSequenceItem = CreateNewSubSequenceFrom(sequence, sequenceItem, masterSequence);
+            }
+        }
+
+        /// <summary>
+        /// Listens for deletion of a Sequence from in the API.
+        /// </summary>
         void OnSequenceDeleted()
         {
-            RefreshData();
+            for (int i = m_Items.Count - 1; i > 0; --i)
+            {
+                EditorialElementTreeViewItem editorialItem = m_Items[i] as EditorialElementTreeViewItem;
+                if (editorialItem == null)
+                    continue;
+
+                if (TimelineSequence.IsNullOrEmpty(editorialItem.timelineSequence))
+                    Detach(editorialItem);
+            }
         }
 
         void OnSequenceSelectionChanged()
@@ -63,6 +126,8 @@ namespace UnityEditor.Sequences
             var foundItem = m_Items.Find(item => (item as EditorialElementTreeViewItem).timelineSequence == sequence);
             if (foundItem != null)
                 SetSelection(new int[] { foundItem.id }, TreeViewSelectionOptions.RevealAndFrame);
+
+            Reload();
         }
 
         void OnSequenceRenamed(Sequence sequence)
@@ -116,7 +181,7 @@ namespace UnityEditor.Sequences
             {
                 if (evt.isKey && evt.type == EventType.KeyUp && evt.keyCode == KeyCode.Delete)
                 {
-                    RemoveSelection(GetSelection());
+                    DeleteItems(GetSelection());
                 }
             }
 
@@ -158,24 +223,43 @@ namespace UnityEditor.Sequences
             EditorGUI.indentLevel = indentLevel;
         }
 
-        public void RefreshData()
-        {
-            m_Items.Clear();
-            SetupParentsAndChildrenFromDepths(m_RootTreeViewItem, m_Items);
-            Reload();
-
-            IEnumerable<MasterSequence> existingAssets = SequencesAssetDatabase.FindAsset<MasterSequence>();
-            GenerateTreeFromData(existingAssets);
-
-            Reload();
-            ExpandAll();
-        }
-
         protected override TreeViewItem BuildRoot()
         {
-            SetupDepthsFromParentsAndChildren(m_RootTreeViewItem);
+            var root = new TreeViewItem()
+            {
+                depth = -1
+            };
+            root.children = new List<TreeViewItem>(m_Items.Count);
 
-            return m_RootTreeViewItem;
+            if (m_Items.Count == 0)
+            {
+                IEnumerable<MasterSequence> existingAssets = SequencesAssetDatabase.FindAsset<MasterSequence>();
+                GenerateTreeFromData(existingAssets);
+            }
+
+
+            //foreach (var item in m_Items)
+            for (int i = m_Items.Count - 1; i >= 0; --i)
+            {
+                if (m_Items[i].depth == 0)
+                {
+                    var item = (m_Items[i] as EditorialElementTreeViewItem);
+
+                    // Detach invalid MasterSequence items.
+                    if (item.state == TreeViewItemBase.State.Ok && item.masterSequence == null)
+                    {
+                        Detach(item);
+                        continue;
+                    }
+
+                    // MasterSequence is valid, add to the tree.
+                    root.AddChild(item);
+                }
+            }
+
+            root.children.Sort();
+
+            return root;
         }
 
         protected override void ContextClickedItem(int id)
@@ -216,20 +300,14 @@ namespace UnityEditor.Sequences
             if (args.acceptedRename)
             {
                 if (item.state == TreeViewItemBase.State.Creation)
-                {
-                    if (item.ValidateCreation(args.newName))
-                        RefreshData();
-                }
+                    item.ValidateCreation(args.newName);
                 else if (item.state == TreeViewItemBase.State.Ok)
-                {
                     item.Rename(args.newName);
-                    RefreshData();
-                }
             }
             else
             {
                 if (item.state == TreeViewItemBase.State.Creation)
-                    RefreshData();
+                    Detach(item);
             }
         }
 
@@ -238,7 +316,12 @@ namespace UnityEditor.Sequences
             return false;
         }
 
-        void RemoveSelection(IList<int> ids)
+        /// <summary>
+        /// Trigger a delete action request on each item from the given parameter.
+        /// Item's implementation is responsible for validating the request.
+        /// </summary>
+        /// <param name="ids"></param>
+        void DeleteItems(IList<int> ids)
         {
             foreach (int id in ids)
             {
@@ -246,7 +329,6 @@ namespace UnityEditor.Sequences
                 if (item != null)
                     item.Delete();
             }
-            RefreshData();
         }
 
         MasterSequenceTreeViewItem CreateNewMasterSequenceFrom(MasterSequence masterSequence)
@@ -258,7 +340,6 @@ namespace UnityEditor.Sequences
             newItem.SetAsset(masterSequence);
 
             m_Items.Add(newItem);
-            rootItem.AddChild(newItem);
 
             return newItem;
         }
@@ -316,7 +397,6 @@ namespace UnityEditor.Sequences
 
                 m_Items.Add(newItem);
                 parent.AddChild(newItem);
-
                 Reload();
 
                 SetSelection(new int[] { newItem.id }, TreeViewSelectionOptions.RevealAndFrame);
@@ -329,19 +409,30 @@ namespace UnityEditor.Sequences
             if (parent is SequenceTreeViewItem)
             {
                 int newId = GetNextId();
-                SubSequenceTreeViewItem newItem = new SubSequenceTreeViewItem { id = newId, depth = parent.depth + 1};
+                SubSequenceTreeViewItem newItem = new SubSequenceTreeViewItem { id = newId, depth = parent.depth + 1 };
                 newItem.owner = this;
 
                 m_Items.Add(newItem);
                 parent.AddChild(newItem);
-
-                SetupDepthsFromParentsAndChildren(m_RootTreeViewItem);
 
                 Reload();
 
                 SetSelection(new int[] { newItem.id }, TreeViewSelectionOptions.RevealAndFrame);
                 BeginRename(newItem);
             }
+        }
+
+        /// <summary>
+        /// Detaches the given item from the TreeView without action on the assigned item.
+        /// </summary>
+        /// <param name="item"></param>
+        public void Detach(TreeViewItem item)
+        {
+            item.parent.children.Remove(item);
+            item.parent = null;
+            m_Items.Remove(item);
+
+            Reload();
         }
 
         public bool SelectionContains(Sequence sequence)
@@ -360,6 +451,22 @@ namespace UnityEditor.Sequences
             return false;
         }
 
+        MasterSequenceTreeViewItem GetMasterSequenceItemFrom(MasterSequence masterSequence)
+        {
+            return m_Items.Find(treeviewItem =>
+            {
+                return (treeviewItem.depth == 0) && (treeviewItem as MasterSequenceTreeViewItem).masterSequence == masterSequence;
+            }) as MasterSequenceTreeViewItem;
+        }
+
+        SequenceTreeViewItem GetSequenceTreeViewItemFrom(TimelineSequence sequence)
+        {
+            return m_Items.Find(treeviewItem =>
+            {
+                return (treeviewItem.depth == 1) && (treeviewItem as SequenceTreeViewItem).timelineSequence == sequence;
+            }) as SequenceTreeViewItem;
+        }
+
         TreeViewItemBase GetItem(int id)
         {
             return m_Items.Find(x => x.id == id) as TreeViewItemBase;
@@ -367,7 +474,7 @@ namespace UnityEditor.Sequences
 
         int GetNextId()
         {
-            return m_IndexGenerator++;;
+            return m_IndexGenerator++;
         }
     }
 }

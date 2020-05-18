@@ -14,7 +14,7 @@ namespace UnityEditor.Sequences
             var result = SequenceUtility.GetSequenceValidity(timelineSequence, masterSequence);
 
             if (result == SequenceUtility.SequenceValidity.MissingMasterSequence)
-                (owner as StructureTreeView).RefreshData();
+                (owner as StructureTreeView).Reload();
 
             return result;
         }

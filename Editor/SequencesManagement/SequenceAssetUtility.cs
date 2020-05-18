@@ -200,20 +200,23 @@ namespace UnityEditor.Sequences
                     var groupTrack = timeline.GetOrCreateTrack<GroupTrack>(GetType(prefab));
                     var track = timeline.CreateTrack<SequenceAssetTrack>(groupTrack, GetSource(prefab).name);
                     clip = track.CreateClip<SequenceAssetPlayableAsset>();
+                    clip.displayName = instance.name;
                 }
 
-                clip.displayName = instance.name;
                 SetClipDuration(clip, timeline, instanceTimeline);
 
                 var clipAsset = clip.asset as SequenceAssetPlayableAsset;
                 if (clipAsset == null)
                     return null;
 
-                Undo.RecordObject(clipAsset, "Add SequenceAsset to Timeline");
-                Undo.RecordObject(sequenceDirector, "Add SequenceAsset to Timeline");
+                if (clipAsset.director.exposedName == null)
+                {
+                    Undo.RecordObject(clipAsset, "Add SequenceAsset to Timeline");
+                    var guid = GUID.Generate().ToString();
+                    clipAsset.director.exposedName = new PropertyName(guid);
+                }
 
-                var guid = GUID.Generate().ToString();
-                clipAsset.director.exposedName = new PropertyName(guid);
+                Undo.RecordObject(sequenceDirector, "Add SequenceAsset to Timeline");
                 sequenceDirector.SetReferenceValue(clipAsset.director.exposedName, instance.GetComponentInChildren<PlayableDirector>(true));
 
                 EditorUtility.SetDirty(timeline);
@@ -282,9 +285,6 @@ namespace UnityEditor.Sequences
 
             var clip = RemoveFromSequenceInternal(oldInstance, sequenceDirector);
             var newInstance = InstantiateInSequence(newPrefab, sequenceDirector, clip);
-
-            Undo.SetCurrentGroupName("Update SequenceAsset in Sequence");
-            Undo.CollapseUndoOperations(Undo.GetCurrentGroup());
 
             return newInstance;
         }

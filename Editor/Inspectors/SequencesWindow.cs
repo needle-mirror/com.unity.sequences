@@ -56,7 +56,6 @@ namespace UnityEditor.Sequences
             m_Structure = new StructureTreeView(m_State, m_StructureTreeViewContainer);
 
             m_StructureTreeViewContainer.onGUIHandler = m_Structure.OnGUI;
-            m_Structure.RefreshData();
 
             // Asset Collections
             m_AssetCollectionsState = new TreeViewState();
@@ -65,7 +64,6 @@ namespace UnityEditor.Sequences
             m_AssetCollectionsTreeView = new AssetCollectionsTreeView(m_AssetCollectionsState, m_AssetCollectionsTreeViewContainer);
 
             m_AssetCollectionsTreeViewContainer.onGUIHandler = m_AssetCollectionsTreeView.OnGUI;
-            m_AssetCollectionsTreeView.RefreshData();
 
             // Popup menus
             m_MainMenu = new SequencesWindowAddMenu();
@@ -73,15 +71,12 @@ namespace UnityEditor.Sequences
             m_MainMenu.userClickedOnCreateSequenceAsset += m_AssetCollectionsTreeView.CreateSequenceAssetInContext;
 
             addDropdownButton.clicked += m_MainMenu.Show;
-
-            // todo: make alternative
-            //EditorApplication.projectChanged += Refresh;
         }
 
-        internal void Refresh()
+        void OnDestroy()
         {
-            m_Structure.RefreshData();
-            m_AssetCollectionsTreeView.RefreshData();
+            m_Structure.Unload();
+            m_AssetCollectionsTreeView.Unload();
         }
     }
 }

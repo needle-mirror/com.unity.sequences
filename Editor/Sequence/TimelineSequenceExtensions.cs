@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEditor.Recorder;
 using UnityEngine;
 using UnityEngine.Sequences;
-using UnityEngine.Sequences.Timeline;
 
 namespace UnityEditor.Sequences
 {
@@ -30,6 +29,7 @@ namespace UnityEditor.Sequences
                 return;
 
             SequencesAssetDatabase.RenameAsset(clip.timeline, newName + "_Timeline");
+            SequencesAssetDatabase.RenameSequenceFolder(clip, newName);
 
             // Parent track hold the name of the editorial clip.
             // This makes sure the rename gets reported to this asset.

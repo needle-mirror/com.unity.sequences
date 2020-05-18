@@ -59,7 +59,7 @@ namespace UnityEngine.Sequences
         /// Get or set the fps of the Sequence. The fps is retrieved from the parent Sequence when it is not
         /// locally defined.
         /// </summary>
-        /// <exception cref="DataException">When no fps is specified, neither locally or inherited from a potential
+        /// <exception>When no fps is specified, neither locally or inherited from a potential
         /// parent.</exception>
         public virtual float fps
         {

@@ -19,7 +19,6 @@ namespace UnityEngine.Sequences.Timeline
         [Tooltip("sorting order of the Storyboard Canvas")]
         [SerializeField] public int sortOrder;
 
-        /// <inheritdoc cref="TrackAsset.CreateTrackMixer"/>
         public override Playable CreateTrackMixer(PlayableGraph graph, GameObject go, int inputCount)
         {
             var mixer =  ScriptPlayable<StoryboardMixerBehaviour>.Create(graph, inputCount);
@@ -28,7 +27,6 @@ namespace UnityEngine.Sequences.Timeline
             return mixer;
         }
 
-        /// <inheritdoc cref="TrackAsset.OnCreateClip"/>
         protected override void OnCreateClip(TimelineClip clip)
         {
             clip.duration = defaultFrameDuration;

@@ -75,7 +75,8 @@ namespace UnityEditor.Sequences
             MasterSequence masterSequenceAsset = (parent.parent as MasterSequenceTreeViewItem).masterSequence;
             TimelineSequence sequence = (parent as SequenceTreeViewItem).timelineSequence;
 
-            SequenceUtility.CreateSequence(newName, masterSequenceAsset, sequence);
+            SetSequence(SequenceUtility.CreateSequence(newName, masterSequenceAsset, sequence));
+            SetMasterSequence(masterSequenceAsset);
 
             state = State.Ok;
             return true;
@@ -89,9 +90,13 @@ namespace UnityEditor.Sequences
             if (!UserVerifications.ValidateSequenceDeletion(timelineSequence))
                 return;
 
-            MasterSequence masterSequenceAsset = (parent.parent as MasterSequenceTreeViewItem).masterSequence;
-            SequenceUtility.DeleteSequence(sequence, masterSequenceAsset);
-            (owner as StructureTreeView).RefreshData();
+            if (SequenceUtility.IsValidSequence(timelineSequence))
+            {
+                MasterSequence masterSequenceAsset = (parent.parent as MasterSequenceTreeViewItem).masterSequence;
+                SequenceUtility.DeleteSequence(sequence, masterSequenceAsset);
+            }
+            else
+                (owner as StructureTreeView).Detach(this);
         }
 
         public void SetMasterSequence(MasterSequence masterSequenceAsset)

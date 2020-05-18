@@ -61,11 +61,11 @@ namespace UnityEditor.Sequences
 
                 case DragAndDropPosition.OutsideItems:
                 {
-                    bool validDrag = ValidDrag(m_RootTreeViewItem, draggedRows);
+                    bool validDrag = ValidDrag(rootItem, draggedRows);
 
                     if (args.performDrop && validDrag)
                     {
-                        OnDropDraggedElementsAtIndex(draggedRows, m_RootTreeViewItem, m_RootTreeViewItem.children.Count);
+                        OnDropDraggedElementsAtIndex(draggedRows, rootItem, rootItem.children.Count);
                     }
 
                     return validDrag ? DragAndDropVisualMode.Move : DragAndDropVisualMode.None;
@@ -116,7 +116,7 @@ namespace UnityEditor.Sequences
             // Insert dragged items under new parent
             parentElement.children.InsertRange(insertionIndex, elements);
 
-            StructureTreeView.UpdateDepthValuesTreeView(m_RootTreeViewItem);
+            StructureTreeView.UpdateDepthValuesTreeView(rootItem);
 
             Reload();
         }

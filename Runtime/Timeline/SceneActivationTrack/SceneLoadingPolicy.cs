@@ -35,6 +35,18 @@ namespace UnityEngine.Sequences
         [FormerlySerializedAs("m_Domain")]
         ExecutionDomain m_RuntimeMode = ExecutionDomain.PlayModeAndPlayerBuild;
 
+        internal Policy activePolicy
+        {
+            get => m_ActivePolicy;
+            set => m_ActivePolicy = value;
+        }
+
+        internal ExecutionDomain runtimeMode
+        {
+            get => m_RuntimeMode;
+            set => m_RuntimeMode = value;
+        }
+
         internal void Awake()
         {
             if (ShouldExecute())
@@ -77,9 +89,11 @@ namespace UnityEngine.Sequences
         void LoadScene(string scenePath)
         {
 #if UNITY_EDITOR
-            EditorSceneManager.LoadSceneInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Additive));
+            if (EditorSceneManager.GetSceneByPath(scenePath) == default)
+                EditorSceneManager.LoadSceneInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Additive));
 #else
-            SceneManagement.SceneManager.LoadScene(scenePath, SceneManagement.LoadSceneMode.Additive);
+            if (SceneManager.GetSceneByPath(scenePath) == default)
+                SceneManager.LoadScene(scenePath, SceneManagement.LoadSceneMode.Additive);
 #endif
         }
 

@@ -70,7 +70,8 @@ namespace UnityEditor.Sequences
                 newName = displayName;
 
             displayName = newName;
-            SequenceUtility.CreateMasterSequence(newName);
+            SetAsset(SequenceUtility.CreateMasterSequence(newName));
+            displayName = masterSequence.name;
 
             state = State.Ok;
             return true;
@@ -84,8 +85,10 @@ namespace UnityEditor.Sequences
             if (!UserVerifications.ValidateSequenceDeletion(timelineSequence))
                 return;
 
-            masterSequence.Delete();
-            (owner as StructureTreeView).RefreshData();
+            if (SequenceUtility.IsValidSequence(timelineSequence))
+                masterSequence.Delete();
+            else
+                (owner as StructureTreeView).Detach(this);
         }
     }
 }

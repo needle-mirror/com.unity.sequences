@@ -4,6 +4,21 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-pre.6] - 2020-05-18
+
+### Changed
+* Consolidate the public API documentation generation.
+
+### Fixed
+* Prevent Sequences window treeviews from unfolding their whole hierarchy when they update.
+* Prevent Scenes from getting dirty on first selection of a Sequence in the Hierarchy when no change actually occurred.
+* Ensure to rename or delete any corresponding folder in the Project window when the user renames or deletes a Sequence from the Sequences window.
+* Ensure to get a complete expected behavior when undoing a swap of Sequence Asset Variant done from the Sequence Assembly window.
+* Ensure that the Scene Loading Policy component does not load Scenes that are already in memory.
+* Ensure to assign the proper default material to the Scene Management sample according to the current render pipeline used in the project.
+* Fix an issue that was throwing an exception when canceling the creation of a Sequence Asset.
+* Fix an issue that was throwing an exception when opening the Profiler window as a standalone process.
+
 ## [1.0.0-pre.5] - 2020-04-27
 
 ### Added

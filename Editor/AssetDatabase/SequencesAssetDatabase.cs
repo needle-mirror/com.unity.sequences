@@ -14,7 +14,7 @@ namespace UnityEditor.Sequences
     // the AssetDatabase from Unity).
     internal static class SequencesAssetDatabase
     {
-        static readonly string k_SequenceBaseFolder = "Sequences";
+        internal static readonly string k_SequenceBaseFolder = "Sequences";
 
         public static string GenerateUniqueMasterSequencePath(string name, string subFolders = "", string extension = ".asset")
         {
@@ -57,10 +57,12 @@ namespace UnityEditor.Sequences
         /// Delete the folder at the given path.
         /// </summary>
         /// <param name="path">The path of the folder to delete.</param>
-        /// <param name="force">True to remove the folder even if not empty, false otherwise.</param>
         /// <returns>Whether the delete of the folder was a success or not.</returns>
         public static bool DeleteFolder(string path)
         {
+            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+                return false;
+
             foreach (var directory in Directory.EnumerateDirectories(path))
             {
                 if (IsEmpty(directory, true))
@@ -130,6 +132,32 @@ namespace UnityEditor.Sequences
         public static bool IsRenameValid(string oldName, string newName)
         {
             return !(string.IsNullOrEmpty(newName) || newName == oldName);
+        }
+
+        internal static string GetSequenceFolder(TimelineSequence sequence)
+        {
+            if (TimelineSequence.IsNullOrEmpty(sequence) ||
+                TimelineSequence.IsNullOrEmpty(sequence.parent as TimelineSequence))
+            {
+                return "";
+            }
+
+            var assetPath = AssetDatabase.GetAssetPath(sequence.timeline);
+            if (assetPath == "")
+                return "";
+
+            var folderPath = Path.Combine(Path.GetDirectoryName(assetPath), sequence.name);
+            if (!AssetDatabase.IsValidFolder(folderPath))
+                return "";
+
+            return folderPath;
+        }
+
+        internal static void RenameSequenceFolder(TimelineSequence sequence, string newName)
+        {
+            var sequenceFolderPath = GetSequenceFolder(sequence);
+            if (!string.IsNullOrEmpty(sequenceFolderPath))
+                AssetDatabase.RenameAsset(sequenceFolderPath, newName);
         }
 
         /// <summary>

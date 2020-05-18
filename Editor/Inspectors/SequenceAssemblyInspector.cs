@@ -25,7 +25,8 @@ namespace UnityEditor.Sequences
         void OnEnable()
         {
             Initialize();
-            SequenceAssetIndexer.indexerChanged += Refresh;
+            SequenceAssetIndexer.sequenceAssetImported += OnSequenceAssetImported;
+            SequenceAssetIndexer.sequenceAssetDeleted += OnSequenceAssetDeleted;
         }
 
         protected void Initialize()
@@ -37,7 +38,8 @@ namespace UnityEditor.Sequences
 
         void OnDisable()
         {
-            SequenceAssetIndexer.indexerChanged -= Refresh;
+            SequenceAssetIndexer.sequenceAssetImported -= OnSequenceAssetImported;
+            SequenceAssetIndexer.sequenceAssetDeleted -= OnSequenceAssetDeleted;
             ClearCollectionsCache();
         }
 
@@ -85,6 +87,16 @@ namespace UnityEditor.Sequences
                 var sequenceAssetOfType = sequenceAssetSelections.Where(value => SequenceAssetUtility.GetType(value) == collectionType);
                 SetAssetCollection(collectionType, sequenceAssetOfType);
             }
+        }
+
+        void OnSequenceAssetImported(GameObject sequenceAsset)
+        {
+            Refresh();
+        }
+
+        void OnSequenceAssetDeleted()
+        {
+            Refresh();
         }
 
         protected virtual void SetAssetCollection(string type, IEnumerable<GameObject> sequenceAssetSelections)

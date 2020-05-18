@@ -14,7 +14,7 @@ namespace UnityEngine.Sequences
 
         void Awake()
         {
-            hideFlags = HideFlags.HideAndDontSave | HideFlags.HideInInspector;
+            hideFlags = HideFlags.HideInHierarchy | HideFlags.HideInInspector | HideFlags.DontSaveInBuild;
         }
 
         void Start()

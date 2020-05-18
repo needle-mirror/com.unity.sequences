@@ -22,14 +22,12 @@ namespace UnityEditor.Sequences
         void DuplicateAction()
         {
             SequenceAssetUtility.DuplicateVariant(target.asset);
-            (target.owner as AssetCollectionsTreeView).RefreshData();
             ResetTarget();
         }
 
         void DeleteAction()
         {
             target.Delete();
-            (target.owner as AssetCollectionsTreeView).RefreshData();
             ResetTarget();
         }
     }

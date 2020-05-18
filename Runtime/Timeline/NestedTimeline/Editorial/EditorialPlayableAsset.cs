@@ -8,8 +8,6 @@ namespace UnityEngine.Sequences.Timeline
     /// <summary>
     /// EditorialPlayableAsset controls the PlayableDirector of a Sequence.
     /// </summary>
-    /// <remarks>Editorial clip duration is based on the other Editorial clip existing in the sub timeline,
-    /// <see cref="UnityEditor.Sequences.Timeline.EditorialClipEditor.OnClipChanged"/>.</remarks>
     [DisplayName("Editorial Clip")]
     public class EditorialPlayableAsset : NestedTimelinePlayableAsset, ITimelineClipAsset
     {

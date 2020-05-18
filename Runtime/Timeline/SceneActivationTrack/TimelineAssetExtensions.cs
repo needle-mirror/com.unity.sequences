@@ -3,7 +3,7 @@ using UnityEngine.Timeline;
 
 namespace UnityEngine.Sequences.Timeline
 {
-    public static class TimelineAssetExtension
+    public static partial class TimelineAssetExtensions
     {
         /// <summary>
         /// Gets a collection of scene paths found in the given timeline.
