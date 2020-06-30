@@ -4,6 +4,10 @@ using UnityEngine.Timeline;
 
 namespace UnityEngine.Sequences.Timeline
 {
+    // Note: This class is excluded from the API documentation, see Documentation > filter.yml.
+    //       It is public only to be able to propose the EditorialTrack and the SequenceAssetTrack as public
+    //       class in the Sequences API. But it has no need to be exposed in the documentation.
+
     /// <summary>
     /// Base class for all Track that host clips that controls other PlayableDirector.
     /// </summary>
@@ -12,6 +16,12 @@ namespace UnityEngine.Sequences.Timeline
     {
         static readonly HashSet<PlayableDirector> s_ProcessedDirectors = new HashSet<PlayableDirector>();
 
+        /// <summary>
+        /// Gather properties for the Timeline Preview mode. In the case of NestedTimelineTrack, only the
+        /// Active state property of GameObject needs to be tracked.
+        /// </summary>
+        /// <param name="director"></param>
+        /// <param name="driver"></param>
         public override void GatherProperties(PlayableDirector director, IPropertyCollector driver)
         {
             if (director == null)

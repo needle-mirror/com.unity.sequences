@@ -20,9 +20,9 @@ Before you get started with the Sequences package:
 
 ## Package technical details
 
-### Experimental package
+### Installation
 
-This package is experimental and is not ready for production use. The features and documentation in this package will change before it is verified for release.
+To install this package, follow the instructions in the [Package Manager documentation](https://docs.unity3d.com/Manual/upm-ui-install.html).
 
 ### Requirements
 
@@ -30,7 +30,11 @@ This version of the Sequences package is compatible with the following versions 
 
 * 2020.3 and later
 
-It also requires specific minimum versions of the following packages (linked as dependencies):
+The Sequences package also requires specific minimum versions of the following packages (linked as dependencies):
 
-* Timeline 1.5.0-preview.3
-* Unity Recorder 2.3.0-preview.1
+* Timeline 1.5.2
+* Unity Recorder 2.5.5
+
+### Known issues and limitations
+
+See the list of current [known issues and limitations](known-issues.md) that you might experience with the Sequences package, and some workarounds.

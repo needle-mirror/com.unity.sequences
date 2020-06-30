@@ -7,8 +7,19 @@ using UnityEngine.Sequences;
 
 namespace UnityEditor.Sequences
 {
+    /// <summary>
+    /// This class extends the TimelineSequence asset management with Unity Editor basic capabilities: save, delete,
+    /// rename, record.
+    /// </summary>
     public static class TimelineSequenceExtensions
     {
+        /// <summary>
+        /// Saves the specified Sequence on disk. Technically speaking, this method saves the TimelineAsset associated
+        /// to the specified Sequence in the folder of the MasterSequence.
+        /// </summary>
+        /// <param name="clip">The Sequence to save.</param>
+        /// <param name="folder">Optional sub-folders of the Assets/Sequences folder to save the MasterSequence asset to.
+        /// The method creates the specified sub-folders if they doesn't already exist.</param>
         public static void Save(this TimelineSequence clip, string folder = null)
         {
             folder = folder ?? GetParentSequencePath(clip);
@@ -23,6 +34,12 @@ namespace UnityEditor.Sequences
             }
         }
 
+        /// <summary>
+        /// Renames the specified Sequence. Technically speaking, this method renames the TimelineAsset associated to
+        /// the specified Sequence.
+        /// </summary>
+        /// <param name="clip">The Sequence to rename.</param>
+        /// <param name="newName">The new name to use.</param>
         public static void Rename(this TimelineSequence clip, string newName)
         {
             if (TimelineSequence.IsNullOrEmpty(clip) || !SequencesAssetDatabase.IsRenameValid(clip.name, newName))
@@ -39,6 +56,11 @@ namespace UnityEditor.Sequences
             clip.name = newName;
         }
 
+        /// <summary>
+        /// Deletes the specified Sequence from disk. Technically speaking, this method deletes the TimelineAsset
+        /// associated to the specified Sequence.
+        /// </summary>
+        /// <param name="clip">The Sequence to delete.</param>
         public static void Delete(this TimelineSequence clip)
         {
             if (TimelineSequence.IsNullOrEmpty(clip))
@@ -48,9 +70,10 @@ namespace UnityEditor.Sequences
         }
 
         /// <summary>
-        /// Records a TimelineSequence using its start/end time, FPS values and name to set up the recorder settings.
+        /// Records a sequence using its <see cref="Sequence.start"/>/<see cref="Sequence.end"/> time,
+        /// <see cref="Sequence.fps"/> values and <see cref="Sequence.name"/> to set up the Recorder settings.
         /// </summary>
-        /// <param name="clip">The TimelineSequence to record.</param>
+        /// <param name="clip">The Sequence to record.</param>
         /// <param name="recordAs">True to open the RecorderWindow and allow manual parameterization before recording,
         /// false to launch a record with current settings.</param>
         public static void Record(this TimelineSequence clip, bool recordAs = false)
@@ -83,7 +106,7 @@ namespace UnityEditor.Sequences
         /// <summary>
         /// Get the right frame start and end to setup records.
         /// </summary>
-        /// <param name="clip">The TimelineSequence to record and used to compute start and end frames.</param>
+        /// <param name="clip">The Sequence to record and use to compute start and end frames.</param>
         /// <param name="frameStart">The computed start frame number (as an integer).</param>
         /// <param name="frameEnd">The computed end frame number (as an integer).</param>
         /// <remarks>This conversion is mainly used to workaround the fact that if we provide time in second to

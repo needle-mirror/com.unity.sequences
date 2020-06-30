@@ -5,6 +5,7 @@ using UnityEngine.Sequences;
 using UnityEngine.Sequences.Timeline;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
+using System.Collections.Generic;
 
 namespace UnityEditor.Sequences
 {
@@ -244,12 +245,9 @@ namespace UnityEditor.Sequences
                 throw new System.NullReferenceException("timeline");
 
             // Hack, needs to talk to devs-timeline
-            PlayableDirector[] playables = Resources.FindObjectsOfTypeAll<PlayableDirector>();
+            IReadOnlyCollection<PlayableDirector> playables = ObjectsCache.FindObjectsFromScenes<PlayableDirector>();
             foreach (var p in playables)
             {
-                if (p.gameObject.scene == default)
-                    continue;
-
                 if (p.playableAsset == timeline)
                 {
                     Selection.activeObject = p.gameObject;

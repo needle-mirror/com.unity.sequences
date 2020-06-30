@@ -8,8 +8,8 @@ namespace UnityEngine.Sequences.Timeline
         /// <summary>
         /// Gets a collection of scene paths found in the given timeline.
         /// </summary>
-        /// <param name="timeline"></param>
-        /// <returns></returns>
+        /// <param name="timeline">The instance of <see cref="TimelineAsset"/> this method applies to.</param>
+        /// <returns>A read only collection of paths, relative to the project folder.</returns>
         public static IReadOnlyCollection<string> GetScenes(this TimelineAsset timeline)
         {
             List<string> paths = new List<string>();

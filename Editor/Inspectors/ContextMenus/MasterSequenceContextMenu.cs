@@ -88,7 +88,7 @@ namespace UnityEditor.Sequences
 
         bool IsTargetInScene()
         {
-            var sequenceFilters = Resources.FindObjectsOfTypeAll<SequenceFilter>();
+            var sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var sequenceFilter in sequenceFilters)
             {
                 if (sequenceFilter.masterSequence == target.masterSequence)

@@ -11,10 +11,14 @@ namespace UnityEditor.Sequences
     internal class AssetCollectionsTreeView : TreeView
     {
         VisualElement m_VisualElementContainer;
-        List<TreeViewItem> m_Items;
+
+        [SerializeField]
+        List<TreeViewItem> m_Items = new List<TreeViewItem>();
 
         // Keep an indexer to assign unique ID to new TreeViewItem.
-        int m_IndexGenerator;
+        // ID starts at 1 as the root item's ID is 0.
+        [SerializeField]
+        int m_IndexGenerator = 1;
 
         bool isCreatingNewItem
         {
@@ -28,10 +32,7 @@ namespace UnityEditor.Sequences
             : base(state)
         {
             m_VisualElementContainer = container;
-            m_Items = new List<TreeViewItem>();
 
-            /// ID starts at 1 as the root item's ID is 0.
-            m_IndexGenerator = 1;
             Reload();
 
             getNewSelectionOverride = OnNewSelection;
@@ -372,6 +373,9 @@ namespace UnityEditor.Sequences
             {
                 GameObject[] sequenceAssets = SequenceAssetUtility.FindAllSources().ToArray();
                 GenerateTreeFromData(sequenceAssets);
+
+                // When reloading the parent windows, internal states may have expanded items.
+                SetExpanded(state.expandedIDs);
             }
 
             foreach (var item in m_Items)

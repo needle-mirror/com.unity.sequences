@@ -6,10 +6,6 @@ namespace UnityEditor.Sequences
 {
     internal class SubSequenceTreeViewItem : EditorialElementTreeViewItem, IEditorialDraggable
     {
-        internal TimelineSequence sequence { get; private set; }
-
-        internal override TimelineSequence timelineSequence => sequence;
-
         public override Texture2D icon => IconUtility.LoadIcon("MasterSequence/Shot", IconUtility.IconType.UniqueToSkin);
         public override Texture2D iconSelected => IconUtility.LoadIcon("MasterSequence/Shot-selected", IconUtility.IconType.CommonToAllSkin);
 
@@ -56,13 +52,7 @@ namespace UnityEditor.Sequences
                 return;
 
             base.Rename(newName);
-            sequence.Rename(newName);
-        }
-
-        public void SetSequence(TimelineSequence existingSequence)
-        {
-            sequence = existingSequence;
-            state = State.Ok;
+            timelineSequence.Rename(newName);
         }
 
         public override bool ValidateCreation(string newName)
@@ -75,10 +65,8 @@ namespace UnityEditor.Sequences
             MasterSequence masterSequenceAsset = (parent.parent as MasterSequenceTreeViewItem).masterSequence;
             TimelineSequence sequence = (parent as SequenceTreeViewItem).timelineSequence;
 
-            SetSequence(SequenceUtility.CreateSequence(newName, masterSequenceAsset, sequence));
-            SetMasterSequence(masterSequenceAsset);
+            SetSequence(SequenceUtility.CreateSequence(newName, masterSequenceAsset, sequence), masterSequenceAsset);
 
-            state = State.Ok;
             return true;
         }
 
@@ -93,16 +81,10 @@ namespace UnityEditor.Sequences
             if (SequenceUtility.IsValidSequence(timelineSequence))
             {
                 MasterSequence masterSequenceAsset = (parent.parent as MasterSequenceTreeViewItem).masterSequence;
-                SequenceUtility.DeleteSequence(sequence, masterSequenceAsset);
+                SequenceUtility.DeleteSequence(timelineSequence, masterSequenceAsset);
             }
             else
                 (owner as StructureTreeView).Detach(this);
-        }
-
-        public void SetMasterSequence(MasterSequence masterSequenceAsset)
-        {
-            masterSequence = masterSequenceAsset;
-            state = State.Ok;
         }
     }
 }

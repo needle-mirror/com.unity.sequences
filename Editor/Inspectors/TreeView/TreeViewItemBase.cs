@@ -7,7 +7,9 @@ namespace UnityEditor.Sequences
     internal abstract class EditorialElementTreeViewItem : TreeViewItemBase
     {
         internal MasterSequence masterSequence { get; set; }
-        internal abstract TimelineSequence timelineSequence { get; }
+        internal TimelineSequence timelineSequence => masterSequence?.manager.GetAt(sequenceIndex) as TimelineSequence;
+
+        int sequenceIndex { get; set; }
 
         internal SequenceUtility.SequenceValidity GetTargetValidity()
         {
@@ -17,6 +19,13 @@ namespace UnityEditor.Sequences
                 (owner as StructureTreeView).Reload();
 
             return result;
+        }
+
+        internal void SetSequence(TimelineSequence existingSequence, MasterSequence existingMasterSequence)
+        {
+            masterSequence = existingMasterSequence;
+            sequenceIndex = masterSequence.manager.GetIndex(existingSequence);
+            state = State.Ok;
         }
     }
 

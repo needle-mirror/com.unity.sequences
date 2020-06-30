@@ -15,6 +15,9 @@
       uidRegex: UnityEngine.Sequences.Timeline.TrackAssetExtensions
       type: Class
   - exclude:
+      uidRegex: ^UnityEngine\.Sequences\.SceneReference\.On.*\Serialize
+      type: Method
+  - exclude:
       uidRegex: ^(Samples)
   - exclude:
       uidRegex: ^(Tests)

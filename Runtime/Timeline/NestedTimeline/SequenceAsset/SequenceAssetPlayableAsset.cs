@@ -14,6 +14,10 @@ namespace UnityEngine.Sequences.Timeline
         //       The Editor of this clip could display something similar to what is displayed in the Sequence Assembly.
         // TODO: Add validation to ensure the controlled PlayableDirector belong to an actual Sequence Asset.
 
+        /// <summary>
+        /// Gets the clip caps. For a SequenceAssetPlayableAsset, SpeedMultiplier, ClipIn and Looping are the three
+        /// extra clip options available.
+        /// </summary>
         public ClipCaps clipCaps => ClipCaps.SpeedMultiplier | ClipCaps.ClipIn | ClipCaps.Looping;
 
         internal override GameObject GetGameObjectToActivate(PlayableDirector playableDirector)

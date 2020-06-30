@@ -5,6 +5,10 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.Sequences
 {
+    /// <summary>
+    /// Component used to attach a MasterSequence's Sequence to its representation in GameObject. A GameObject with
+    /// a SequenceFilter component should also have a PlayableDirector component that drives the Sequence's Timeline.
+    /// </summary>
     [ExecuteInEditMode]
     public sealed class SequenceFilter : MonoBehaviour
     {
@@ -19,12 +23,18 @@ namespace UnityEngine.Sequences
         [SerializeField] int m_ElementIndex;
         [SerializeField] internal Type type;
 
+        /// <summary>
+        /// The MasterSequence asset the Sequence is from.
+        /// </summary>
         public MasterSequence masterSequence
         {
             get => m_MasterSequence;
             set => m_MasterSequence = value;
         }
 
+        /// <summary>
+        /// Index of the Sequence this GameObject represents.
+        /// </summary>
         public int elementIndex
         {
             get => m_ElementIndex;

@@ -228,5 +228,26 @@ namespace UnityEditor.Sequences
                     $"Invalid path, the path for a {asset.GetType().ToString()} " +
                     $"should end with the {expectedExtension} extension.");
         }
+
+        /// <summary>
+        /// Scan all prefabs in the AssetDatabase and return the SequenceAssets.
+        /// This is costly. If relying on the Indexer suffice, please use <see cref="SequenceAssetIndexer.indexes"/> instead.
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<GameObject> FindAllSequenceAssets()
+        {
+            var prefabGuids = AssetDatabase.FindAssets("glob:\"*.prefab\"");
+            foreach (var guid in prefabGuids)
+            {
+                GameObject go = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
+                if (go == null)
+                    continue;
+
+                if (go.GetComponent<SequenceAsset>() == null)
+                    continue;
+
+                yield return go;
+            }
+        }
     }
 }

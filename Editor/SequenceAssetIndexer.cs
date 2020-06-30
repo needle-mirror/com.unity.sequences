@@ -10,6 +10,33 @@ namespace UnityEditor.Sequences
     [FilePath("Library/QuickSequenceAsset.index", FilePathAttribute.Location.ProjectFolder)]
     class SequenceAssetIndexer : ScriptableSingleton<SequenceAssetIndexer>
     {
+        [InitializeOnLoadMethod]
+        static void InitializeOnLoad()
+        {
+            string indexerFilePath = Path.Combine(Application.dataPath, "..", GetFilePath());
+            if (!File.Exists(indexerFilePath))
+            {
+                // Delay the initialize call because operations with AssetDatabase must wait the Editor to refresh at least once.
+                EditorApplication.delayCall += InitializeWithExistingData;
+            }
+            else
+            {
+                // Remove null references. Might happen if files were removed directly from the filesystem.
+                instance.PruneDeletedSequenceAsset();
+            }
+        }
+
+        /// <summary>
+        /// Runs a scan pass on the data every time the Editor starts.
+        /// When no indexer already exists, initialize a new index.
+        /// When one exists, remove all potential null references from the index.
+        /// </summary>
+        internal static void InitializeWithExistingData()
+        {
+            foreach (GameObject go in SequencesAssetDatabase.FindAllSequenceAssets())
+                instance.AddSequenceAsset(go);
+        }
+
         [Serializable]
         internal class Index
         {
@@ -38,6 +65,28 @@ namespace UnityEditor.Sequences
 
         internal Index[] indexes => m_Indexes;
 
+        public bool IsRegistered(GameObject prefab)
+        {
+            if (SequenceAssetUtility.IsSource(prefab))
+            {
+                return GetIndexOf(prefab) >= 0;
+            }
+            else if (SequenceAssetUtility.IsVariant(prefab))
+            {
+                GameObject source = SequenceAssetUtility.GetSource(prefab);
+                if (source == null)
+                    return false;
+
+                int index = GetIndexOf(source);
+                if (index < 0)
+                    return false;
+
+                return (ArrayUtility.Contains<GameObject>(indexes[index].variants, prefab));
+            }
+
+            return false;
+        }
+
         public void AddSequenceAsset(GameObject prefab)
         {
             if (SequenceAssetUtility.IsSource(prefab))
@@ -53,7 +102,6 @@ namespace UnityEditor.Sequences
                 AddSequenceAssetVariant(source, prefab);
             }
 
-            sequenceAssetImported?.Invoke(prefab);
             Save();
         }
 
@@ -104,10 +152,10 @@ namespace UnityEditor.Sequences
         int AddSequenceAssetSource(GameObject prefab)
         {
             int i = GetIndexOf(prefab);
-            if (i > 0)
+            if (i >= 0)
                 return i;
-
             ArrayUtility.Add(ref m_Indexes, new Index() { mainPrefab = prefab });
+            sequenceAssetImported?.Invoke(prefab);
             return m_Indexes.Length - 1;
         }
 
@@ -122,6 +170,7 @@ namespace UnityEditor.Sequences
                 return;
 
             ArrayUtility.Add(ref data.variants, variant);
+            sequenceAssetImported?.Invoke(variant);
         }
     }
 
@@ -131,28 +180,50 @@ namespace UnityEditor.Sequences
         {
             foreach (string path in importedAssets)
             {
-                string ext = Path.GetExtension(path);
-                if (ext != ".prefab")
+                if (!IsPrefab(path))
                     continue;
 
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (!SequenceAssetUtility.IsSequenceAsset(prefab))
+                ProcessImportedPrefab(path);
+            }
+
+            foreach (string path in movedAssets)
+            {
+                if (!IsPrefab(path) || ArrayUtility.Contains<string>(importedAssets, path))
                     continue;
 
-                // Moved or renamed assets.
-                if (ArrayUtility.Contains(movedAssets, path))
-                {
-                    SequenceAssetIndexer.instance.UpdateSequenceAsset(prefab);
-                    continue;
-                }
-
-                // New Sequence asset source or variant.
-                SequenceAssetIndexer.instance.AddSequenceAsset(prefab);
+                ProcessMovedPrefab(path);
             }
 
             // If there is at least one deleted prefab, check the indexed prefab to remove all the deleted ones.
             if (Array.Exists(deletedAssets, a => Path.GetExtension(a) == ".prefab"))
                 SequenceAssetIndexer.instance.PruneDeletedSequenceAsset();
+        }
+
+        static bool IsPrefab(string path)
+        {
+            return Path.GetExtension(path) == ".prefab";
+        }
+
+        static void ProcessImportedPrefab(string path)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (!SequenceAssetUtility.IsSequenceAsset(prefab))
+                return;
+
+            if (!SequenceAssetIndexer.instance.IsRegistered(prefab))
+                SequenceAssetIndexer.instance.AddSequenceAsset(prefab);
+            else
+                SequenceAssetIndexer.instance.UpdateSequenceAsset(prefab);
+        }
+
+        static void ProcessMovedPrefab(string path)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (!SequenceAssetUtility.IsSequenceAsset(prefab))
+                return;
+
+            if (SequenceAssetIndexer.instance.IsRegistered(prefab))
+                SequenceAssetIndexer.instance.UpdateSequenceAsset(prefab);
         }
     }
 }

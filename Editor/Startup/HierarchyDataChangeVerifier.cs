@@ -33,18 +33,17 @@ namespace UnityEditor.Sequences
 
         static void OnSequenceDeleted()
         {
-            var allFilters = Resources.FindObjectsOfTypeAll<SequenceFilter>();
+            var allFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var filter in allFilters)
             {
-                if (filter == null)
-                    continue;
-
-                // If this comes from a Prefab, do nothing.
-                if (filter.gameObject.scene == default)
-                    continue;
-
                 // If GameObject is already in the process of being destroyed, do nothing.
                 if (filter.isBeingDestroyed)
+                    continue;
+
+                // A MasterSequence's SequenceFilter might get destroyed in this loop
+                // first, before their children's SequenceFilter. If that's the case, filter
+                // is null.
+                if (filter == null)
                     continue;
 
                 // If the filter is not bound to a masterSequence, do nothing.
@@ -63,10 +62,10 @@ namespace UnityEditor.Sequences
 
         static void OnSequenceRenamed(Sequence sequence)
         {
-            var allFilters = Resources.FindObjectsOfTypeAll<SequenceFilter>();
+            var allFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var filter in allFilters)
             {
-                if (filter.masterSequence == null || filter.gameObject.scene == default)
+                if (filter.masterSequence == null)
                     continue;
 
                 var currentSequence = filter.masterSequence.manager.GetAt(filter.elementIndex);
@@ -121,12 +120,10 @@ namespace UnityEditor.Sequences
         static GameObject CreateSequenceGameObject(TimelineSequence sequence, MasterSequence masterSequence)
         {
             int parentIndex = masterSequence.manager.GetIndex(sequence.parent);
-            var allFilters = Resources.FindObjectsOfTypeAll<SequenceFilter>();
+            var allFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var filter in allFilters)
             {
                 // Find parent to attach the new GameObject.
-                if (filter.gameObject.scene == default)
-                    continue;
                 if (filter.masterSequence != masterSequence)
                     continue;
                 if (filter.elementIndex != parentIndex)

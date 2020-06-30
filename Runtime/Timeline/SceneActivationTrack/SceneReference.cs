@@ -8,7 +8,7 @@ namespace UnityEngine.Sequences
     /// <summary>
     /// Scene wrapper to allow proper serialization of SceneAsset references.
     /// SceneAsset only exist in Editor so the path is stored as well any time the object is serialized.
-    /// The scene path is used at runtime, assuming the scene has been added to the Build Settings.
+    /// The Scene path is used at runtime, assuming the Scene has been added to the Build Settings.
     /// </summary>
     // Inspired from: https://github.com/starikcetin/unity-scene-reference
     [System.Serializable]
@@ -30,6 +30,9 @@ namespace UnityEngine.Sequences
 
         [SerializeField][HideInInspector] string m_ScenePath;
 
+        /// <summary>
+        /// Path to the Scene asset, relative to the project folder.
+        /// </summary>
         public string path
         {
             get
@@ -67,7 +70,7 @@ namespace UnityEngine.Sequences
 
         void BeforeSerialize()
         {
-            // Asset is invalid but have a path try to get the scene
+            // Asset is invalid but have a path try to get the Scene
             if (isValidSceneAsset == false && string.IsNullOrEmpty(m_ScenePath) == false)
             {
                 m_SceneAsset = GetSceneAssetFromPath();
@@ -89,7 +92,9 @@ namespace UnityEngine.Sequences
         }
 
 #endif
-
+        /// <summary>
+        /// Receives callback event from <see cref="ISerializationCallbackReceiver"/>.
+        /// </summary>
         public void OnBeforeSerialize()
         {
 #if UNITY_EDITOR
@@ -97,6 +102,9 @@ namespace UnityEngine.Sequences
 #endif
         }
 
+        /// <summary>
+        /// Receives callback event from <see cref="ISerializationCallbackReceiver"/>.
+        /// </summary>
         public void OnAfterDeserialize()
         {
 #if UNITY_EDITOR

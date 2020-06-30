@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -89,7 +90,7 @@ namespace UnityEditor.Sequences
 
         bool IsTargetInScene()
         {
-            PlayableDirector[] playableDirectors = Resources.FindObjectsOfTypeAll<PlayableDirector>();
+            var playableDirectors = ObjectsCache.FindObjectsFromScenes<PlayableDirector>();
             foreach (var playableDirector in playableDirectors)
             {
                 if (playableDirector.playableAsset == target.timelineSequence.timeline)

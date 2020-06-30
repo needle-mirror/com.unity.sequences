@@ -4,12 +4,22 @@ using UnityEngine.Serialization;
 
 namespace UnityEngine.Sequences
 {
+    /// <summary>
+    /// The MasterSequence ScriptableObject serializes a hierarchy of Sequences and allows their creation and deletion.
+    /// </summary>
     public class MasterSequence : ScriptableObject
     {
         [FormerlySerializedAs("m_RootCinematicIndex")][SerializeField] int m_RootIndex = -1;
         [SerializeReference] SequenceManager m_Manager;
 
+        /// <summary>
+        /// Event invoked when a Sequence is removed from a MasterSequence.
+        /// </summary>
         public static event Action<MasterSequence, TimelineSequence> sequenceRemoved;
+
+        /// <summary>
+        /// Event invoked when a new Sequence is added to a MasterSequence.
+        /// </summary>
         public static event Action<MasterSequence, TimelineSequence> sequenceAdded;
 
         internal int rootIndex
@@ -39,12 +49,21 @@ namespace UnityEngine.Sequences
             }
         }
 
+        /// <summary>
+        /// The root Sequence of the structure defined in the MasterSequence.
+        /// </summary>
         public TimelineSequence rootSequence
         {
             get => manager.GetAt(rootIndex) as TimelineSequence;
             private set => rootIndex = manager.GetIndex(value);
         }
 
+        /// <summary>
+        /// Creates a new MasterSequence instance.
+        /// </summary>
+        /// <param name="name">The name of the created MasterSequence.</param>
+        /// <param name="fps">The framerate of the created MasterSequence.</param>
+        /// <returns>The newly created MasterSequence.</returns>
         public static MasterSequence CreateInstance(string name, float fps = 24.0f)
         {
             var masterSequence = ScriptableObject.CreateInstance<MasterSequence>();
@@ -61,6 +80,13 @@ namespace UnityEngine.Sequences
             return masterSequence;
         }
 
+        /// <summary>
+        /// Creates and adds a new Sequence to this MasterSequence.
+        /// </summary>
+        /// <param name="clipName">The name of the created Sequence.</param>
+        /// <param name="parent">The parent is the root sequence by default if you don't specify a value for this parameter.</param>
+        /// <returns>The newly created Sequence.</returns>
+        /// <remarks>This function invokes the <see cref="sequenceAdded"/> event.</remarks>
         public TimelineSequence NewSequence(string clipName, TimelineSequence parent = null)
         {
             var sequence = TimelineSequence.CreateInstance(manager);
@@ -77,11 +103,12 @@ namespace UnityEngine.Sequences
         }
 
         /// <summary>
-        /// Remove the given sequence and all its children from this MasterSequence.
+        /// Remove the specified Sequence and all its children from this MasterSequence.
         /// </summary>
         /// <param name="sequence">The Sequence to remove.</param>
         /// <returns>Returns the list of sequences that was removed from this MasterSequence. That can be used for
         /// any post-processing like removing the associated assets from disk.</returns>
+        /// <remarks>This function invokes the <see cref="sequenceRemoved"/> event.</remarks>
         public IEnumerable<TimelineSequence> RemoveSequence(TimelineSequence sequence)
         {
             sequence.parent = null;

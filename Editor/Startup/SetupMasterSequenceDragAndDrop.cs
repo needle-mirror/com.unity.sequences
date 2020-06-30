@@ -1,6 +1,7 @@
 using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.Sequences;
+using System.Collections.Generic;
 #if !UNITY_2021_2_0_A18_OR_NEWER
 using System;
 using System.Reflection;
@@ -38,7 +39,7 @@ namespace UnityEditor.Sequences.Startup
 
             if (perform)
             {
-                SequenceFilter[] sequenceFilters = GameObject.FindObjectsOfType<SequenceFilter>();
+                var sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
                 foreach (var sequenceFilter in sequenceFilters)
                 {
                     if (sequenceFilter.masterSequence == masterSequence)
@@ -90,7 +91,7 @@ namespace UnityEditor.Sequences.Startup
 
             if (perform)
             {
-                SequenceFilter[] sequenceFilters = GameObject.FindObjectsOfType<SequenceFilter>();
+                IReadOnlyCollection<SequenceFilter> sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
                 foreach (var sequenceFilter in sequenceFilters)
                 {
                     if (sequenceFilter.masterSequence == masterSequence)

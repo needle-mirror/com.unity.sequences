@@ -45,7 +45,6 @@ namespace UnityEditor.Sequences
         public override void Rename(string newName)
         {
             var actualNewName = SequenceAssetUtility.Rename(asset, asset.name, newName);
-            base.Rename(actualNewName);
         }
 
         public void SetSequenceAsset(GameObject sequenceAsset)

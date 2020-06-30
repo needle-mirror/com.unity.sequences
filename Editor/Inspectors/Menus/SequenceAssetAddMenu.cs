@@ -14,6 +14,7 @@ namespace UnityEditor.Sequences
         public SequenceAssetAddMenu()
         {
             SequenceAssetIndexer.sequenceAssetImported += Refresh;
+            SequenceAssetIndexer.sequenceAssetUpdated += Refresh;
         }
 
         void Refresh(GameObject importedPrefab)

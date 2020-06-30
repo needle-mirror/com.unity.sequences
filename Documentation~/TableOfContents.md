@@ -7,3 +7,4 @@
   * [Hierarchy window](hierarchy-window.md)
 * [Under the hood](under-the-hood.md)
 * [Reference: Components](ref-components.md)
+* [Known issues](known-issues.md)

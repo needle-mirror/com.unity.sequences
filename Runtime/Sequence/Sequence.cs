@@ -5,13 +5,28 @@ using UnityEngine.Scripting.APIUpdating;
 
 namespace UnityEngine.Sequences
 {
+    /// <summary>
+    /// Sequence is a base object to define a time unit in a MasterSequence (in a cinematic).
+    /// </summary>
     [Serializable]
     [MovedFrom(false, "UnityEngine.CinematicToolbox", "Unity.CinematicToolbox", "CinematicClip")]
     public class Sequence
     {
+        /// <summary>
+        /// The name of the Sequence.
+        /// </summary>
         [SerializeField] protected string m_Name = "NewSequence";
+        /// <summary>
+        /// The framerate of the Sequence.
+        /// </summary>
         [SerializeField] protected float m_Fps = -1.0f;
+        /// <summary>
+        /// The start time of the Sequence.
+        /// </summary>
         [SerializeField] protected internal double m_Start = 0.0;
+        /// <summary>
+        /// The duration of the Sequence.
+        /// </summary>
         [SerializeField] protected double m_Duration = 2.0;
         [SerializeField] int m_Parent = -1;
         [SerializeReference] List<int> m_Children = null;
@@ -65,7 +80,7 @@ namespace UnityEngine.Sequences
         {
             get
             {
-                if (m_Fps > 0.0f)  // FPS is locally specified.
+                if (!isFpsInherited)  // FPS is locally specified.
                     return m_Fps;
 
                 if (parent == null)  // No FPS are specified, either locally or in a parent.
@@ -75,6 +90,11 @@ namespace UnityEngine.Sequences
             }
             set => m_Fps = value;
         }
+
+        /// <summary>
+        /// Indicates whether the framerate inherited its value from the parent Sequence or not.
+        /// </summary>
+        protected bool isFpsInherited => m_Fps < 0.0;
 
         /// <summary>
         /// Get or set the Sequence start time (in seconds).

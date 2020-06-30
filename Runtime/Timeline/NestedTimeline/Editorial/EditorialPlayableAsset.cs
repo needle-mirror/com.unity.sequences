@@ -14,6 +14,10 @@ namespace UnityEngine.Sequences.Timeline
         // TODO: Hide the `director` ExposedReference by a Sequence.
         // TODO: Add validation to ensure the controlled PlayableDirector belong to an actual Sequence.
 
+        /// <summary>
+        /// Get the clip caps. For a EditorialPlayableAsset, SpeedMultiplier and ClipIn are the two
+        /// extra clip options available.
+        /// </summary>
         public ClipCaps clipCaps => ClipCaps.SpeedMultiplier | ClipCaps.ClipIn;
 
         internal double GetEditorialContentDuration(PlayableDirector inspectedDirector)

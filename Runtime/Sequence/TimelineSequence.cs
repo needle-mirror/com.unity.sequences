@@ -1,11 +1,14 @@
 using System;
-using System.Data;
 using UnityEngine.Sequences.Timeline;
 using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.Timeline;
 
 namespace UnityEngine.Sequences
 {
+    /// <summary>
+    /// A TimelineSequence is a <see cref="Sequence"/> object associated with a TimelineAsset. This is the main object used
+    /// in the <see cref="MasterSequence"/> asset to define an editorial hierarchy of sequences.
+    /// </summary>
     [Serializable]
     [MovedFrom(false, "UnityEngine.CinematicToolbox", "Unity.CinematicToolbox", "TimelineCinematicClip")]
     public partial class TimelineSequence : Sequence
@@ -39,24 +42,9 @@ namespace UnityEngine.Sequences
         }
 
         /// <summary>
-        /// Get the Sequence timeline with the right fps (if possible, otherwise fps will be default timeline fps).
+        /// Gets the Sequence timeline.
         /// </summary>
-        public TimelineAsset timeline
-        {
-            get
-            {
-                try
-                {
-                    // Ensure the returned timeline has the right Fps according to what is set in the
-                    // TimelineSequence or in one of its parent.
-                    m_Timeline.editorSettings.fps = fps;
-                }
-                // Let the timeline has its default value for Fps if none are specified.
-                catch (DataException) {}
-
-                return m_Timeline;
-            }
-        }
+        public TimelineAsset timeline => m_Timeline;
 
         /// <summary>
         /// Get the Sequence EditorialTrack that contains children clips. It can be null.
@@ -80,9 +68,8 @@ namespace UnityEngine.Sequences
         }
 
         /// <summary>
-        /// Get the Sequence editorial TimelineClip. This is the clip present in the parent childrenTrack that
-        /// point to the timeline of this Sequence.
-        /// <seealso cref="TimelineSequence.childrenTrack"/>
+        /// Gets the Sequence editorial TimelineClip. This is the clip that belongs to the parent
+        /// <see cref="TimelineSequence.childrenTrack"/> and point to the timeline of this Sequence.
         /// </summary>
         public TimelineClip editorialClip
         {
@@ -103,8 +90,8 @@ namespace UnityEngine.Sequences
 
         /// <inheritdoc cref="Sequence.name"/>
         /// <summary>
-        /// Changing the name of a TimelineSequence also change the name of the timeline and the editorialClip
-        /// (if it exists).
+        /// Indicates the name of the Sequence. Changing the name of a TimelineSequence also changes the name of the
+        /// timeline and the editorialClip (if it exists).
         /// </summary>
         public override string name
         {
@@ -116,6 +103,42 @@ namespace UnityEngine.Sequences
                     editorialClip.displayName = value;
 
                 base.name = value;
+            }
+        }
+
+        /// <summary>
+        /// Indicates the framerate of the Sequence. The framerate is retrieved from the Timeline asset when possible.
+        /// </summary>
+        public override float fps
+        {
+            get
+            {
+                if (m_Timeline != null)
+                    return (float)m_Timeline.GetFrameRate();
+
+                return base.fps;
+            }
+            set
+            {
+                base.fps = value;
+
+                if (m_Timeline != null)
+                    SetTimelineFpsRecursive(value);
+            }
+        }
+
+        void SetTimelineFpsRecursive(float value)
+        {
+            if (timeline == null)
+                return;
+
+            timeline.SetFrameRate(value);
+
+            foreach (var child in children)
+            {
+                var timelineChild = child as TimelineSequence;
+                if (timelineChild != null && timelineChild.isFpsInherited)
+                    timelineChild.SetTimelineFpsRecursive(value);
             }
         }
 
@@ -191,21 +214,26 @@ namespace UnityEngine.Sequences
         }
 
         /// <summary>
-        /// On top of adding the given Sequence as a child, the childrenTrack is created if it doesn't exist yet.
+        /// Adds the specified Sequence as a child of this Sequence and creates the childrenTrack if it doesn't already exist.
         /// The editorialClip of the added clip is also created in the childrenTrack.
         /// If the given clip is not a TimelineSequence, no track or clip are created.
-        /// <seealso cref="Sequence.AddChild"/>
-        /// <seealso cref="Sequence.parent"/>
+        ///
+        /// This function is used by <seealso cref="Sequence.AddChild"/>
+        /// and the <seealso cref="Sequence.parent"/> setter.
         /// </summary>
         /// <param name="childClip">The child Sequence to add.</param>
         /// <returns>The actual start time of the added clip.</returns>
         protected override double AddChildClip(Sequence childClip)
         {
             var timelineChildClip = childClip as TimelineSequence;
-            if (timelineChildClip == null) return base.AddChildClip(childClip); // If childClip is not a TimelineSequence, there is nothing to do Timeline wise.
+            if (timelineChildClip == null)
+                return base.AddChildClip(childClip); // If childClip is not a TimelineSequence, there is nothing to do Timeline wise.
 
             m_ChildrenTrack = timeline.GetOrCreateTrack<EditorialTrack>(childrenTrackName);
             timelineChildClip.CreateEditorialClip(m_ChildrenTrack);
+
+            if (timelineChildClip.isFpsInherited)
+                timelineChildClip.SetTimelineFpsRecursive(fps);
 
             return base.AddChildClip(childClip);
         }

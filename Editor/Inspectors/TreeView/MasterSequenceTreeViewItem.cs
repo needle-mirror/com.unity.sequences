@@ -6,9 +6,6 @@ namespace UnityEditor.Sequences
 {
     internal class MasterSequenceTreeViewItem : EditorialElementTreeViewItem, IEditorialDraggable
     {
-        internal override TimelineSequence timelineSequence =>
-            (state == State.Ok) ? masterSequence.rootSequence : null;
-
         public override Texture2D icon => IconUtility.LoadIcon("MasterSequence/MasterSequence", IconUtility.IconType.UniqueToSkin);
         public override Texture2D iconSelected => IconUtility.LoadIcon("MasterSequence/MasterSequence-selected", IconUtility.IconType.CommonToAllSkin);
 
@@ -58,22 +55,17 @@ namespace UnityEditor.Sequences
                 base.Rename(newName);
         }
 
-        public void SetAsset(MasterSequence existingAsset)
-        {
-            masterSequence = existingAsset;
-            state = State.Ok;
-        }
-
         public override bool ValidateCreation(string newName)
         {
             if (string.IsNullOrEmpty(newName))
                 newName = displayName;
 
             displayName = newName;
-            SetAsset(SequenceUtility.CreateMasterSequence(newName));
+            // This looks odd but will eventually change in a next refactor.
+            var masterSequence = SequenceUtility.CreateMasterSequence(newName);
+            SetSequence(masterSequence.rootSequence, masterSequence);
             displayName = masterSequence.name;
 
-            state = State.Ok;
             return true;
         }
 

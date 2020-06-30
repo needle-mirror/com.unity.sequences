@@ -2,10 +2,21 @@ using UnityEngine.Playables;
 
 namespace UnityEngine.Sequences.Timeline
 {
+    // Todo: This class should be made internal: https://jira.unity3d.com/browse/SEQ-542
+    // Note: The documentation XML are added only to remove warning when validating the package until this class
+    //       can be made private. In the meantime, it is explicitly excluded from the documentation, see
+    //       Documentation > filter.yml
+
+    /// <summary>
+    ///
+    /// </summary>
     public class StoryboardMixerBehaviour : PlayableBehaviour
     {
         Canvas m_Canvas;
 
+        /// <summary>
+        ///
+        /// </summary>
         public Canvas canvas => m_Canvas;
 
         /// <inheritdoc cref="PlayableBehaviour.OnPlayableCreate"/>

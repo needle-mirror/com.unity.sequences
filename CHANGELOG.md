@@ -4,6 +4,27 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2020-06-30
+
+### Changed
+* Optimize the Sequence Asset search method to improve the Editor responsiveness when selecting a Sequence or performing simple operations on it.
+* Optimize caching to improve the overall responsiveness of the Sequences window.
+* Use by default the Timeline framerate value from the Project Settings when creating a MasterSequence with no specified FPS value.
+
+### Fixed
+* Make sure the renaming of a MasterSequence works under all conditions and with all supported Unity versions.
+* Prevent the Sequences Structure from displaying an invalid Sequence entry after the renaming of a MasterSequence.
+* Fix the Sequence Asset renaming process to handle edge cases for whitespace and duplicate names.
+* Ensure to always update and refresh the Sequence Assembly window and the Asset Collection view after renaming a Sequence Asset.
+* Ensure that the Asset Collection captures all the Sequence Assets when the project imports.
+* Fix cases where the Variant dropdowns of the Sequence Assembly window become unresponsive.
+* Preserve the Timeline playhead position when updating a Prefab instance.
+* Don't prevent users from changing the framerate (FPS) of a Timeline associated to a Sequence via the Timeline Window.
+* Make the Sequences Window retain the state of the Structure treeview between domain reloads.
+* Avoid throwing exception on prefabized Sequences when setting the Timeline breadcrumb.
+* Complete the public API Documentation.
+
+
 ## [1.0.0-pre.6] - 2020-05-18
 
 ### Changed
@@ -68,7 +89,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     * Rename the Cinematic asset to MasterSequence. Rename the whole Cinematic related API to reflect the new Master Sequence/Sequence terminology.
     * Rename the package assemblies and namespaces to replace "CinematicToolbox" by the new package name "Sequences".
 * Make the **Sequence Assembly** window read-only in Play mode and show the instance name of the SequenceAssets populating the selected Sequence.
-* The Sequence Assembly "Name" field now shows the selected Sequence name instead of the related TimelineAsset name. 
+* The Sequence Assembly "Name" field now shows the selected Sequence name instead of the related TimelineAsset name.
 
 ### Fixed
 * When creating Sequences and Sub-Sequences, they are now always created consecutively in time.
@@ -215,9 +236,9 @@ _First release under the new name: com.unity.sequences._
 * Fix Cinematic element getting destroyed when leaving Prefab isolation.
 * Ensure performances are created and saved with unique name in folder with unique name.
 * Fix the `Promote to Performance` menu item that was not available anymore.
-* Fix a bug where duplicating a performance take that contains another number than the take number 
+* Fix a bug where duplicating a performance take that contains another number than the take number
   was incrementing the other number as well as the take number.
-* Fix Cinematic Manager getting focused when a selection happens in the Hierarchy window. 
+* Fix Cinematic Manager getting focused when a selection happens in the Hierarchy window.
 * Fix Cinematic element creation not dirtying the active scene.
 * Fix the switch of performance take that was throwing exceptions before and loosing timeline binding.
 * Fix deletion of cinematic GameObject that was throwing a null exception when the Cinematic asset was already removed from the Project.

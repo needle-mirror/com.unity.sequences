@@ -31,14 +31,14 @@ namespace UnityEditor.Sequences
         public virtual void OnInspectorGUI();
     }
 
-    public static class SequenceAssetUtility
+    [System.Runtime.CompilerServices.Extension] public static class SequenceAssetUtility
     {
         public static UnityEngine.GameObject CreateSource(string name, string type = default(string), bool animate = True, bool instantiate = False);
         public static UnityEngine.GameObject CreateVariant(UnityEngine.GameObject source, bool instantiate = False);
         public static bool DeleteSourceAsset(UnityEngine.GameObject source, bool deleteVariants = True);
         public static bool DeleteVariantAsset(UnityEngine.GameObject variant);
         public static UnityEngine.GameObject DuplicateVariant(UnityEngine.GameObject variant);
-        [System.Runtime.CompilerServices.IteratorStateMachine(typeof(UnityEditor.Sequences.SequenceAssetUtility.<FindAllSources>d__10))] public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> FindAllSources(string type = default(string));
+        [System.Runtime.CompilerServices.IteratorStateMachine(typeof(UnityEditor.Sequences.SequenceAssetUtility.<FindAllSources>d__16))] public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> FindAllSources(string type = default(string));
         public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> GetInstancesInSequence(UnityEngine.Playables.PlayableDirector sequenceDirector, string type = default(string));
         public static UnityEngine.GameObject GetSource(UnityEngine.GameObject prefab);
         public static string GetType(UnityEngine.GameObject prefab);
@@ -57,7 +57,7 @@ namespace UnityEditor.Sequences
     {
         public static event System.Action<UnityEngine.Sequences.TimelineSequence, UnityEngine.Sequences.MasterSequence> sequenceCreated;
         public static event System.Action sequenceDeleted;
-        public static UnityEngine.Sequences.MasterSequence CreateMasterSequence(string name, float fps = 24);
+        public static UnityEngine.Sequences.MasterSequence CreateMasterSequence(string name, float fps = -1);
         public static UnityEngine.Sequences.TimelineSequence CreateSequence(string name, UnityEngine.Sequences.MasterSequence masterSequence, UnityEngine.Sequences.TimelineSequence parent = default(UnityEngine.Sequences.TimelineSequence));
         public static void DeleteSequence(UnityEngine.Sequences.TimelineSequence sequence, UnityEngine.Sequences.MasterSequence masterSequence);
     }

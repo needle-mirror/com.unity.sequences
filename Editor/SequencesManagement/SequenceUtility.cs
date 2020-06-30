@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.Sequences;
@@ -46,13 +45,15 @@ namespace UnityEditor.Sequences
         /// Creates a new MasterSequence and saves it on disk.
         /// </summary>
         /// <param name="name">The created MasterSequence name.</param>
-        /// <param name="fps">The frame rate of the created MasterSequence, set by default 24 frames per second.</param>
+        /// <param name="fps">The created MasterSequence frame rate. If you don't specify a framerate, the
+        /// MasterSequence uses by default the Timeline framerate value from the Project Settings.</param>
         /// <returns>The newly created MasterSequence asset.</returns>
-        public static MasterSequence CreateMasterSequence(string name, float fps = 24.0f)
+        public static MasterSequence CreateMasterSequence(string name, float fps = -1.0f)
         {
             Undo.SetCurrentGroupName("Create Master Sequence");
             var groupIndex = Undo.GetCurrentGroup();
 
+            fps = fps < 0.0 ? (float)TimelineUtility.GetProjectFrameRate() : fps;
             var masterSequence = MasterSequence.CreateInstance(name, fps);
             masterSequence.Save();
 
@@ -201,7 +202,7 @@ namespace UnityEditor.Sequences
         /// <returns>The GameObject that corresponds to the specified Sequence.</returns>
         static GameObject GetSequenceGameObject(TimelineSequence sequence)
         {
-            var sequenceFilters = Object.FindObjectsOfType<SequenceFilter>(true);
+            var sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var sequenceFilter in sequenceFilters)
             {
                 if (sequenceFilter.masterSequence.manager.GetAt(sequenceFilter.elementIndex) == sequence)
@@ -220,11 +221,10 @@ namespace UnityEditor.Sequences
         /// <returns>True if the MasterSequence is loaded in the Hierarchy view. False otherwise.</returns>
         static bool IsMasterSequenceInScene(MasterSequence masterSequence)
         {
-            var sequenceFilters = Object.FindObjectsOfType<SequenceFilter>(true);
+            var sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var sequenceFilter in sequenceFilters)
             {
-                if (sequenceFilter.gameObject.scene != default &&
-                    sequenceFilter.masterSequence == masterSequence)
+                if (sequenceFilter.masterSequence == masterSequence)
                 {
                     return true;
                 }

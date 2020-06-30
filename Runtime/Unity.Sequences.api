@@ -35,6 +35,7 @@ namespace UnityEngine.Sequences
         public double end { get; }
         public virtual float fps { get; set; }
         public bool hasChildren { get; }
+        protected bool isFpsInherited { get; }
         public virtual string name { get; set; }
         public UnityEngine.Sequences.Sequence parent { get; set; }
         public virtual double start { get; set; }
@@ -68,6 +69,7 @@ namespace UnityEngine.Sequences
         public string childrenTrackName { get; set; }
         public virtual double duration { get; set; }
         public UnityEngine.Timeline.TimelineClip editorialClip { get; }
+        public virtual float fps { get; set; }
         public virtual string name { set; }
         public virtual double start { get; set; }
         public UnityEngine.Timeline.TimelineAsset timeline { get; }

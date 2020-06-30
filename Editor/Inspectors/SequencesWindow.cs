@@ -15,9 +15,14 @@ namespace UnityEditor.Sequences
             public static readonly string k_SequencesWindowAddDropdownViewPath = "add_dropdown";
         }
 
-        TreeViewState m_State;
+        [SerializeField]
+        TreeViewState m_State = new TreeViewState();
+
         StructureTreeView m_Structure;
-        TreeViewState m_AssetCollectionsState;
+
+        [SerializeField]
+        TreeViewState m_AssetCollectionsState =  new TreeViewState();
+
         AssetCollectionsTreeView m_AssetCollectionsTreeView;
 
         IMGUIContainer m_StructureTreeViewContainer;
@@ -50,16 +55,12 @@ namespace UnityEditor.Sequences
             Button addDropdownButton = root.Q<Button>(Styles.k_SequencesWindowAddDropdownViewPath);
 
             // Hierarchy
-            m_State = new TreeViewState();
-
             m_StructureTreeViewContainer = root.Q<IMGUIContainer>(Styles.k_StructureContentViewPath);
             m_Structure = new StructureTreeView(m_State, m_StructureTreeViewContainer);
 
             m_StructureTreeViewContainer.onGUIHandler = m_Structure.OnGUI;
 
             // Asset Collections
-            m_AssetCollectionsState = new TreeViewState();
-
             m_AssetCollectionsTreeViewContainer = root.Q<IMGUIContainer>(Styles.k_AssetCollectionsContentViewPath);
             m_AssetCollectionsTreeView = new AssetCollectionsTreeView(m_AssetCollectionsState, m_AssetCollectionsTreeViewContainer);
 

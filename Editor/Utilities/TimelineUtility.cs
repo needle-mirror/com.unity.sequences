@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.Sequences;
@@ -8,10 +6,16 @@ using UnityEngine.Sequences.Timeline;
 using UnityEngine.Playables;
 using UnityEngine.Timeline;
 
+#if !TIMELINE_1_6_0_PRE_5_OR_NEWER
+using System;
+using System.Reflection;
+#endif
+
 namespace UnityEditor.Sequences
 {
     internal static class TimelineUtility
     {
+#if !TIMELINE_1_6_0_PRE_5_OR_NEWER
         static MethodInfo s_TimelineWindowSetCurrentTimelineMethod;
 
         static MethodInfo timelineWindowSetCurrentTimelineMethod
@@ -43,6 +47,7 @@ namespace UnityEditor.Sequences
         /// In that case, Timeline's API might have changed.
         /// </summary>
         internal static bool breadcrumbIsAvailable => timelineWindowSetCurrentTimelineMethod != null;
+#endif
 
         internal static TimelinePath breadcrumb = new TimelinePath();
 
@@ -77,20 +82,23 @@ namespace UnityEditor.Sequences
                 TimelineSequence current = destinationClip;
                 while (current != null)
                 {
+                    var director = current.timeline.FindDirector();
+                    if (director == null)
+                        return;
+
+                    TimelineClip hostClip = null;
                     if (current.parent != null)
                     {
                         var track = (current.parent as TimelineSequence).childrenTrack;
                         if (track == null)
                             return;
 
-                        var hostClip = track.GetFirstClipWithName(current.name);
+                        hostClip = track.GetFirstClipWithName(current.name);
                         if (hostClip == null)
                             return;
-
-                        path.Push(new Element() { director = current.timeline.FindDirector(), hostClip = hostClip });
                     }
-                    else
-                        path.Push(new Element() { director = current.timeline.FindDirector(), hostClip = null });
+
+                    path.Push(new Element() { director = director, hostClip = hostClip });
 
                     current = current.parent as TimelineSequence;
                 }
@@ -102,6 +110,7 @@ namespace UnityEditor.Sequences
             }
         }
 
+#if !TIMELINE_1_6_0_PRE_5_OR_NEWER
         static void PushItemIntoBreadcrumb(PlayableDirector director, TimelineClip hostClip)
         {
             var window = TimelineEditor.GetWindow();
@@ -111,26 +120,56 @@ namespace UnityEditor.Sequences
             timelineWindowSetCurrentTimelineMethod?.Invoke(window, new object[] { director, hostClip });
         }
 
+#endif
+
         public static void RefreshBreadcrumb(TimelinePath path = null)
         {
             if (path == null)
                 path = breadcrumb;
 
             TimelinePath.Element parent = default;
+
+#if TIMELINE_1_6_0_PRE_5_OR_NEWER
+            TimelineEditorWindow window = TimelineEditor.GetWindow();
+            if (window == null)
+                return;
+#endif
             while (path.count > 0)
             {
                 TimelinePath.Element drillInClip = path.Pop();
                 if (parent.director != null)
                 {
+#if TIMELINE_1_6_0_PRE_5_OR_NEWER
+                    SequenceContext context = default;
+
+                    // Look for existing context before creating a new one.
+                    foreach (var child in window.navigator.GetChildContexts())
+                    {
+                        if (child.director == drillInClip.director)
+                        {
+                            context = child;
+                            break;
+                        }
+                    }
+
+                    if (context == default)
+                        context = new SequenceContext(drillInClip.director, drillInClip.hostClip);
+
+                    window.navigator.NavigateTo(context);
+#else
                     PushItemIntoBreadcrumb(drillInClip.director, drillInClip.hostClip);
+#endif
                 }
                 else
                 {
                     // Add a PlayableDirectorInternalState only on the master timeline.
                     if (!drillInClip.director.GetComponent<PlayableDirectorInternalState>())
                         Undo.AddComponent<PlayableDirectorInternalState>(drillInClip.director.gameObject);
-
+#if TIMELINE_1_6_0_PRE_5_OR_NEWER
+                    window.SetTimeline(drillInClip.director);
+#else
                     PushItemIntoBreadcrumb(drillInClip.director, null);
+#endif
                 }
                 parent = drillInClip;
             }
@@ -141,6 +180,31 @@ namespace UnityEditor.Sequences
                 component.RestoreTimeState();
                 TimelineEditor.Refresh(RefreshReason.ContentsModified);
             }
+        }
+
+#if TIMELINE_1_6_0_PRE_5_OR_NEWER
+        internal static double GetProjectFrameRate()
+        {
+            return TimelineProjectSettings.instance.defaultFrameRate;
+        }
+
+#else
+        internal static double GetProjectFrameRate()
+        {
+            return TimelineProjectSettings.instance.assetDefaultFramerate;
+        }
+
+#endif
+
+        [InitializeOnLoadMethod]
+        static void Initialize()
+        {
+            PrefabUtility.prefabInstanceUpdated += OnPrefabInstanceUpdated;
+        }
+
+        static void OnPrefabInstanceUpdated(GameObject prefabInstance)
+        {
+            RefreshBreadcrumb();
         }
     }
 }

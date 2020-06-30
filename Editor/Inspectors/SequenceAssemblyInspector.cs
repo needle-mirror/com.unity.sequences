@@ -26,6 +26,7 @@ namespace UnityEditor.Sequences
         {
             Initialize();
             SequenceAssetIndexer.sequenceAssetImported += OnSequenceAssetImported;
+            SequenceAssetIndexer.sequenceAssetUpdated += OnSequenceAssetUpdated;
             SequenceAssetIndexer.sequenceAssetDeleted += OnSequenceAssetDeleted;
         }
 
@@ -39,6 +40,7 @@ namespace UnityEditor.Sequences
         void OnDisable()
         {
             SequenceAssetIndexer.sequenceAssetImported -= OnSequenceAssetImported;
+            SequenceAssetIndexer.sequenceAssetUpdated -= OnSequenceAssetUpdated;
             SequenceAssetIndexer.sequenceAssetDeleted -= OnSequenceAssetDeleted;
             ClearCollectionsCache();
         }
@@ -90,6 +92,11 @@ namespace UnityEditor.Sequences
         }
 
         void OnSequenceAssetImported(GameObject sequenceAsset)
+        {
+            Refresh();
+        }
+
+        void OnSequenceAssetUpdated(GameObject sequenceAsset)
         {
             Refresh();
         }

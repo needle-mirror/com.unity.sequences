@@ -16,10 +16,14 @@ namespace UnityEditor.Sequences
         }
 
         VisualElement m_VisualElementContainer;
-        List<TreeViewItem> m_Items;
+
+        [SerializeField]
+        List<TreeViewItem> m_Items =  new List<TreeViewItem>();
 
         // Keep an indexer to assign unique ID to new TreeViewItem.
-        int m_IndexGenerator;
+        // ID starts at 1 as the root item's ID is 0.
+        [SerializeField]
+        int m_IndexGenerator = 1;
 
         /// <summary>
         /// Tells if TreeView is in the process of creating a new item.
@@ -37,10 +41,7 @@ namespace UnityEditor.Sequences
             : base(state)
         {
             m_VisualElementContainer = container;
-            m_Items = new List<TreeViewItem>();
 
-            /// ID starts at 1 as the root item's ID is 0.
-            m_IndexGenerator = 1;
             Reload();
 
             getNewSelectionOverride = OnNewSelection;
@@ -235,6 +236,9 @@ namespace UnityEditor.Sequences
             {
                 IEnumerable<MasterSequence> existingAssets = SequencesAssetDatabase.FindAsset<MasterSequence>();
                 GenerateTreeFromData(existingAssets);
+
+                // When reloading the parent windows, internal states may have expanded items.
+                SetExpanded(state.expandedIDs);
             }
 
 
@@ -337,7 +341,7 @@ namespace UnityEditor.Sequences
 
             MasterSequenceTreeViewItem newItem = new MasterSequenceTreeViewItem { id = newId, depth = 0, displayName = masterSequence.rootSequence.name };
             newItem.owner = this;
-            newItem.SetAsset(masterSequence);
+            newItem.SetSequence(masterSequence.rootSequence, masterSequence);
 
             m_Items.Add(newItem);
 
@@ -349,8 +353,7 @@ namespace UnityEditor.Sequences
             int newId = GetNextId();
             var newItem = new SequenceTreeViewItem { id = newId, depth = parent.depth + 1, displayName = sequence.name };
             newItem.owner = this;
-            newItem.SetSequence(sequence);
-            newItem.SetMasterSequence(masterSequence);
+            newItem.SetSequence(sequence, masterSequence);
 
             m_Items.Add(newItem);
             parent.AddChild(newItem);
@@ -363,8 +366,7 @@ namespace UnityEditor.Sequences
             int newId = GetNextId();
             SubSequenceTreeViewItem newItem = new SubSequenceTreeViewItem { id = newId, depth = parent.depth + 1, displayName = sequence.name };
             newItem.owner = this;
-            newItem.SetSequence(sequence);
-            newItem.SetMasterSequence(masterSequence);
+            newItem.SetSequence(sequence, masterSequence);
 
             m_Items.Add(newItem);
             parent.AddChild(newItem);

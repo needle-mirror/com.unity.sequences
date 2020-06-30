@@ -4,42 +4,65 @@ using UnityEngine.UI;
 
 namespace UnityEngine.Sequences.Timeline
 {
+    // Todo: This class should be made internal: https://jira.unity3d.com/browse/SEQ-542
+    // Note: The documentation XML are added only to remove warning when validating the package until this class
+    //       can be made private. In the meantime, it is explicitly excluded from the documentation, see
+    //       Documentation > filter.yml
+
     /// <summary>
     /// Contains the logic for displaying and scaling the image to the screen size.
     /// </summary>
     public class StoryboardPlayableBehaviour : PlayableBehaviour
     {
         Texture m_Board = null;
+        /// <summary>
+        ///
+        /// </summary>
         public Texture board
         {
             set => m_Board = value;
         }
 
         bool m_ShowBoard = true;
+        /// <summary>
+        ///
+        /// </summary>
         public bool showBoard
         {
             set => m_ShowBoard = value;
         }
 
         Vector2 m_Position = Vector2.zero;
+        /// <summary>
+        ///
+        /// </summary>
         public Vector2 position
         {
             set => m_Position = value;
         }
 
         float m_Alpha = 1;
+        /// <summary>
+        ///
+        /// </summary>
         public float alpha
         {
             set => m_Alpha = value;
         }
 
         Vector3 m_Rotation = Vector3.zero;
+        /// <summary>
+        ///
+        /// </summary>
         public Vector3 rotation
         {
             set => m_Rotation = value;
         }
 
         Vector2 m_Scale = Vector2.one;
+        /// <summary>
+        ///
+        /// </summary>
         public Vector2 scale
         {
             set => m_Scale = value;

@@ -1,4 +1,3 @@
-using UnityEngine;
 using UnityEngine.Sequences;
 
 namespace UnityEditor.Sequences
@@ -20,11 +19,11 @@ namespace UnityEditor.Sequences
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 return;
 
-            var sequenceFilters = Resources.FindObjectsOfTypeAll(typeof(SequenceFilter));
-            foreach (var sequenceFilterObj in sequenceFilters)
+            var sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
+            foreach (var sequenceFilter in sequenceFilters)
             {
-                var sequenceFilter = sequenceFilterObj as SequenceFilter;
-                if (sequenceFilter == null || sequenceFilter.masterSequence == null) continue;
+                if (sequenceFilter.masterSequence == null)
+                    continue;
 
                 // Process names
                 var sequence = sequenceFilter.masterSequence.manager.GetAt(sequenceFilter.elementIndex) as TimelineSequence;

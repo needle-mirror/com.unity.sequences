@@ -5,12 +5,12 @@ namespace UnityEngine.Sequences
 {
     /// <summary>
     /// Manager used by SceneActivationTrack and SceneActivationMixer.
-    /// It enables/disables scenes based on the number of requests it receives.
+    /// It enables/disables Scenes based on the number of requests it receives.
     /// </summary>
     static class SceneActivationManager
     {
         /// <summary>
-        /// List of active tracked scenes.
+        /// List of active tracked Scenes.
         /// </summary>
         static readonly List<SceneTracker> s_SceneTrackers = new List<SceneTracker>();
 
@@ -20,11 +20,11 @@ namespace UnityEngine.Sequences
         static readonly ISceneActivationBehaviour s_ActivationStrategy = new BasicSceneActivation();
 
         /// <summary>
-        /// Tracker object used to follow the number of requesters (= SceneActivationTrack) for a given scene.
+        /// Tracker object used to follow the number of requesters (= SceneActivationTrack) for a given Scene.
         /// </summary>
         /// <remarks>
-        /// Mostly useful when multiple SceneActivationTrack request the same scene.
-        /// A weight is computed based on the received request to ensure if a given scene must be enabled.
+        /// Mostly useful when multiple SceneActivationTrack request the same Scene.
+        /// A weight is computed based on the received request to ensure if a given Scene must be enabled.
         /// </remarks>
         [System.Serializable]
         class SceneTracker
@@ -109,9 +109,9 @@ namespace UnityEngine.Sequences
         }
 
         /// <summary>
-        /// Requests a scene to be activated.
+        /// Requests a Scene to be activated.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to the Scene, relative to the project folder.</param>
         internal static void RequestActivateScene(string path)
         {
             Scene loadedScene = SceneManager.GetSceneByPath(path);
@@ -127,9 +127,9 @@ namespace UnityEngine.Sequences
         }
 
         /// <summary>
-        /// Requests a scene to be deactivated.
+        /// Requests a Scene to be deactivated.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to the Scene, relative to the project folder.</param>
         internal static void RequestDeactivateScene(string path)
         {
             Scene loadedScene = SceneManager.GetSceneByPath(path);
@@ -146,7 +146,7 @@ namespace UnityEngine.Sequences
         /// <summary>
         /// Registers a requester. This must be done before making a request.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to the Scene, relative to the project folder.</param>
         internal static void Register(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -167,7 +167,7 @@ namespace UnityEngine.Sequences
         /// <summary>
         /// Unregisters a requester.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Path to the Scene, relative to the project folder.</param>
         internal static void Unregister(string path)
         {
             if (string.IsNullOrEmpty(path))

@@ -3,6 +3,10 @@ using UnityEngine.Timeline;
 
 namespace UnityEngine.Sequences.Timeline
 {
+    // Note: This class is excluded from the API documentation, see Documentation > filter.yml.
+    //       It is public only to be able to propose the EditorialPlayableAsset and the SequenceAssetPlayableAsset as
+    //       public class in the Sequences API. But it has no need to be exposed in the documentation.
+
     /// <summary>
     /// Base class for all PlayableAsset that controls another PlayableDirector.
     /// </summary>
@@ -10,6 +14,9 @@ namespace UnityEngine.Sequences.Timeline
     [HideInMenu]
     public abstract class NestedTimelinePlayableAsset : PlayableAsset
     {
+        /// <summary>
+        /// The PlayableDirector to control.
+        /// </summary>
         public ExposedReference<PlayableDirector> director;
         double m_SubTimelineLength = 0.0;
 
@@ -18,6 +25,9 @@ namespace UnityEngine.Sequences.Timeline
             set => m_SubTimelineLength = value;
         }
 
+        /// <summary>
+        /// The total duration of the driven sub-Timeline.
+        /// </summary>
         public override double duration => m_SubTimelineLength;
 
         /// <summary>
