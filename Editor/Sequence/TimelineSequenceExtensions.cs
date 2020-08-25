@@ -27,7 +27,7 @@ namespace UnityEditor.Sequences
             if (clip.timeline != null)
             {
                 string timelinePath = null;
-                if (SequencesAssetDatabase.LoadAsset(clip.timeline) == null)
+                if (!AssetDatabase.Contains(clip.timeline))
                     timelinePath = SequencesAssetDatabase.GenerateUniqueMasterSequencePath(clip.timeline.name, folder, ".playable");
 
                 SequencesAssetDatabase.SaveAsset(clip.timeline, timelinePath);

@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 
 namespace UnityEditor.Sequences
 {
-    // The SequencesAssetDatabase (ou Manager?) encapsulate the Unity AssetDatabase functions and can be overriden
+    // The SequencesAssetDatabase encapsulate the Unity AssetDatabase functions and can be overriden
     // to handle any way of handling assets (for example, it could connect to Shotgun or Perforce instead of using
     // the AssetDatabase from Unity).
     internal static class SequencesAssetDatabase
@@ -21,31 +21,22 @@ namespace UnityEditor.Sequences
             return GetNewAssetPath(name, k_SequenceBaseFolder, subFolders, extension);
         }
 
-        public static void SaveAsset<T>(T asset, string path = null, Object[] subAssets = null) where T : ScriptableObject
+        public static void SaveAsset<T>(T asset, string path = null) where T : ScriptableObject
         {
             if (string.IsNullOrEmpty(path))
                 EditorUtility.SetDirty(asset);
             else
                 AssetDatabase.CreateAsset(asset, path);
 
-            if (subAssets == null)
-            {
-                AssetDatabase.SaveAssets();
-                return;
-            }
-
-            foreach (var subAsset in subAssets)
-                AssetDatabase.AddObjectToAsset(subAsset, asset);
-
             AssetDatabase.SaveAssets();
         }
 
-        public static void SaveAsset(TimelineAsset asset, string path = null, Object[] subAssets = null)
+        public static void SaveAsset(TimelineAsset asset, string path = null)
         {
             if (!string.IsNullOrEmpty(path))
                 ValidatePath(path, asset, ".playable");
 
-            SaveAsset<TimelineAsset>(asset, path, subAssets);
+            SaveAsset<TimelineAsset>(asset, path);
         }
 
         public static bool DeleteAsset<T>(T asset) where T : Object
@@ -82,24 +73,16 @@ namespace UnityEditor.Sequences
             AssetDatabase.SaveAssets();
         }
 
-        public static T LoadAsset<T>(T asset) where T : Object
-        {
-            if (AssetDatabase.Contains(asset))
-                return LoadAsset<T>(AssetDatabase.GetAssetPath(asset));
-
-            return null;
-        }
-
         public static IEnumerable<T> FindAsset<T>(string name = null) where T : Object
         {
             string filter = !string.IsNullOrEmpty(name) ? $"{name} t:{typeof(T).ToString()}" : $"t:{typeof(T).ToString()}";
             var guids = AssetDatabase.FindAssets(filter);
 
             foreach (var guid in guids)
-                yield return LoadAsset<T>(AssetDatabase.GUIDToAssetPath(guid));
+                yield return AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid));
         }
 
-        public static string GenerateUniqueAssetName<T>(T asset, string newName) where T : Object
+        public static string GenerateNewUniqueMasterSequenceName(MasterSequence asset, string newName)
         {
             var oldFolderPath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(asset));
             var newFolderPath = Path.Combine(Path.GetDirectoryName(oldFolderPath), newName);
@@ -122,11 +105,6 @@ namespace UnityEditor.Sequences
             AssetDatabase.RenameAsset(oldFolderPath, newFolderName);
 
             return newFolderPath;
-        }
-
-        public static string GetAssetPath<T>(T asset) where T : Object
-        {
-            return AssetDatabase.GetAssetPath(asset);
         }
 
         public static bool IsRenameValid(string oldName, string newName)
@@ -187,11 +165,6 @@ namespace UnityEditor.Sequences
                 return false;
 
             return true;
-        }
-
-        static T LoadAsset<T>(string assetPath) where T : Object
-        {
-            return AssetDatabase.LoadAssetAtPath<T>(assetPath);
         }
 
         static string GetNewAssetPath(string name, string basePath, string subFolders = "", string extension = ".asset")

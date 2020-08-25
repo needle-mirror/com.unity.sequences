@@ -65,6 +65,7 @@ namespace UnityEditor.Sequences
             var masterSequence = SequenceUtility.CreateMasterSequence(newName);
             SetSequence(masterSequence.rootSequence, masterSequence);
             displayName = masterSequence.name;
+            id = SequenceUtility.GetHashCode(timelineSequence, masterSequence);
 
             return true;
         }
@@ -77,10 +78,7 @@ namespace UnityEditor.Sequences
             if (!UserVerifications.ValidateSequenceDeletion(timelineSequence))
                 return;
 
-            if (SequenceUtility.IsValidSequence(timelineSequence))
-                masterSequence.Delete();
-            else
-                (owner as StructureTreeView).Detach(this);
+            masterSequence.Delete();
         }
     }
 }

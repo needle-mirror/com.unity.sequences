@@ -133,9 +133,12 @@ namespace UnityEditor.Sequences
 
         void OnSequenceRenamed(Sequence sequence)
         {
-            var found = m_Items.Find(x => ((EditorialElementTreeViewItem)x).timelineSequence == sequence);
+            EditorialElementTreeViewItem found = m_Items.Find(x => ((EditorialElementTreeViewItem)x).timelineSequence == sequence) as EditorialElementTreeViewItem;
             if (found != null)
+            {
+                found.id = SequenceUtility.GetHashCode(found.timelineSequence, found.masterSequence);
                 found.displayName = sequence.name;
+            }
         }
 
         void GenerateTreeFromData(IEnumerable<MasterSequence> masterSequences)
@@ -337,7 +340,7 @@ namespace UnityEditor.Sequences
 
         MasterSequenceTreeViewItem CreateNewMasterSequenceFrom(MasterSequence masterSequence)
         {
-            int newId = GetNextId();
+            int newId = SequenceUtility.GetHashCode(masterSequence.rootSequence, masterSequence);
 
             MasterSequenceTreeViewItem newItem = new MasterSequenceTreeViewItem { id = newId, depth = 0, displayName = masterSequence.rootSequence.name };
             newItem.owner = this;
@@ -350,7 +353,7 @@ namespace UnityEditor.Sequences
 
         SequenceTreeViewItem CreateNewSequenceFrom(TimelineSequence sequence, MasterSequenceTreeViewItem parent, MasterSequence masterSequence)
         {
-            int newId = GetNextId();
+            int newId = SequenceUtility.GetHashCode(sequence, masterSequence);
             var newItem = new SequenceTreeViewItem { id = newId, depth = parent.depth + 1, displayName = sequence.name };
             newItem.owner = this;
             newItem.SetSequence(sequence, masterSequence);
@@ -363,7 +366,7 @@ namespace UnityEditor.Sequences
 
         SubSequenceTreeViewItem CreateNewSubSequenceFrom(TimelineSequence sequence, SequenceTreeViewItem parent, MasterSequence masterSequence)
         {
-            int newId = GetNextId();
+            int newId = SequenceUtility.GetHashCode(sequence, masterSequence);
             SubSequenceTreeViewItem newItem = new SubSequenceTreeViewItem { id = newId, depth = parent.depth + 1, displayName = sequence.name };
             newItem.owner = this;
             newItem.SetSequence(sequence, masterSequence);
@@ -376,7 +379,7 @@ namespace UnityEditor.Sequences
 
         public void CreateNewMasterSequence()
         {
-            int newId = GetNextId();
+            int newId = GetTemporaryId();
 
             MasterSequenceTreeViewItem newItem = new MasterSequenceTreeViewItem { id = newId, depth = 0 };
             newItem.owner = this;
@@ -393,7 +396,7 @@ namespace UnityEditor.Sequences
         {
             if (parent is MasterSequenceTreeViewItem)
             {
-                int newId = GetNextId();
+                int newId = GetTemporaryId();
                 var newItem = new SequenceTreeViewItem { id = newId, depth = parent.depth + 1 };
                 newItem.owner = this;
 
@@ -410,7 +413,7 @@ namespace UnityEditor.Sequences
         {
             if (parent is SequenceTreeViewItem)
             {
-                int newId = GetNextId();
+                int newId = GetTemporaryId();
                 SubSequenceTreeViewItem newItem = new SubSequenceTreeViewItem { id = newId, depth = parent.depth + 1 };
                 newItem.owner = this;
 
@@ -474,7 +477,13 @@ namespace UnityEditor.Sequences
             return m_Items.Find(x => x.id == id) as TreeViewItemBase;
         }
 
-        int GetNextId()
+        /// <summary>
+        /// Returns a temporary Id until the actual hashcode for an item can be resolved.
+        /// Used mostly when creating a new item as the latter needs to wait for the data to be created
+        /// in order to move its state to <see cref="TreeViewItemBase.State.Ok"/>.
+        /// </summary>
+        /// <returns></returns>
+        int GetTemporaryId()
         {
             return m_IndexGenerator++;
         }

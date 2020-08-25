@@ -23,8 +23,8 @@ namespace UnityEditor.Sequences.Timeline
             var clipAsset = clip.asset as SequenceAssetPlayableAsset;
             var clipDirector = clipAsset.director.Resolve(director);
 
-            if (clipDirector == null)
-                options.errorText = "No PlayableDirector set.";
+            if (clipDirector == null || clipDirector.playableAsset == null)
+                options.errorText = "No PlayableDirector set, or PlayableDirector has no valid PlayableAsset.";
 
             // This can't be done in Playmode because the link between the instance and the Prefab asset doesn't
             // exist at this point.

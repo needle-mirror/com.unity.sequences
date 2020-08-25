@@ -42,7 +42,7 @@ namespace UnityEditor.Sequences
             if (!SequencesAssetDatabase.IsRenameValid(masterSequence.name, newName))
                 return false;
 
-            newName = SequencesAssetDatabase.GenerateUniqueAssetName(masterSequence, newName);
+            newName = SequencesAssetDatabase.GenerateNewUniqueMasterSequenceName(masterSequence, newName);
             SequencesAssetDatabase.RenameAssetFolder(masterSequence, newName);
 
             masterSequence.rootSequence.Rename(newName);
@@ -62,7 +62,7 @@ namespace UnityEditor.Sequences
         {
             SequenceUtility.DeleteSequence(masterSequence.rootSequence, masterSequence);
 
-            var directoryName = Path.GetDirectoryName(SequencesAssetDatabase.GetAssetPath(masterSequence));
+            var directoryName = Path.GetDirectoryName(AssetDatabase.GetAssetPath(masterSequence));
 
             SequencesAssetDatabase.DeleteAsset(masterSequence);
             SequencesAssetDatabase.DeleteFolder(directoryName);

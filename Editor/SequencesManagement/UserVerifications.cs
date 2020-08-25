@@ -5,8 +5,17 @@ namespace UnityEditor.Sequences
 {
     internal static class UserVerifications
     {
+        /// <summary>
+        /// Skips the Editor popups asking users for confirmation.
+        /// Set it to True when methods are called from automation.
+        /// </summary>
+        internal static bool skipUserVerification = false;
+
         internal static bool ValidateSequenceDeletion(Sequence deletedSequence)
         {
+            if (skipUserVerification)
+                return true;
+
             var deleteAssets = EditorUtility.DisplayDialog(
                 "Sequence deletion",
                 $"Do you want to delete the \"{deletedSequence.name}\" Sequence and its children?\n\n" +
@@ -20,6 +29,9 @@ namespace UnityEditor.Sequences
 
         internal static bool ValidateSequenceAssetDeletion(GameObject deletedSequenceAsset)
         {
+            if (skipUserVerification)
+                return true;
+
             var hasVariantMessage = "";
             if (SequenceAssetUtility.HasVariants(deletedSequenceAsset))
                 hasVariantMessage = " and its Variants";
@@ -62,6 +74,9 @@ namespace UnityEditor.Sequences
             }
 
             if (!hasNonDefaultOverrides)
+                return true;
+
+            if (skipUserVerification)
                 return true;
 
             var result = EditorUtility.DisplayDialogComplex(

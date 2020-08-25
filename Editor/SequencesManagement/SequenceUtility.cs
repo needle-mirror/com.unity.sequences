@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.Sequences;
@@ -200,11 +201,15 @@ namespace UnityEditor.Sequences
         /// </summary>
         /// <param name="sequence">The TimelineSequence to look the GameObject for.</param>
         /// <returns>The GameObject that corresponds to the specified Sequence.</returns>
-        static GameObject GetSequenceGameObject(TimelineSequence sequence)
+        internal static GameObject GetSequenceGameObject(TimelineSequence sequence)
         {
             var sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var sequenceFilter in sequenceFilters)
             {
+                // Might happen when instantiating a Sequence prefab under a MasterSequence GameObject.
+                if (sequenceFilter.masterSequence == null)
+                    continue;
+
                 if (sequenceFilter.masterSequence.manager.GetAt(sequenceFilter.elementIndex) == sequence)
                 {
                     return sequenceFilter.gameObject;
@@ -231,6 +236,34 @@ namespace UnityEditor.Sequences
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets an unique hashcode from the provided sequence.
+        /// It gets it by building the sequence path. Renaming a Sequence or the MasterSequence will yield a new hashcode.
+        /// </summary>
+        /// <param name="sequence">The Sequence the returned hashcode belongs to.</param>
+        /// <param name="masterSequence">The MasterSequence the <paramref name="sequence"/> belongs to.</param>
+        /// <returns>An unique integer</returns>
+        internal static int GetHashCode(TimelineSequence sequence, MasterSequence masterSequence)
+        {
+            string path = string.Empty;
+
+            TimelineSequence current = sequence;
+            while (current != null)
+            {
+                if (current.parent == null)
+                    path = Path.Combine(AssetDatabase.GetAssetPath(masterSequence), path);
+                else
+                    path = Path.Combine(
+                        masterSequence.manager.GetIndex(sequence).ToString(),
+                        "_",
+                        current.name,
+                        path);
+
+                current = current.parent as TimelineSequence;
+            }
+            return path.GetHashCode();
         }
     }
 }

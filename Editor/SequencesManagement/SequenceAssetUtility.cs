@@ -371,9 +371,7 @@ namespace UnityEditor.Sequences
             bool renameVariants = true,
             bool renameInstances = true)
         {
-            var sanitizedName = SanitizeName(newName);
-
-            if (string.IsNullOrWhiteSpace(sanitizedName) || oldName == sanitizedName)
+            if (!SanitizeAndValidateName(oldName, newName, out var sanitizedName))
                 return oldName;
 
             var actualNewName = sanitizedName;
@@ -537,10 +535,10 @@ namespace UnityEditor.Sequences
         /// <returns></returns>
         internal static TimelineClip GetClipFromInstance(GameObject instance, PlayableDirector sequenceDirector)
         {
-            var timeline = sequenceDirector.playableAsset as TimelineAsset;
-            if (timeline == null)
+            if (!HasTimelineSetup(instance))
                 return null;
 
+            var timeline = sequenceDirector.playableAsset as TimelineAsset;
             foreach (var clip in timeline.GetSequenceAssetClips())
             {
                 var bindInstance = GetInstanceFromClip(clip, sequenceDirector);
@@ -601,8 +599,12 @@ namespace UnityEditor.Sequences
             for (var i = 0; i < sequence.transform.childCount; ++i)
             {
                 var instance = sequence.transform.GetChild(i).gameObject;
-                if (!IsSequenceAsset(instance) || PrefabUtility.IsPrefabAssetMissing(instance))
+                if (!PrefabUtility.IsPartOfPrefabInstance(instance) ||
+                    !IsSequenceAsset(instance) ||
+                    PrefabUtility.IsPrefabAssetMissing(instance))
+                {
                     continue;
+                }
 
                 if (string.IsNullOrEmpty(type) || type == GetType(instance))
                     yield return instance;
@@ -799,12 +801,6 @@ namespace UnityEditor.Sequences
         /// <returns></returns>
         static TimelineClip RemoveFromSequenceInternal(GameObject instance, PlayableDirector sequenceDirector)
         {
-            if (!HasTimelineSetup(instance))
-            {
-                Undo.DestroyObjectImmediate(instance);
-                return null;
-            }
-
             var clip = GetClipFromInstance(instance, sequenceDirector);
             Undo.DestroyObjectImmediate(instance);
 
@@ -921,6 +917,20 @@ namespace UnityEditor.Sequences
             Array.ForEach<char>(invalidChars, c => newName = newName.Replace(c, '_'));
 
             return newName;
+        }
+
+        /// <summary>
+        /// Sanitizes the specified new name by replacing invalid file characters by underscores and then verifies that
+        /// it is a valid name (i.e. it is not empty or only white spaces and not equals to the old name).
+        /// </summary>
+        /// <param name="oldName"></param>
+        /// <param name="newName"></param>
+        /// <param name="sanitizedName"></param>
+        /// <returns>Returns True if the sanitized new name is valid.</returns>
+        internal static bool SanitizeAndValidateName(string oldName, string newName, out string sanitizedName)
+        {
+            sanitizedName = SanitizeName(newName);
+            return !string.IsNullOrWhiteSpace(sanitizedName) && oldName != sanitizedName;
         }
 
         /// <summary>

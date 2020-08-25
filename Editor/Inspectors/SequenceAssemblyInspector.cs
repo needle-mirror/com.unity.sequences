@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.Sequences
 {
-    internal class SequenceAssemblyInspector : Editor
+    internal partial class SequenceAssemblyInspector : Editor
     {
         class Styles
         {

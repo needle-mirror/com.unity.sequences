@@ -107,7 +107,8 @@ namespace UnityEditor.Sequences
         static void TrySetTimelineInContextOf(PlayableDirector director)
         {
             var sequenceAsset = PrefabUtility.GetNearestPrefabInstanceRoot(director.gameObject);
-            if (sequenceAsset == null || !SequenceAssetUtility.IsSequenceAsset(sequenceAsset))
+            if (sequenceAsset == null ||
+                !SequenceAssetUtility.IsSequenceAsset(sequenceAsset))
             {
                 SelectPlayableDirector(director);
                 return;
@@ -130,10 +131,13 @@ namespace UnityEditor.Sequences
                 breadcrumb.Clear();
 
                 var sequenceAssetClip = SequenceAssetUtility.GetClipFromInstance(sequenceAsset, parentPlayableDirector);
+                if (sequenceAssetClip == null)
+                {
+                    SelectPlayableDirector(director);
+                    return;
+                }
 
-                if (sequenceAssetClip != null)
-                    breadcrumb.Append(director, sequenceAssetClip);
-
+                breadcrumb.Append(director, sequenceAssetClip);
                 breadcrumb.BuildAndAppend(sequence);
                 TimelineUtility.RefreshBreadcrumb(breadcrumb);
             }

@@ -4,6 +4,20 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2020-08-25
+
+### Changed
+* Update the help URL for the SequenceFilter, SequenceAsset and SceneLoadPolicy components.
+
+### Fixed
+* Ignore SequenceAsset components added on GameObjects that are not part of a Prefab instance when listing the actual Sequence Assets included in a Sequence.
+* Ignore SequenceAsset renaming from the Sequence Assembly window if the input name is invalid.
+* Properly delete a Sequence previously converted to a Prefab.
+* Make sure the Structure treeview always keeps its current expanded/collapsed state.
+* Ensure that the Timeline Window always displays the correct breadcrumb context and Timeline asset when selecting a Sequence Asset in the Hierarchy.
+* Improved the handling of invalid sequence deletion from the Sequences window.
+* Make sure to properly rename a Sequence when the user only appends a suffix to the current name.
+
 ## [1.0.0] - 2020-06-30
 
 ### Changed

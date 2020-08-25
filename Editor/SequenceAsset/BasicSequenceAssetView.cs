@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.Sequences
 {
-    internal class BasicSequenceAssetView : ISequenceAssetView
+    internal partial class BasicSequenceAssetView : ISequenceAssetView
     {
         static readonly string k_UXMLFilePath = "Packages/com.unity.sequences/Editor/UI/SequenceAssetVariantField.uxml";
 

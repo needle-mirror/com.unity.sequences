@@ -10,6 +10,12 @@ namespace UnityEngine.Sequences
     /// a SequenceFilter component should also have a PlayableDirector component that drives the Sequence's Timeline.
     /// </summary>
     [ExecuteInEditMode]
+#if UNITY_2021_1_OR_NEWER
+    [ComponentHelpURL("sequence-filter")]
+#else
+    [HelpURL(DocumentationInfo.baseURL + DocumentationInfo.version + DocumentationInfo.manual +
+        DocumentationInfo.components + DocumentationInfo.ext + DocumentationInfo.titleRef + "sequence-filter")]
+#endif
     public sealed class SequenceFilter : MonoBehaviour
     {
         internal enum Type
@@ -118,6 +124,16 @@ namespace UnityEngine.Sequences
 #endif
             clipAsset.director.exposedName = new PropertyName(guid);
             parentDirector.SetReferenceValue(clipAsset.director.exposedName, childDirector);
+        }
+
+        internal bool Equals(SequenceFilter other)
+        {
+            if (this == other)
+                return true;
+
+            return (masterSequence == other.masterSequence
+                && elementIndex == other.elementIndex
+                && type == other.type);
         }
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine.Playables;
 
 namespace UnityEditor.Sequences
 {
-    class SequenceAssemblyWindow : EditorWindow
+    partial class SequenceAssemblyWindow : EditorWindow
     {
         SequenceAssemblyInspector m_CachedEditor;
         bool m_PlayMode;

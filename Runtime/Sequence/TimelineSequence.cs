@@ -97,7 +97,7 @@ namespace UnityEngine.Sequences
         {
             set
             {
-                timeline.name = timeline.name.Replace(name, value);
+                timeline.name = value + "_Timeline";
 
                 if (editorialClip != null)
                     editorialClip.displayName = value;

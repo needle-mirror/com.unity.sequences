@@ -66,7 +66,7 @@ namespace UnityEditor.Sequences
             TimelineSequence sequence = (parent as SequenceTreeViewItem).timelineSequence;
 
             SetSequence(SequenceUtility.CreateSequence(newName, masterSequenceAsset, sequence), masterSequenceAsset);
-
+            id = SequenceUtility.GetHashCode(timelineSequence, masterSequence);
             return true;
         }
 
@@ -78,13 +78,8 @@ namespace UnityEditor.Sequences
             if (!UserVerifications.ValidateSequenceDeletion(timelineSequence))
                 return;
 
-            if (SequenceUtility.IsValidSequence(timelineSequence))
-            {
-                MasterSequence masterSequenceAsset = (parent.parent as MasterSequenceTreeViewItem).masterSequence;
-                SequenceUtility.DeleteSequence(timelineSequence, masterSequenceAsset);
-            }
-            else
-                (owner as StructureTreeView).Detach(this);
+            MasterSequence masterSequenceAsset = (parent.parent as MasterSequenceTreeViewItem).masterSequence;
+            SequenceUtility.DeleteSequence(timelineSequence, masterSequenceAsset);
         }
     }
 }

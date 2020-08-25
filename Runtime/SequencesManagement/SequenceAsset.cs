@@ -8,6 +8,12 @@ namespace UnityEngine.Sequences
     /// </summary>
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
+#if UNITY_2021_1_OR_NEWER
+    [ComponentHelpURL("sequence-asset")]
+#else
+    [HelpURL(DocumentationInfo.baseURL + DocumentationInfo.version + DocumentationInfo.manual +
+        DocumentationInfo.components + DocumentationInfo.ext + DocumentationInfo.titleRef + "sequence-asset")]
+#endif
     public class SequenceAsset : MonoBehaviour
     {
         [SerializeField] string m_Type = "Character";

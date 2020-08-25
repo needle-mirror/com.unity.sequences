@@ -50,13 +50,13 @@ namespace UnityEngine.Sequences
         protected virtual void UnParentClip();
     }
 
-    [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteInEditMode] public class SequenceAsset : UnityEngine.MonoBehaviour
+    [UnityEngine.DisallowMultipleComponent] [UnityEngine.ExecuteInEditMode] [UnityEngine.HelpURL(@"https://docs.unity3d.com/Packages/com.unity.sequences@1.0/manual//ref-components.html#sequence-asset")] public class SequenceAsset : UnityEngine.MonoBehaviour
     {
         public string type { get; set; }
         public SequenceAsset() {}
     }
 
-    [UnityEngine.ExecuteInEditMode] public sealed class SequenceFilter : UnityEngine.MonoBehaviour
+    [UnityEngine.ExecuteInEditMode] [UnityEngine.HelpURL(@"https://docs.unity3d.com/Packages/com.unity.sequences@1.0/manual//ref-components.html#sequence-filter")] public sealed class SequenceFilter : UnityEngine.MonoBehaviour
     {
         public int elementIndex { get; set; }
         public UnityEngine.Sequences.MasterSequence masterSequence { get; set; }

@@ -5,7 +5,7 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.Sequences
 {
-    class SequenceAssetFoldoutItem : SelectableScrollViewItem, INotifyValueChanged<bool>
+    partial class SequenceAssetFoldoutItem : SelectableScrollViewItem, INotifyValueChanged<bool>
     {
         public new class UxmlFactory : UxmlFactory<SequenceAssetFoldoutItem, UxmlTraits> {}
 
@@ -175,12 +175,23 @@ namespace UnityEditor.Sequences
 
         void OnSequenceAssetNameChange(ChangeEvent<string> changeEvent)
         {
-            var rename = EditorUtility.DisplayDialog("Rename Sequence asset?",
-                $"Rename Sequence asset \"{changeEvent.previousValue}\" to \"{changeEvent.newValue}\"?",
-                "Rename", "Cancel");
+            var isValid =
+                SequenceAssetUtility.SanitizeAndValidateName(
+                    changeEvent.previousValue,
+                    changeEvent.newValue,
+                    out var sanitizedName);
+
+            var rename = false;
+            if (isValid)
+            {
+                rename = EditorUtility.DisplayDialog("Rename Sequence asset?",
+                    $"Rename Sequence asset \"{changeEvent.previousValue}\" to \"{sanitizedName}\"?",
+                    "Rename", "Cancel");
+            }
 
             if (!rename)
             {
+                // We end up here if (1) the new name is invalid or (2) users chose to cancel the renaming.
                 m_SequenceAssetNameField.SetValueWithoutNotify(changeEvent.previousValue);
                 return;
             }

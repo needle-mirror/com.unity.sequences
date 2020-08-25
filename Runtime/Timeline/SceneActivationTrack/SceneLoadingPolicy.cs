@@ -11,6 +11,12 @@ namespace UnityEngine.Sequences
 {
     [RequireComponent(typeof(SequenceFilter))]
     [DisallowMultipleComponent()]
+#if UNITY_2021_1_OR_NEWER
+    [ComponentHelpURL("scene-loading-policy")]
+#else
+    [HelpURL(DocumentationInfo.baseURL + DocumentationInfo.version + DocumentationInfo.manual +
+        DocumentationInfo.components + DocumentationInfo.ext + DocumentationInfo.titleRef + "scene-loading-policy")]
+#endif
     class SceneLoadingPolicy : MonoBehaviour
     {
         internal enum Policy
