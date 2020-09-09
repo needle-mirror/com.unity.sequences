@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.Sequences;
 using UnityEngine.UIElements;
 
+using TreeView = UnityEditor.IMGUI.Controls.TreeView;
+
 namespace UnityEditor.Sequences
 {
     internal partial class StructureTreeView : TreeView

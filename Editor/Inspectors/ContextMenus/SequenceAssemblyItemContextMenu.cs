@@ -1,5 +1,10 @@
-using UnityEditor.UIElements;
 using UnityEngine;
+
+#if UNITY_2022_1_OR_NEWER
+using PopupField = UnityEngine.UIElements.PopupField<UnityEngine.GameObject>;
+#else
+using PopupField = UnityEditor.UIElements.PopupField<UnityEngine.GameObject>;
+#endif
 
 namespace UnityEditor.Sequences
 {
@@ -24,9 +29,9 @@ namespace UnityEditor.Sequences
         GenericMenu m_Menu;
         GameObject variant { get; set; }
         GameObject source { get; set; }
-        PopupField<GameObject> variantSelector { get; set; }
+        PopupField variantSelector { get; set; }
 
-        public void Show(PopupField<GameObject> selector, GameObject target)
+        public void Show(PopupField selector, GameObject target)
         {
             Initialize(selector, target);
             m_Menu = new GenericMenu();
@@ -49,7 +54,7 @@ namespace UnityEditor.Sequences
             m_Menu.ShowAsContext();
         }
 
-        void Initialize(PopupField<GameObject> selector, GameObject newTarget)
+        void Initialize(PopupField selector, GameObject newTarget)
         {
             variant = newTarget;
             source = SequenceAssetUtility.GetSource(newTarget);

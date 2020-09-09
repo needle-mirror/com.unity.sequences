@@ -1,9 +1,12 @@
 using System;
 using System.Linq;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.UIElements;
+
+#if !UNITY_2022_1_OR_NEWER
+using UnityEditor.UIElements;
+#endif
 
 namespace UnityEditor.Sequences
 {
