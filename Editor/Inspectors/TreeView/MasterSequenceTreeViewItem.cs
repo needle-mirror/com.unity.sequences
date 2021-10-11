@@ -22,7 +22,7 @@ namespace UnityEditor.Sequences
 
         public override void Selected()
         {
-            if (GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            if (!isTargetValid)
                 return;
 
             SelectionUtility.TrySelectSequence(timelineSequence);
@@ -33,13 +33,12 @@ namespace UnityEditor.Sequences
             if (masterSequence == null)
                 return;
 
-            MasterSequenceContextMenu.instance.isItemValid = GetTargetValidity() == SequenceUtility.SequenceValidity.Valid;
-            MasterSequenceContextMenu.instance.Show(this);
+            SequenceContextMenu.instance.Show(this);
         }
 
         public override void DoubleClicked()
         {
-            if (GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            if (!isTargetValid)
                 return;
 
             SelectionUtility.TrySelectSequence(masterSequence.rootSequence);
@@ -48,7 +47,7 @@ namespace UnityEditor.Sequences
 
         public override void Rename(string newName)
         {
-            if (GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            if (!canRename)
                 return;
 
             if (masterSequence.Rename(newName))
@@ -72,7 +71,7 @@ namespace UnityEditor.Sequences
 
         public override void Delete()
         {
-            if (masterSequence == null)
+            if (!canDelete)
                 return;
 
             if (!UserVerifications.ValidateSequenceDeletion(timelineSequence))

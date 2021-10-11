@@ -82,9 +82,58 @@ You can also manually create and configure a Sequence Asset track through the Ti
 4. Select **Load** if you need to load the targeted Scene in the Hierarchy, in addition to the Scene that contains your Sequences.
 
 
-## Moving and trimming clips
+## Managing clips
 
-You can move and trim any Sequence, Sequence Asset and Scene Activation clips within the Timeline track that contains them, to rearrange the action within your cinematic and adjust your cuts.
+### Moving and trimming clips
 
-![](images/timeline-clips-trimmed.png)
-<br />*Example: Timeline of a Shot with trimmed clips in Sequence Asset and Scene Activation tracks. Notice the highlighted area that represents the actual length of the Sequence that contains these tracks.*
+You can [move](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_position.html) and [trim](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_trim.html) any Sequence, Sequence Asset and Scene Activation clips within the Timeline track that contains them, as any other Timeline clip type.
+
+**Note:** The actual behavior of these actions depends on the [clip edit mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#clip-edit-modes) currently selected in Timeline.
+
+| Example: Trimmed Sequence clip |
+|:---|
+| The arrow tips at the left and at the right of the clip indicate that the Sequence is trimmed at both the start and the end.<br /><br />![](images/timeline-clips-trimmed.png)<br /><br />In the clip content, notice how the highlighted area shows the actual used portion of the sequence.<br /><br />![](images/timeline-clips-trimmed-content.png) |
+
+### Matching a clip to its overall content
+
+You can automatically adjust the length of any clip to [match its content](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#clips-and-the-clips-view) overall, that is, the range that includes all immediate sub-items of the clip, regardless of their type.
+
+* To adjust the length of any clip to match its content overall:
+  1. Right click on the clip.
+  2. select **Match Content**.
+
+**Note:** The actual behavior of this action depends on the [clip edit mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#clip-edit-modes) currently selected in Timeline.
+
+| Example: Match Content on Sequence clip |
+|:---|
+| **Before:** Seq-01 clip (frames 0 to 72) is shorter than its actual content.<br />In the clip content, notice that its largest sub-item, the AudioAsset clip, covers 144 frames.<br /><br />![](images/timeline-match-content-before.png)<br /><br />![](images/timeline-match-content-before-sub-items.png)<br /> |
+| **After:** Seq-01 clip covers frames 0 to 144.<br /><br />![](images/timeline-match-content-after.png) |
+
+### Matching a Sequence clip to its editorial content
+
+You can automatically adjust the length of Sequence clips to exclusively match their editorial content, that is, only the Sequence clips from their immediate sub-level.
+
+**Note:** This content matching process ignores any sub-items that are not Sequence clips. If the targeted Sequence contains clips of any other types that are longer than the total length of the sub-sequences, the process automatically cuts off the end of these clips. This is equivalent to selectively trimming the Sequence.
+
+* To adjust the length of **a single Sequence clip** to match its editorial content:
+  1. Right click on the Sequence clip.
+  2. Select **Match Editorial Content (Ripple)**.
+
+You can also perform the same action in batch at the track level.
+
+* To adjust the length of **all Sequence clips in a track** to match their editorial content:
+  1. Right click on the Editorial track that contains the Sequence clips.
+  2. Select **Match Editorial Content (Ripple)**.
+
+
+  **Note:** In both cases, this action uses the [Ripple mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#ripple-mode) behavior, regardless to the selected mode in the Timeline view.
+
+| Example: Match Editorial Content on single Sequence clip |
+|:---|
+| **Before:** Seq-01 clip (frames 0 to 72) is shorter than its actual editorial content (3 sequence clips covering 96 frames).<br />In the clip content, notice the additional AudioAsset clip that covers a larger range and is not a Sequence clip. Also remember that Match Editorial Content ignores clips that are not Sequence clips.<br /><br />![](images/timeline-match-editorial-content-before.png)<br /><br />![](images/timeline-match-editorial-content-before-sub-sequences.png)<br /> |
+| **After:** Seq-01 clip covers frames 0 to 96, and Seq-02 and Seq-03 clips accordingly shifted to the right. Notice the process ignored the AudioAsset clip length because it's not a Sequence clip.<br /><br />![](images/timeline-match-editorial-content-after-clip.png) |
+
+| Example: Match Editorial Content on Editorial track |
+|:---|
+| **Before:** Let's assume Seq-01 and Seq-03 clips are shorter than their actual editorial content, and Seq-02 clip is longer than its own one.<br /><br />![](images/timeline-match-editorial-content-before.png)<br /> |
+| **After:** All 3 clips match their editorial content according to the above assumption, and the overall adjustment kept the continuity of the whole editorial track.<br /><br />![](images/timeline-match-editorial-content-after-track.png) |

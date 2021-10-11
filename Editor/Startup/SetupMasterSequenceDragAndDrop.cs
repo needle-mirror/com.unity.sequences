@@ -51,6 +51,9 @@ namespace UnityEditor.Sequences.Startup
                 // parentForDraggedObjects is always null in this call. We expect it to vary when the cinemactic is dragged and dropped under
                 // different objects in the hierarchy. It will remain for now, but make sure to double-check it when te API releases.
                 SequenceFilter.GenerateSequenceRepresentation(masterSequence, masterSequence.rootSequence, parentForDraggedObjects);
+
+                if (EditorWindow.HasOpenInstances<SequencesWindow>())
+                    EditorWindow.GetWindow<SequencesWindow>().structureTreeView.Reload();
             }
 
             return DragAndDropVisualMode.Generic;

@@ -80,7 +80,8 @@ namespace UnityEditor.Sequences
             }
             else
             {
-                // A Sequence Asset playable director has been selected.
+                // A non Sequence GameObject playable director has been selected. If it is a Sequence Asset, the
+                // Timeline is set in the context of its Sequence breadcrumb when possible.
                 TrySetTimelineInContextOf(director);
             }
         }
@@ -107,8 +108,7 @@ namespace UnityEditor.Sequences
         static void TrySetTimelineInContextOf(PlayableDirector director)
         {
             var sequenceAsset = PrefabUtility.GetNearestPrefabInstanceRoot(director.gameObject);
-            if (sequenceAsset == null ||
-                !SequenceAssetUtility.IsSequenceAsset(sequenceAsset))
+            if (sequenceAsset == null || !SequenceAssetUtility.IsSequenceAsset(sequenceAsset))
             {
                 SelectPlayableDirector(director);
                 return;
@@ -132,6 +132,16 @@ namespace UnityEditor.Sequences
 
                 var sequenceAssetClip = SequenceAssetUtility.GetClipFromInstance(sequenceAsset, parentPlayableDirector);
                 if (sequenceAssetClip == null)
+                {
+                    SelectPlayableDirector(director);
+                    return;
+                }
+
+                // Check that the PlayableDirector controlled by the clip found is the director that is selected.
+                // If not, don't try to setup a Breadcrumb context.
+                var clipAsset = sequenceAssetClip.asset as SequenceAssetPlayableAsset;
+                var resolvedDirector = (PlayableDirector)parentPlayableDirector.GetReferenceValue(clipAsset.director.exposedName, out _);
+                if (resolvedDirector != director)
                 {
                     SelectPlayableDirector(director);
                     return;

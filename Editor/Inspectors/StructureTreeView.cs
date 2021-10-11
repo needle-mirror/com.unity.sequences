@@ -201,32 +201,59 @@ namespace UnityEditor.Sequences
                 base.RowGUI(args);
                 return;
             }
+
             var item = args.item as EditorialElementTreeViewItem;
+            if (item.timelineSequence == null)
+                return;
 
-
-            GUIContent itemLabel = new GUIContent(args.label, (args.selected) ? item.iconSelected : item.icon);
-            var indentLevel = EditorGUI.indentLevel;
+            var itemState = item.GetTargetState();
 
             GUIStyle itemStyle = new GUIStyle(GUI.skin.label);
+            SetItemColor(itemStyle, itemState);
 
-            if (item.GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
-                itemStyle.normal.textColor = EditorGUIUtility.isProSkin ? Styles.k_InvalidColorDark : Styles.k_InvalidColorLight;
-            else
-                itemStyle.normal.textColor = GUI.skin.label.normal.textColor;
+            GUIContent itemLabel = new GUIContent(args.label, (args.selected) ? item.iconSelected : item.icon);
+            SetItemTooltips(itemLabel, itemState);
 
-            itemLabel.tooltip = "";
-            if (item.GetTargetValidity().HasFlag(SequenceUtility.SequenceValidity.MissingGameObject))
-                itemLabel.tooltip += "Missing GameObject";
-
-            if (item.GetTargetValidity().HasFlag(SequenceUtility.SequenceValidity.MissingTimeline))
-                itemLabel.tooltip += String.IsNullOrEmpty(itemLabel.tooltip) ? "Missing Timeline" : "\nMissing Timeline";
-
-            if (item.GetTargetValidity().HasFlag(SequenceUtility.SequenceValidity.Orphan))
-                itemLabel.tooltip += String.IsNullOrEmpty(itemLabel.tooltip) ? "Missing Timeline in a parent Sequence" : "\nMissing Timeline in a parent Sequence";
-
+            var indentLevel = EditorGUI.indentLevel;
             EditorGUI.indentLevel = args.item.depth + 1;
             EditorGUI.LabelField(args.rowRect, itemLabel, itemStyle);
             EditorGUI.indentLevel = indentLevel;
+        }
+
+        void SetItemColor(GUIStyle style, SequenceUtility.SequenceState sequenceState)
+        {
+            var defaultTextColor = GUI.skin.label.normal.textColor;
+
+            if (!sequenceState.HasFlag(SequenceUtility.SequenceState.Valid)) // Red
+                style.normal.textColor = EditorGUIUtility.isProSkin ? Styles.k_InvalidColorDark : Styles.k_InvalidColorLight;
+
+            else if (sequenceState.HasFlag(SequenceUtility.SequenceState.NotInHierarchy)) // Grey
+            {
+                var defaultTransparent = defaultTextColor;
+                defaultTransparent.a = 0.5f;
+                style.normal.textColor = defaultTransparent;
+            }
+            else // Default
+                style.normal.textColor = defaultTextColor;
+        }
+
+        void SetItemTooltips(GUIContent label, SequenceUtility.SequenceState sequenceState)
+        {
+            var tooltips = new List<string>();
+
+            if (sequenceState.HasFlag(SequenceUtility.SequenceState.MissingGameObject))
+                tooltips.Add("Missing GameObject");
+
+            if (sequenceState.HasFlag(SequenceUtility.SequenceState.MissingTimeline))
+                tooltips.Add("Missing Timeline");
+
+            if (sequenceState.HasFlag(SequenceUtility.SequenceState.Orphan))
+                tooltips.Add("Missing GameObject or Timeline in a parent Sequence");
+
+            if (sequenceState.HasFlag(SequenceUtility.SequenceState.NotInHierarchy))
+                tooltips.Add("Not in the Hierarchy");
+
+            label.tooltip = String.Join("\n", tooltips);
         }
 
         protected override TreeViewItem BuildRoot()
@@ -296,10 +323,10 @@ namespace UnityEditor.Sequences
         protected override bool CanRename(TreeViewItem item)
         {
             var editorialItem = item as EditorialElementTreeViewItem;
-            if (editorialItem != null && editorialItem.GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
-                return false;
+            if (editorialItem != null && editorialItem.canRename)
+                return true;
 
-            return true;
+            return false;
         }
 
         protected override void RenameEnded(RenameEndedArgs args)

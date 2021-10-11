@@ -1,4 +1,10 @@
+using System;
 using UnityEngine.Sequences;
+#if UNITY_2021_2_OR_NEWER
+using PrefabStage = UnityEditor.SceneManagement.PrefabStage;
+#else
+using PrefabStage = UnityEditor.Experimental.SceneManagement.PrefabStage;
+#endif
 
 namespace UnityEditor.Sequences
 {
@@ -9,9 +15,12 @@ namespace UnityEditor.Sequences
     [InitializeOnLoad]
     class HierarchyChangeListener
     {
+        internal static event Action sequencePrefabInstantiated;
+
         static HierarchyChangeListener()
         {
             EditorApplication.hierarchyChanged += UpdateMasterSequence;
+            PrefabStage.prefabStageOpened += SequencePrefabOpened;
         }
 
         static void UpdateMasterSequence()
@@ -34,7 +43,22 @@ namespace UnityEditor.Sequences
                     else
                         sequence.Rename(sequenceFilter.gameObject.name);
                 }
+
+                // Process instantiation of "prefabized" sequences.
+                var parent = sequenceFilter.transform.parent;
+                if (parent == null || parent.GetComponent<SequenceFilter>() == null)
+                {
+                    sequenceFilter.gameObject.SetActive(true);
+                    sequencePrefabInstantiated?.Invoke();
+                }
             }
+        }
+
+        static void SequencePrefabOpened(PrefabStage stage)
+        {
+            var root = stage.prefabContentsRoot;
+            if (root.GetComponent<SequenceFilter>() != null)
+                root.SetActive(true);
         }
     }
 }

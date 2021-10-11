@@ -2,9 +2,13 @@
 
 This page lists some known issues and limitations that you might experience with the Sequences package. It also gives basic instructions to help you work around them when possible.
 
-#### Functionality limitations when converting a Sequence into a Prefab
+#### Can’t rename a Sequence whose GameObject is a Prefab
 
-Unity doesn’t prevent you from converting a Sequence GameObject into a Prefab. However, it is currently not recommended to do it. Such a conversion might bring unwanted side-effects in your workflow, due to the inherent behaviors of Unity Prefabs that are not yet supported in Sequences. For example, you can’t use the Sequence Assembly window to remove Sequence Assets from a Prefab-converted Sequence.
+**Limitation:** You can’t currently rename a Prefab-converted Sequence from the Sequences window.
+
+**Workaround:** Depending on the scope of your need, use the Hierarchy window to rename the instantiated Prefab, or the Project view to rename the Prefab Asset, or both.
+
+**Note:** if you rename the instantiated Prefab, Unity automatically renames the Sequence in the Sequences window.
 
 #### Limited Editorial clip manipulation in Timeline
 

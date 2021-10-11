@@ -55,48 +55,7 @@ namespace UnityEditor.Sequences
                 if (sequence == null)
                 {
                     var scene = filter.gameObject.scene;
-
-                    if (PrefabUtility.IsAnyPrefabInstanceRoot(filter.gameObject) && PrefabUtility.IsOutermostPrefabInstanceRoot(filter.gameObject))
-                    {
-                        // Sequence is the root of a prefab instance.
-                        PrefabUtility.UnpackPrefabInstance(filter.gameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-                        GameObject.DestroyImmediate(filter.gameObject);
-                    }
-                    else if (PrefabUtility.IsPartOfAnyPrefab(filter.gameObject))
-                    {
-                        string rootAssetPath = string.Empty;
-                        if (PrefabUtility.IsAnyPrefabInstanceRoot(filter.gameObject))
-                        {
-                            // Sequence is a prefab and nested in another Prefab.
-                            var outermost = PrefabUtility.GetOutermostPrefabInstanceRoot(filter.gameObject);
-                            rootAssetPath = AssetDatabase.GetAssetPath(PrefabUtility.GetCorrespondingObjectFromOriginalSource<GameObject>(outermost));
-                        }
-                        else
-                        {
-                            // Sequence is a regular GameObject inside another prefab.
-                            rootAssetPath = PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(filter.gameObject);
-                        }
-
-                        // Open the right prefab then delete the Sequence.
-                        using (var editScope = new PrefabUtility.EditPrefabContentsScope(rootAssetPath))
-                        {
-                            var children = editScope.prefabContentsRoot.GetComponentsInChildren<SequenceFilter>();
-                            foreach (var target in children)
-                            {
-                                if (filter.Equals(target))
-                                {
-                                    Object.DestroyImmediate(target.gameObject);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Sequence is a regular GameObject (not in a Prefab instance).
-                        GameObject.DestroyImmediate(filter.gameObject);
-                    }
-
+                    GameObject.DestroyImmediate(filter.gameObject);
                     EditorSceneManager.MarkSceneDirty(scene);
                 }
             }
@@ -174,6 +133,8 @@ namespace UnityEditor.Sequences
                 Transform parent = filter.gameObject.transform;
 
                 GameObject newGo = new GameObject(sequence.name);
+                newGo.SetActive(false);
+
                 Undo.RegisterCreatedObjectUndo(newGo, Undo.GetCurrentGroupName());
                 Undo.SetTransformParent(newGo.transform, parent, Undo.GetCurrentGroupName());
 

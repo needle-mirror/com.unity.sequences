@@ -4,7 +4,12 @@ using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.Sequences;
 using UnityEngine.Timeline;
-using Object = UnityEngine.Object;
+
+#if UNITY_2021_2_OR_NEWER
+using PrefabStageUtility = UnityEditor.SceneManagement.PrefabStageUtility;
+#else
+using PrefabStageUtility = UnityEditor.Experimental.SceneManagement.PrefabStageUtility;
+#endif
 
 namespace UnityEditor.Sequences
 {
@@ -20,13 +25,50 @@ namespace UnityEditor.Sequences
         /// missing.
         /// </summary>
         [Flags]
-        internal enum SequenceValidity
+        internal enum SequenceState
         {
-            Valid = 0,
-            MissingMasterSequence = 1,
-            MissingGameObject = 2,
-            MissingTimeline = 4,
-            Orphan = 8
+            Valid = 1,
+            MissingMasterSequence = 2,
+            MissingGameObject = 4,
+            MissingTimeline = 8,
+            Orphan = 16,
+            NotInHierarchy = 32,
+            PrefabInstanceRoot = 64,
+            PrefabStageRoot = 128
+        }
+
+        /// <summary>
+        /// Define the loaded status of a MasterSequence structure in the Hierarchy window.
+        /// A MasterSequence structure can be fully loaded in the Hierarchy or partially (through a Sequence prefab
+        /// instantiated in its own scene for example).
+        /// A MasterSequence can be completely absent (None) from the Hierarchy.
+        /// A PrefabStage can be open, in this case only the sequences that are loaded in this prefab stage will be
+        /// editable (see <see cref="SequenceUtility.GetSequenceState"/>).
+        /// Finally, a MasterSequence structure could be loaded in an invalid way in the Hierarchy. In this case, it is
+        /// considered not loaded.
+        ///
+        /// Those loaded status are used in <see cref="SequenceUtility.GetSequenceState"/> and in
+        /// <see cref="SequenceUtility.GetSequenceEditionStatus"/>.
+        /// </summary>
+        enum MasterSequenceLoaded
+        {
+            Fully,
+            Partially,
+            InPrefabStage,
+            None,
+            Invalid
+        }
+
+        /// <summary>
+        /// Mask to define what kind of edit(s) can be performed on a specified Sequence.
+        /// </summary>
+        [Flags]
+        internal enum SequenceEditionStatus
+        {
+            CanRename = 1,
+            CanDelete = 2,
+            CanCreate = 4,
+            CanManipulate = 8  // Record and Scene Management.
         }
 
         internal static readonly string k_DefaultMasterSequenceName = "New Master Sequence";
@@ -171,27 +213,74 @@ namespace UnityEditor.Sequences
         /// <param name="masterSequence">The MasterSequence of the specified sequence. This is used to check if the
         /// whole MasterSequence is loaded in a Scene or not. If it's not, there is no need to check if the Sequence
         /// GameObject exists.</param>
-        /// <returns>A <see cref="SequenceValidity"/> mask.</returns>
-        internal static SequenceValidity GetSequenceValidity(TimelineSequence sequence, MasterSequence masterSequence)
+        /// <returns>A <see cref="SequenceState"/> mask.</returns>
+        internal static SequenceState GetSequenceState(TimelineSequence sequence, MasterSequence masterSequence)
         {
             if (masterSequence == null)
-                return SequenceValidity.MissingMasterSequence;
+                return SequenceState.MissingMasterSequence;
 
-            SequenceValidity result = SequenceValidity.Valid;
+            SequenceState result = SequenceState.Valid;
 
+            // Check the state of the parent, if not valid, then the current sequence is an orphan and invalid.
             var parentSequence = sequence.parent as TimelineSequence;
-            if (parentSequence != null && !IsValidSequence(parentSequence))
-                result |= SequenceValidity.Orphan;
+            if (parentSequence != null)
+            {
+                var parentState = GetSequenceState(parentSequence, masterSequence);
+                if (!parentState.HasFlag(SequenceState.Valid))
+                {
+                    // Sequence's parent is invalid, then Sequence is invalid and an orphan.
+                    result &= ~SequenceState.Valid;
+                    result |= SequenceState.Orphan;
+                }
+            }
 
             if (TimelineSequence.IsNullOrEmpty(sequence))
-                result |= SequenceValidity.MissingTimeline;
+            {
+                // Sequence is not valid and its timeline is missing.
+                result &= ~SequenceState.Valid;
+                result |= SequenceState.MissingTimeline;
+            }
 
-            if (!IsMasterSequenceInScene(masterSequence))
-                return result;
+            // If the Master Sequence is not represented at all in the Hierarchy, no need to check for missing
+            // GameObjects.
+            var masterSequenceLoadedStatus = GetMasterSequenceLoadedStatus(masterSequence);
+            if (masterSequenceLoadedStatus != MasterSequenceLoaded.None &&
+                masterSequenceLoadedStatus != MasterSequenceLoaded.Invalid)
+            {
+                var gameObject = GetSequenceGameObject(sequence);
+                if (gameObject == null)
+                {
+                    var rootSequenceFilter = GetRootSequenceFilterInHierarchy(masterSequence);
+                    var rootSequenceInHierarchy = rootSequenceFilter.sequence;
 
-            var gameObject = GetSequenceGameObject(sequence);
-            if (gameObject == null)
-                result |= SequenceValidity.MissingGameObject;
+                    if (!IsChildSequence(sequence, rootSequenceInHierarchy))
+                    {
+                        // The sequence is not a child of the the root sequence found in the hierarchy, so we don't
+                        // expect to find a corresponding GameObject and it's ok.
+                        result |= SequenceState.NotInHierarchy;
+                    }
+                    else
+                    {
+                        result &= ~SequenceState.Valid;
+                        result |= SequenceState.MissingGameObject;
+                    }
+                }
+                else
+                {
+                    var prefabStage = PrefabStageUtility.GetCurrentPrefabStage();
+                    if (PrefabUtility.IsAnyPrefabInstanceRoot(gameObject))
+                    {
+                        result |= SequenceState.PrefabInstanceRoot;
+                    }
+                    else if (masterSequenceLoadedStatus == MasterSequenceLoaded.InPrefabStage &&
+                             gameObject == prefabStage.prefabContentsRoot)
+                    {
+                        result |= SequenceState.PrefabStageRoot;
+                    }
+                }
+            }
+            else
+                result |= SequenceState.NotInHierarchy;
 
             return result;
         }
@@ -219,23 +308,90 @@ namespace UnityEditor.Sequences
             return null;
         }
 
-        /// <summary>
-        /// Checks if the specified MasterSequence asset is loaded in the Hierarchy view.
-        /// </summary>
-        /// <param name="masterSequence">The MasterSequence asset to look for.</param>
-        /// <returns>True if the MasterSequence is loaded in the Hierarchy view. False otherwise.</returns>
-        static bool IsMasterSequenceInScene(MasterSequence masterSequence)
+        static SequenceFilter GetRootSequenceFilterInHierarchy(MasterSequence masterSequence)
         {
             var sequenceFilters = ObjectsCache.FindObjectsFromScenes<SequenceFilter>();
             foreach (var sequenceFilter in sequenceFilters)
             {
-                if (sequenceFilter.masterSequence == masterSequence)
+                if (sequenceFilter.masterSequence == null || sequenceFilter.masterSequence != masterSequence)
+                    continue;
+
+                if (sequenceFilter.gameObject.transform.parent == null ||
+                    sequenceFilter.gameObject.transform.parent.GetComponent<SequenceFilter>() == null)
                 {
-                    return true;
+                    return sequenceFilter;
                 }
             }
 
-            return false;
+            return null;
+        }
+
+        static MasterSequenceLoaded GetMasterSequenceLoadedStatus(MasterSequence masterSequence)
+        {
+            var rootSequenceFilter = GetRootSequenceFilterInHierarchy(masterSequence);
+
+            if (rootSequenceFilter == null)
+                return MasterSequenceLoaded.None;
+
+            if (PrefabStageUtility.GetCurrentPrefabStage() != null)
+                return MasterSequenceLoaded.InPrefabStage;
+
+            if (rootSequenceFilter.sequence == null)
+                return MasterSequenceLoaded.Invalid;
+
+            if (rootSequenceFilter.sequence == rootSequenceFilter.masterSequence.rootSequence)
+                return MasterSequenceLoaded.Fully;
+
+            if (PrefabUtility.IsAnyPrefabInstanceRoot(rootSequenceFilter.gameObject))
+                return MasterSequenceLoaded.Partially;
+
+            return MasterSequenceLoaded.Invalid;
+        }
+
+        internal static SequenceEditionStatus GetSequenceEditionStatus(TimelineSequence sequence, MasterSequence masterSequence)
+        {
+            var sequenceState = GetSequenceState(sequence, masterSequence);
+            var masterSequenceLoadedState = GetMasterSequenceLoadedStatus(masterSequence);
+
+            bool isPlaymode = EditorApplication.isPlayingOrWillChangePlaymode;
+            bool isValid = sequenceState.HasFlag(SequenceState.Valid);
+            bool isPrefabRoot =
+                sequenceState.HasFlag(SequenceState.PrefabInstanceRoot) ||
+                sequenceState.HasFlag(SequenceState.PrefabStageRoot);
+            bool isPartial =
+                masterSequenceLoadedState == MasterSequenceLoaded.Partially ||
+                masterSequenceLoadedState == MasterSequenceLoaded.InPrefabStage;
+
+            // The basic requirements for a Sequence to be manipulated (create sub-sequence, rename, delete...) are:
+            // - Unity is not in PlayMode.
+            // - The MasterSequence structure is fully loaded in the Hierarchy or not at all. If it is partially loaded
+            //   (Prefab stage or a Sequence prefab is isolated in a scene) then the target sequence must be in the
+            //   hierarchy.
+            bool basicRequirements =
+                !isPlaymode && !(isPartial && sequenceState.HasFlag(SequenceState.NotInHierarchy));
+
+            bool basicValidRequirements = isValid && basicRequirements;
+
+            SequenceEditionStatus result = 0;
+            // It is ok for an invalid Sequence to be deleted, except if it is specifically an
+            // orphan (i.e. a parent sequence is invalid).
+            if (basicRequirements && !(isPartial && isPrefabRoot) && !sequenceState.HasFlag(SequenceState.Orphan))
+                result |= SequenceEditionStatus.CanDelete;
+
+            if (basicValidRequirements && !isPrefabRoot)
+                result |= SequenceEditionStatus.CanRename;
+
+            if (basicValidRequirements)
+                result |= SequenceEditionStatus.CanCreate;
+
+            if (basicValidRequirements &&
+                !sequenceState.HasFlag(SequenceState.NotInHierarchy) &&
+                masterSequenceLoadedState != MasterSequenceLoaded.InPrefabStage)
+            {
+                result |= SequenceEditionStatus.CanManipulate;
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -264,6 +420,18 @@ namespace UnityEditor.Sequences
                 current = current.parent as TimelineSequence;
             }
             return path.GetHashCode();
+        }
+
+        static bool IsChildSequence(TimelineSequence sequence, TimelineSequence rootSequence)
+        {
+            foreach (var child in rootSequence.GetChildren())
+            {
+                var childSequence = child as TimelineSequence;
+                if (sequence == childSequence || IsChildSequence(sequence, childSequence))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

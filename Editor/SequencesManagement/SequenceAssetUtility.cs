@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEditor.SceneManagement;
 using UnityEditor.Timeline;
 using UnityEngine;
 using UnityEngine.Sequences;
@@ -269,8 +270,20 @@ namespace UnityEditor.Sequences
         /// <param name="instance">The Sequence Asset Prefab instance to remove from the Scene.</param>
         /// <param name="sequenceDirector">The Sequence PlayableDirector in which the Sequence Asset is currently
         /// instantiated.</param>
-        public static void RemoveFromSequence(GameObject instance, PlayableDirector sequenceDirector)
+        /// <param name="interactionMode">Choose the mode of interaction, user or automated.</param>
+        public static void RemoveFromSequence(
+            GameObject instance,
+            PlayableDirector sequenceDirector,
+            InteractionMode interactionMode = InteractionMode.UserAction)
         {
+            if (!Application.isBatchMode && interactionMode is InteractionMode.UserAction &&
+                PrefabUtility.IsPartOfPrefabInstance(sequenceDirector) &&
+                !PrefabUtility.IsAddedGameObjectOverride(instance))
+            {
+                UserVerifications.OpenPrefabStage(sequenceDirector.gameObject);
+                return;
+            }
+
             var clip = RemoveFromSequenceInternal(instance, sequenceDirector);
             if (clip == null)
                 return;
@@ -318,8 +331,15 @@ namespace UnityEditor.Sequences
             PlayableDirector sequenceDirector,
             InteractionMode interactionMode = InteractionMode.UserAction)
         {
-            if (!Application.isBatchMode && interactionMode is InteractionMode.UserAction &&
-                !UserVerifications.ValidateInstanceChange(oldInstance))
+            bool needUserAction = !Application.isBatchMode && interactionMode is InteractionMode.UserAction;
+            if (needUserAction && PrefabUtility.IsPartOfPrefabInstance(sequenceDirector) &&
+                !PrefabUtility.IsAddedGameObjectOverride(oldInstance))
+            {
+                UserVerifications.OpenPrefabStage(sequenceDirector.gameObject);
+                return null;
+            }
+
+            if (needUserAction && !UserVerifications.ValidateInstanceChange(oldInstance))
             {
                 // Don't proceed with the swap, user choose to keep the current instance.
                 return null;
@@ -570,6 +590,7 @@ namespace UnityEditor.Sequences
         ///
         /// </summary>
         /// <param name="sequenceDirector"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
         /// <exception cref="SequenceAssetException"></exception>
         static IEnumerable<GameObject> GetInstancesInSequenceTimeline(PlayableDirector sequenceDirector, string type = null)
@@ -593,15 +614,17 @@ namespace UnityEditor.Sequences
         ///
         /// </summary>
         /// <param name="sequence"></param>
-        /// <returns></returns>
+        /// <param name="type"></param>
+        /// <returns>The list of Sequence Asset instances present under a sequence GameObject. Sequence Asset prefab
+        /// instance with no Prefab asset on disk are ignored except in PlayMode when the concept of "Prefab" doesn't
+        /// exists anymore.</returns>
         static IEnumerable<GameObject> GetInstancesUnderSequenceGameObject(GameObject sequence, string type = null)
         {
             for (var i = 0; i < sequence.transform.childCount; ++i)
             {
                 var instance = sequence.transform.GetChild(i).gameObject;
-                if (!PrefabUtility.IsPartOfPrefabInstance(instance) ||
-                    !IsSequenceAsset(instance) ||
-                    PrefabUtility.IsPrefabAssetMissing(instance))
+                if (!IsSequenceAsset(instance) || PrefabUtility.IsPrefabAssetMissing(instance) ||
+                    (!EditorApplication.isPlayingOrWillChangePlaymode && !PrefabUtility.IsAnyPrefabInstanceRoot(instance)))
                 {
                     continue;
                 }
@@ -629,6 +652,7 @@ namespace UnityEditor.Sequences
                 director = prefab.AddComponent<PlayableDirector>();
 
             director.playableAsset = AssetDatabase.LoadAssetAtPath<TimelineAsset>(timelinePath);
+            director.playOnAwake = false;
         }
 
         /// <summary>

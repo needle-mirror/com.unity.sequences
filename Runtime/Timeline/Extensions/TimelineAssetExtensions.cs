@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Playables;
@@ -48,6 +49,7 @@ namespace UnityEngine.Sequences.Timeline
         /// </summary>
         /// <param name="timeline">The instance of <see cref="TimelineAsset"/> to look for.</param>
         /// <returns>Null when no matching <see cref="PlayableDirector"/> is found.</returns>
+        [Obsolete("Use UnityEditor.Sequences.TimelineAssetEditorExtensions.FindDirector() instead.", false)]
         public static PlayableDirector FindDirector(this TimelineAsset timeline)
         {
             if (timeline == null)

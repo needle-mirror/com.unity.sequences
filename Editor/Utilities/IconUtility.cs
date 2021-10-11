@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace UnityEditor.Sequences
@@ -20,6 +21,22 @@ namespace UnityEditor.Sequences
         {
             UniqueToSkin,
             CommonToAllSkin
+        }
+
+        [InitializeOnLoadMethod]
+        static void PreloadIconsOnStart()
+        {
+            EditorApplication.delayCall += PreloadIconsWithDelay;
+        }
+
+        static void PreloadIconsWithDelay()
+        {
+            foreach (string relativeFilePath in GetIconsFilePath())
+            {
+                // Load the icon and the selected version of it.
+                LoadIcon(relativeFilePath, IconType.UniqueToSkin);
+                LoadIcon(relativeFilePath + "-selected", IconType.CommonToAllSkin);
+            }
         }
 
         /// <summary>
@@ -62,6 +79,47 @@ namespace UnityEditor.Sequences
             fullIconPath += ".png";
 
             return fullIconPath;
+        }
+
+        static string BuildBasePath(IconType type)
+        {
+            string fullIconPath = PackageUtility.editorResourcesFolder;
+
+            string typeFolder = (type == IconType.UniqueToSkin) ? EditorGUIUtility.isProSkin ? "Dark" : "Light" : "Common";
+            fullIconPath = Path.Combine(fullIconPath, "Icons");
+            fullIconPath = Path.Combine(fullIconPath, typeFolder);
+
+            return fullIconPath;
+        }
+
+        static IEnumerable<string> GetIconsFilePath()
+        {
+            string folderPath = IconUtility.BuildBasePath(IconType.UniqueToSkin);
+            // Regex to detect files with @2x, @4x, etc.
+            Regex reg = new Regex(@"(@\d*\w)(.png)");
+
+            // Regex to capture only the filepath from the Editor Default Resources/Icons folder.
+            Regex regCapture = new Regex(@"(\w*[\/\\]\w*).png");
+
+            string[] files = Directory.GetFiles(folderPath, "*.png", SearchOption.AllDirectories);
+            foreach (string file in files)
+            {
+                // Skip all files ending with a size number. Example: "@2x.png"
+                var match = reg.Match(file);
+                if (match.Success)
+                    continue;
+
+                var capture = regCapture.Match(file);
+
+                // Ensure there is a match.
+                if (!capture.Success)
+                    continue;
+
+                // Remove the file extension from the path.
+                string finalResult = capture.Value.Replace(".png", string.Empty);
+
+                yield return finalResult;
+            }
         }
 
         /// <summary>

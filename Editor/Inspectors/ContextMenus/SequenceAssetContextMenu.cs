@@ -13,6 +13,8 @@ namespace UnityEditor.Sequences
         {
             m_Menu = new GenericMenu();
             m_Menu.AddItem(new GUIContent("Create Variant"), false, CreateVariant);
+            m_Menu.AddSeparator("");
+            m_Menu.AddItem(new GUIContent("Rename"), false, Rename);
             m_Menu.AddItem(new GUIContent("Delete"), false, Delete);
         }
 
@@ -25,6 +27,12 @@ namespace UnityEditor.Sequences
         void CreateVariant()
         {
             (target.owner as AssetCollectionsTreeView).CreateSequenceAssetVariantInContext(target.asset);
+            ResetTarget();
+        }
+
+        void Rename()
+        {
+            (target.owner as AssetCollectionsTreeView).BeginRename(target);
             ResetTarget();
         }
 

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Sequences;
 
 #if UNITY_2022_1_OR_NEWER
 using PopupField = UnityEngine.UIElements.PopupField<UnityEngine.GameObject>;
@@ -27,8 +28,10 @@ namespace UnityEditor.Sequences
         }
 
         GenericMenu m_Menu;
-        GameObject variant { get; set; }
-        GameObject source { get; set; }
+
+        GameObject sourceAsset { get; set; }
+        GameObject selectionAsset { get; set; }
+        GameObject selectionInstance { get; set; }
         PopupField variantSelector { get; set; }
 
         public void Show(PopupField selector, GameObject target)
@@ -36,48 +39,48 @@ namespace UnityEditor.Sequences
             Initialize(selector, target);
             m_Menu = new GenericMenu();
 
-            m_Menu.AddItem(new GUIContent("Create new variant"), false, CreateNewVariant);
+            AddItem("Create new variant", true, CreateNewVariant);
 
-            if (source == target)
-            {
-                m_Menu.AddDisabledItem(new GUIContent("Duplicate current variant"));
-                m_Menu.AddSeparator("");
-                m_Menu.AddDisabledItem(new GUIContent("Delete current variant"));
-            }
-            else
-            {
-                m_Menu.AddItem(new GUIContent("Duplicate current variant"), false, DuplicateVariant);
-                m_Menu.AddSeparator("");
-                m_Menu.AddItem(new GUIContent("Delete current variant"), false, DeleteVariant);
-            }
+            bool isVariant = sourceAsset != selectionAsset;
+            AddItem("Duplicate current variant", isVariant, DuplicateVariant);
+            AddItem("Delete current variant", isVariant, DeleteVariant);
 
             m_Menu.ShowAsContext();
         }
 
-        void Initialize(PopupField selector, GameObject newTarget)
+        void Initialize(PopupField selector, GameObject selection)
         {
-            variant = newTarget;
-            source = SequenceAssetUtility.GetSource(newTarget);
+            selectionInstance = selection;
+            selectionAsset = SequenceAssetUtility.GetAssetFromInstance(selection);
+            sourceAsset = SequenceAssetUtility.GetSource(this.selectionAsset);
             variantSelector = selector;
+        }
+
+        void AddItem(string content, bool enabled = true, GenericMenu.MenuFunction func = null)
+        {
+            if (enabled)
+                m_Menu.AddItem(new GUIContent(content), false, func);
+            else
+                m_Menu.AddDisabledItem(new GUIContent(content), false);
         }
 
         void CreateNewVariant()
         {
-            SequenceAssetUtility.CreateVariant(source);
+            SequenceAssetUtility.CreateVariant(sourceAsset);
         }
 
         void DuplicateVariant()
         {
-            SequenceAssetUtility.DuplicateVariant(variant);
+            SequenceAssetUtility.DuplicateVariant(selectionAsset);
         }
 
         void DeleteVariant()
         {
-            if (!UserVerifications.ValidateSequenceAssetDeletion(variant))
+            if (!UserVerifications.ValidateSequenceAssetDeletion(selectionAsset))
                 return;
 
-            variantSelector.value = source;
-            SequenceAssetUtility.DeleteVariantAsset(variant);
+            variantSelector.value = sourceAsset;
+            SequenceAssetUtility.DeleteVariantAsset(selectionAsset);
         }
     }
 }

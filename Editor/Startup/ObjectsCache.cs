@@ -7,6 +7,14 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Sequences;
 using UObject = UnityEngine.Object;
 
+#if UNITY_2021_2_OR_NEWER
+using PrefabStageUtility = UnityEditor.SceneManagement.PrefabStageUtility;
+using PrefabStage = UnityEditor.SceneManagement.PrefabStage;
+#else
+using PrefabStageUtility = UnityEditor.Experimental.SceneManagement.PrefabStageUtility;
+using PrefabStage = UnityEditor.Experimental.SceneManagement.PrefabStage;
+#endif
+
 namespace UnityEditor.Sequences
 {
     /// <summary>
@@ -31,32 +39,85 @@ namespace UnityEditor.Sequences
             void RemoveInvalidReferences();
         }
 
-        /// <summary>
-        /// Generic implementation of <see cref="ICache"/>.
-        /// It holds references living in loaded scenes.
-        /// </summary>
-        /// <typeparam name="T">Type derived from <see cref="UnityEngine.Object"/>.</typeparam>
-        class SceneObjectsCache<T> : ICache where T : UObject
+        abstract class StageObjectsCache<T> : ICache where T : UObject
         {
-            List<T> m_References = new List<T>();
+            static List<GameObject> s_RootGameObjectsBuffer = new List<GameObject>();
+            static List<T> s_ObjectBuffer = new List<T>();
+
+            protected List<T> m_References = new List<T>();
 
             bool ICache.shouldRebuild => m_References.Count == 0;
 
             IReadOnlyCollection<UObject> ICache.references => m_References;
 
-            void ICache.InvalidateData()
+            public abstract IReadOnlyList<Scene> GetScenes();
+
+            public void Build()
+            {
+                var scenes = GetScenes();
+                for (int i = 0; i < scenes.Count; ++i)
+                {
+                    scenes[i].GetRootGameObjects(s_RootGameObjectsBuffer);
+                    foreach (GameObject root in s_RootGameObjectsBuffer)
+                    {
+                        root.GetComponentsInChildren<T>(true, s_ObjectBuffer);
+                        m_References.AddRange(s_ObjectBuffer);
+                        s_ObjectBuffer.Clear();
+                    }
+
+                    s_RootGameObjectsBuffer.Clear();
+                }
+            }
+
+            public virtual void InvalidateData()
             {
                 m_References.Clear();
             }
 
-            void ICache.Build()
-            {
-                m_References.AddRange(UObject.FindObjectsOfType<T>(true));
-            }
-
-            void ICache.RemoveInvalidReferences()
+            public virtual void RemoveInvalidReferences()
             {
                 m_References.RemoveAll(obj => obj == null);
+            }
+        }
+
+        /// <summary>
+        /// Implementation of <see cref="ICache"/> for the Editor Main Stage.
+        /// It holds references living in the Main Stage loaded scenes.
+        /// </summary>
+        /// <typeparam name="T">Type derived from <see cref="UnityEngine.Object"/>.</typeparam>
+        class MainStageObjectsCache<T> : StageObjectsCache<T> where T : UObject
+        {
+            List<Scene> m_SceneCache = new List<Scene>();
+
+            public override IReadOnlyList<Scene> GetScenes()
+            {
+                m_SceneCache.Clear();
+
+                for (int i = 0; i < EditorSceneManager.sceneCount; ++i)
+                {
+                    var scene = EditorSceneManager.GetSceneAt(i);
+                    m_SceneCache.Add(scene);
+                }
+
+                return m_SceneCache;
+            }
+        }
+
+        /// <summary>
+        /// Implementation of <see cref="ICache"/> for the Editor Prefab Stage.
+        /// It holds references living in the Prefab Stage loaded scenes.
+        /// </summary>
+        /// <typeparam name="T">Type derived from <see cref="UnityEngine.Object"/>.</typeparam>
+        class PrefabStageObjectsCache<T> : StageObjectsCache<T> where T : UObject
+        {
+            Scene[] m_SceneCache = new Scene[1];
+
+            public override IReadOnlyList<Scene> GetScenes()
+            {
+                var stage = PrefabStageUtility.GetCurrentPrefabStage();
+                m_SceneCache[0] = stage.scene;
+
+                return m_SceneCache;
             }
         }
 
@@ -65,6 +126,13 @@ namespace UnityEditor.Sequences
         /// </summary>
         class ObjectsCacheSystem
         {
+            enum CacheType
+            {
+                MainStage,
+                PrefabStage
+            }
+
+            CacheType cacheType = CacheType.MainStage;
             Dictionary<Type, ICache> m_Caches = new Dictionary<Type, ICache>();
 
             internal IReadOnlyCollection<T> GetObjects<T>() where T : UObject
@@ -73,8 +141,12 @@ namespace UnityEditor.Sequences
 
                 // Create cache for the given type if it does not exist.
                 if (!m_Caches.ContainsKey(type))
-                    m_Caches.Add(type, new SceneObjectsCache<T>());
-
+                {
+                    if (cacheType == CacheType.PrefabStage)
+                        m_Caches.Add(type, new PrefabStageObjectsCache<T>());
+                    else
+                        m_Caches.Add(type, new MainStageObjectsCache<T>());
+                }
                 ICache cache = m_Caches[type];
 
                 // Rebuild cache if it has been invalidated or is empty.
@@ -91,6 +163,18 @@ namespace UnityEditor.Sequences
             {
                 foreach (KeyValuePair<Type, ICache> cache in m_Caches)
                     cache.Value.InvalidateData();
+            }
+
+            internal void SwapToMainStageCache()
+            {
+                m_Caches.Clear();
+                cacheType = CacheType.MainStage;
+            }
+
+            internal void SwapToPrefabStageCache()
+            {
+                m_Caches.Clear();
+                cacheType = CacheType.PrefabStage;
             }
         }
 
@@ -114,6 +198,23 @@ namespace UnityEditor.Sequences
             EditorSceneManager.sceneLoaded += EditorSceneManager_sceneLoaded;
             EditorSceneManager.sceneUnloaded += EditorSceneManager_sceneUnloaded;
             EditorSceneManager.sceneOpened += EditorSceneManager_sceneOpened;
+            PrefabStage.prefabStageOpened += PrefabStage_prefabStageOpened;
+            PrefabStage.prefabStageClosing += PrefabStage_prefabStageClosing;
+
+            // Domain reload can happen while being in Prefab Stage.
+            // This ensures we set the proper cache.
+            if (PrefabStageUtility.GetCurrentPrefabStage() != null)
+                m_Internal.SwapToPrefabStageCache();
+        }
+
+        private static void PrefabStage_prefabStageClosing(PrefabStage stage)
+        {
+            m_Internal.SwapToMainStageCache();
+        }
+
+        private static void PrefabStage_prefabStageOpened(PrefabStage stage)
+        {
+            m_Internal.SwapToPrefabStageCache();
         }
 
         /// <summary>

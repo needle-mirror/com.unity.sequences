@@ -20,7 +20,7 @@ namespace UnityEditor.Sequences
 
         public abstract void Show(TreeViewItemType target);
 
-        protected void SetTarget(TreeViewItemType newTarget)
+        protected virtual void SetTarget(TreeViewItemType newTarget)
         {
             target = newTarget;
         }

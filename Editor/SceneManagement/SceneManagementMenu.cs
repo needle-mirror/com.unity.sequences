@@ -8,52 +8,47 @@ namespace UnityEditor.Sequences
     {
         internal class ContextInfo
         {
-            public MasterSequence masterSequence;
             public TimelineSequence sequence;
+            public bool canCreateOrLoadScenes;
         }
 
         internal static void AppendMenuFrom(ContextInfo context, GenericMenu destinationMenu)
         {
-            if (context.sequence.HasScenes() && !EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                destinationMenu.AddItem(new GUIContent("Load Scenes"), false, LoadAllScenes, context);
-            }
-            else
-            {
-                destinationMenu.AddDisabledItem(new GUIContent("Load Scenes"));
-            }
+            bool hasSequenceScenes = context.sequence.HasScenes();
 
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            AddItem(destinationMenu, "Load Scenes", context.canCreateOrLoadScenes && hasSequenceScenes, false, LoadAllScenes, context);
+
+            if (hasSequenceScenes)
             {
-                destinationMenu.AddDisabledItem(new GUIContent("Load specific Scene"));
-            }
-            else
-            {
-                foreach (string path in context.sequence.GetRelatedScenes())
+                if (!context.canCreateOrLoadScenes)
+                    AddItem(destinationMenu, "Load specific Scene", false);
+
+                else
                 {
-                    string fileName = Path.GetFileNameWithoutExtension(path);
-                    if (SceneManagement.IsLoaded(path))
+                    foreach (string path in context.sequence.GetRelatedScenes())
                     {
-                        destinationMenu.AddDisabledItem(new GUIContent(string.Format("Load specific Scene/{0}", fileName)),
-                            true);
-                    }
-                    else
-                    {
-                        destinationMenu.AddItem(new GUIContent(string.Format("Load specific Scene/{0}", fileName)), false,
-                            LoadScene, path);
+                        string fileName = Path.GetFileNameWithoutExtension(path);
+                        bool isLoaded = SceneManagement.IsLoaded(path);
+                        AddItem(destinationMenu, $"Load specific Scene/{fileName}", !isLoaded, isLoaded, LoadScene, path);
                     }
                 }
             }
 
+            AddItem(destinationMenu, "Create Scene...", context.canCreateOrLoadScenes, false, AddNewScene, context);
+        }
 
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                destinationMenu.AddDisabledItem(new GUIContent("Create Scene..."), false);
-            }
+        static void AddItem(
+            GenericMenu menu,
+            string content,
+            bool enabled,
+            bool on = false,
+            GenericMenu.MenuFunction2 func = null,
+            object userData = null)
+        {
+            if (enabled)
+                menu.AddItem(new GUIContent(content), on, func, userData);
             else
-            {
-                destinationMenu.AddItem(new GUIContent("Create Scene..."), false, AddNewScene, context);
-            }
+                menu.AddDisabledItem(new GUIContent(content), on);
         }
 
         static void LoadScene(object pathObject)

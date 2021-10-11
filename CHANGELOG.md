@@ -4,12 +4,27 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.0.3] - 2020-09-09
+## [1.1.0-pre.1] - 2021-10-11
+
+### Added
+* Add a "Rename" context menu option in Sequences window, applicable to any Sequence, Sequence Asset, and Variant.
+
+### Changed
+* Make sure Sequence GameObjects are inactive by default at their creation to minimize the use of system resources when Timeline is out of preview mode.
+
+### Fixed
+* Preload Sequence and Asset Collection icons to prevent them from flickering.
+* Make sure to update the Timeline context according to the current Hierarchy content when opening a Sequence in Prefab isolation mode.
+* Fix Timeline Window display when selecting a PlayableDirector inside a Sequence Asset, including related exception thrown in the Console.
+* In Play mode, make sure the Sequence Assembly window displays a read-only list of the Sequence Assets contained in the current selected Sequence.
+* Make sure users can still edit a Sequence that has been transformed into a Prefab. 
+
+## [1.0.3] - 2021-09-09
 
 ### Changed
 * Change internal code to comply with UIToolkit changes in 2022.1.
 
-## [1.0.2] - 2020-08-25
+## [1.0.2] - 2021-08-25
 
 ### Changed
 * Update the help URL for the SequenceFilter, SequenceAsset and SceneLoadPolicy components.
@@ -23,7 +38,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Improved the handling of invalid sequence deletion from the Sequences window.
 * Make sure to properly rename a Sequence when the user only appends a suffix to the current name.
 
-## [1.0.0] - 2020-06-30
+## [1.0.0] - 2021-06-30
 
 ### Changed
 * Optimize the Sequence Asset search method to improve the Editor responsiveness when selecting a Sequence or performing simple operations on it.
@@ -44,7 +59,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Complete the public API Documentation.
 
 
-## [1.0.0-pre.6] - 2020-05-18
+## [1.0.0-pre.6] - 2021-05-18
 
 ### Changed
 * Consolidate the public API documentation generation.
@@ -59,12 +74,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix an issue that was throwing an exception when canceling the creation of a Sequence Asset.
 * Fix an issue that was throwing an exception when opening the Profiler window as a standalone process.
 
-## [1.0.0-pre.5] - 2020-04-27
+## [1.0.0-pre.5] - 2021-04-27
 
 ### Added
 * Added a Third Party Notices file in the package
 
-## [1.0.0-pre.4] - 2020-04-26
+## [1.0.0-pre.4] - 2021-04-26
 
 ### Changed
 * Minor update in the CHANGELOG.

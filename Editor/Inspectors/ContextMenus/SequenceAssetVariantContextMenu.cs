@@ -9,6 +9,7 @@ namespace UnityEditor.Sequences
         public SequenceAssetVariantContextMenu()
         {
             m_Menu = new GenericMenu();
+            m_Menu.AddItem(new GUIContent("Rename"), false, RenameAction);
             m_Menu.AddItem(new GUIContent("Duplicate"), false, DuplicateAction);
             m_Menu.AddItem(new GUIContent("Delete"), false, DeleteAction);
         }
@@ -17,6 +18,12 @@ namespace UnityEditor.Sequences
         {
             SetTarget(target);
             m_Menu.ShowAsContext();
+        }
+
+        void RenameAction()
+        {
+            (target.owner as AssetCollectionsTreeView).BeginRename(target);
+            ResetTarget();
         }
 
         void DuplicateAction()

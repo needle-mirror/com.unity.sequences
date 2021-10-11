@@ -1,72 +1,101 @@
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Playables;
 
 namespace UnityEditor.Sequences
 {
-    internal class SequenceContextMenu : SequencesWindowContextMenu<SequenceContextMenu, SequenceTreeViewItem>
+    internal class SequenceContextMenu : SequencesWindowContextMenu<SequenceContextMenu, EditorialElementTreeViewItem>
     {
         GenericMenu m_Menu;
-        internal bool isItemValid;
 
-        public override void Show(SequenceTreeViewItem target)
+        bool isValid { get; set; }
+        bool canRename { get; set; }
+        bool canDelete { get; set; }
+        bool canCreate { get; set; }
+        bool canManipulate { get; set; }
+
+        new EditorialElementTreeViewItem target { get; set; }
+
+        protected override void SetTarget(EditorialElementTreeViewItem newTarget)
         {
-            SetTarget(target);
+            target = newTarget;
 
+            var editionStatus = SequenceUtility.GetSequenceEditionStatus(target.timelineSequence, target.masterSequence);
+
+            canRename = editionStatus.HasFlag(SequenceUtility.SequenceEditionStatus.CanRename);
+            canDelete = editionStatus.HasFlag(SequenceUtility.SequenceEditionStatus.CanDelete);
+            canCreate = editionStatus.HasFlag(SequenceUtility.SequenceEditionStatus.CanCreate);
+            canManipulate = editionStatus.HasFlag(SequenceUtility.SequenceEditionStatus.CanManipulate);
+            isValid = target.isTargetValid;
+        }
+
+        public override void Show(EditorialElementTreeViewItem targetItem)
+        {
+            SetTarget(targetItem);
             m_Menu = new GenericMenu();
             PopulateMenu();
             m_Menu.ShowAsContext();
         }
 
+        void AddItem(string content, bool enabled = true, GenericMenu.MenuFunction func = null)
+        {
+            if (enabled)
+                m_Menu.AddItem(new GUIContent(content), false, func);
+            else
+                m_Menu.AddDisabledItem(new GUIContent(content), false);
+        }
+
         void PopulateMenu()
         {
-            if (isItemValid)
-                PopulateMenuForValidItem();
+            if (isValid)
+                PopulateMenuBase();
             else
-                PopulateMenuForInvalidItem();
+                PopulateMenuInvalidItem();
         }
 
-        void PopulateMenuForValidItem()
+        void PopulateMenuBase()
         {
             var context = new SceneManagementMenu.ContextInfo();
-            context.masterSequence = target.masterSequence;
             context.sequence = target.timelineSequence;
+            context.canCreateOrLoadScenes = canManipulate;
 
-            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            if (!(target is SubSequenceTreeViewItem))
             {
-                m_Menu.AddDisabledItem(new GUIContent("Create Sequence"), false);
-                m_Menu.AddDisabledItem(new GUIContent("Delete"), false);
-            }
-            else
-            {
-                m_Menu.AddItem(new GUIContent("Create Sequence"), false, CreateShotAction);
-                m_Menu.AddItem(new GUIContent("Delete"), false, DeleteAction);
+                AddItem("Create Sequence", canCreate, CreateSequenceAction);
+                m_Menu.AddSeparator("");
             }
 
+            // Sequence manipulation
+            AddItem("Rename", canRename, RenameAction);
+            AddItem("Delete", canDelete, DeleteAction);
             m_Menu.AddSeparator("");
+
+            // Sequence scenes
             SceneManagementMenu.AppendMenuFrom(context, m_Menu);
-
             m_Menu.AddSeparator("");
-            if (IsTargetInScene() && !EditorApplication.isPlayingOrWillChangePlaymode)
-            {
-                m_Menu.AddItem(new GUIContent("Record"), false, RecordAction);
-                m_Menu.AddItem(new GUIContent("Record As..."), false, RecordAsAction);
-            }
-            else
-            {
-                m_Menu.AddDisabledItem(new GUIContent("Record"));
-                m_Menu.AddDisabledItem(new GUIContent("Record As..."));
-            }
+
+            // Sequence recording
+            AddItem("Record", canManipulate, RecordAction);
+            AddItem("Record As...", canManipulate, RecordAsAction);
         }
 
-        void PopulateMenuForInvalidItem()
+        void PopulateMenuInvalidItem()
         {
             m_Menu.AddItem(new GUIContent("Delete"), false, DeleteAction);
         }
 
-        void CreateShotAction()
+        void CreateSequenceAction()
         {
-            (target.owner as StructureTreeView).CreateNewSubSequenceInContext(target);
+            if (target is MasterSequenceTreeViewItem)
+                (target.owner as StructureTreeView).CreateNewSequenceInContext(target as MasterSequenceTreeViewItem);
+
+            else if (target is SequenceTreeViewItem)
+                (target.owner as StructureTreeView).CreateNewSubSequenceInContext(target as SequenceTreeViewItem);
+
+            ResetTarget();
+        }
+
+        void RenameAction()
+        {
+            (target.owner as StructureTreeView).BeginRename(target);
             ResetTarget();
         }
 
@@ -86,20 +115,6 @@ namespace UnityEditor.Sequences
         {
             target.timelineSequence.Record(true);
             ResetTarget();
-        }
-
-        bool IsTargetInScene()
-        {
-            var playableDirectors = ObjectsCache.FindObjectsFromScenes<PlayableDirector>();
-            foreach (var playableDirector in playableDirectors)
-            {
-                if (playableDirector.playableAsset == target.timelineSequence.timeline)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }

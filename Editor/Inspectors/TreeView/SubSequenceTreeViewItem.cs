@@ -22,7 +22,7 @@ namespace UnityEditor.Sequences
 
         public override void Selected()
         {
-            if (GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            if (!isTargetValid)
                 return;
 
             SelectionUtility.TrySelectSequence(timelineSequence);
@@ -30,16 +30,16 @@ namespace UnityEditor.Sequences
 
         public override void ContextClicked()
         {
-            if (masterSequence == null || (parent as SequenceTreeViewItem).GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            // TODO: this could be replace by 'isOrphan'?
+            if (masterSequence == null || !(parent as SequenceTreeViewItem).isTargetValid)
                 return;
 
-            SubSequenceContextMenu.instance.isItemValid = GetTargetValidity() == SequenceUtility.SequenceValidity.Valid;
-            SubSequenceContextMenu.instance.Show(this);
+            SequenceContextMenu.instance.Show(this);
         }
 
         public override void DoubleClicked()
         {
-            if (GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            if (!isTargetValid)
                 return;
 
             SelectionUtility.TrySelectSequence(timelineSequence);
@@ -48,7 +48,7 @@ namespace UnityEditor.Sequences
 
         public override void Rename(string newName)
         {
-            if (GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            if (!canRename)
                 return;
 
             base.Rename(newName);
@@ -72,7 +72,7 @@ namespace UnityEditor.Sequences
 
         public override void Delete()
         {
-            if (masterSequence == null || (parent as SequenceTreeViewItem).GetTargetValidity() != SequenceUtility.SequenceValidity.Valid)
+            if (!canDelete)
                 return;
 
             if (!UserVerifications.ValidateSequenceDeletion(timelineSequence))

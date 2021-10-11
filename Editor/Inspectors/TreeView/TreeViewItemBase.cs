@@ -11,11 +11,21 @@ namespace UnityEditor.Sequences
 
         int sequenceIndex { get; set; }
 
-        internal SequenceUtility.SequenceValidity GetTargetValidity()
-        {
-            var result = SequenceUtility.GetSequenceValidity(timelineSequence, masterSequence);
+        internal bool isTargetValid => GetTargetState().HasFlag(SequenceUtility.SequenceState.Valid);
 
-            if (result == SequenceUtility.SequenceValidity.MissingMasterSequence)
+        internal bool canRename =>
+            SequenceUtility.GetSequenceEditionStatus(timelineSequence, masterSequence)
+                .HasFlag(SequenceUtility.SequenceEditionStatus.CanRename);
+
+        internal bool canDelete =>
+            SequenceUtility.GetSequenceEditionStatus(timelineSequence, masterSequence)
+                .HasFlag(SequenceUtility.SequenceEditionStatus.CanDelete);
+
+        internal SequenceUtility.SequenceState GetTargetState()
+        {
+            var result = SequenceUtility.GetSequenceState(timelineSequence, masterSequence);
+
+            if (result == SequenceUtility.SequenceState.MissingMasterSequence)
                 (owner as StructureTreeView).Reload();
 
             return result;

@@ -47,6 +47,17 @@ namespace UnityEngine.Sequences
             set => m_ElementIndex = value;
         }
 
+        internal TimelineSequence sequence
+        {
+            get
+            {
+                if (masterSequence == null)
+                    return null;
+
+                return masterSequence.manager.GetAt(elementIndex) as TimelineSequence;
+            }
+        }
+
         /// <summary>
         /// Tell if this GameObject is already in the process of being destroyed.
         /// Set to true from OnDestroy().
@@ -94,7 +105,14 @@ namespace UnityEngine.Sequences
             filter.type = (sequence.parent == null) ? Type.MasterSequence : sequence.parent.parent == null ? Type.Sequence : Type.Shot;
 
             if (parent)
+            {
                 child.transform.SetParent(parent);
+
+                // Only the Master Sequence GameObject is active, every child sequences GameObject are created
+                // deactivated to avoid slowness on any domain reload.
+                if (parent.GetComponent<SequenceFilter>() != null)
+                    child.SetActive(false);
+            }
 
             PlayableDirector director = child.GetComponent<PlayableDirector>();
             director.playableAsset = sequence.timeline;

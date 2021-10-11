@@ -2,7 +2,7 @@
   "displayName": "Sequences",
   "name": "com.unity.sequences",
   "unity": "2020.3",
-  "version": "1.0.3",
+  "version": "1.1.0-pre.1",
   "dependencies": {
     "com.unity.timeline": "1.5.2",
     "com.unity.recorder": "2.5.5",
@@ -11,15 +11,15 @@
   },
   "description": "Efficiently create movies, game cinematics or any other linear content.\nOrganize your project's editorial structure and your creative content, assemble the elements for easy authoring and collaboration, and try out new ideas in a non-destructive way.",
   "relatedPackages": {
-    "com.unity.sequences.tests": "1.0.3"
+    "com.unity.sequences.tests": "1.1.0-pre.1"
   },
   "upmCi": {
-    "footprint": "53467a2dfab00e27ff36828f398ffb6a25d53400"
+    "footprint": "f41200dc4490dc5df68547c7dfc068a89586b293"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.sequences.git",
     "type": "git",
-    "revision": "409770082b811ec98354b41f443805b8211a7966"
+    "revision": "23d4606031f571d54c870a18cac89fec61e643df"
   },
   "samples": [
     {
