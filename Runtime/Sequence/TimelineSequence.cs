@@ -193,6 +193,43 @@ namespace UnityEngine.Sequences
         }
 
         /// <summary>
+        /// Gets the recording start time.
+        /// This time is computed based on the TimelineSequence editorial clip start and its parent (if any) editorial
+        /// clip start and clip-in values.
+        /// </summary>
+        /// <returns>The recording start time in second (double).</returns>
+        internal double GetRecordStart()
+        {
+            if (parent == null)
+                return start;
+
+            var timelineParent = parent as TimelineSequence;
+            var parentClipIn = timelineParent.editorialClip?.clipIn ?? 0;
+            var recordStart = start - parentClipIn;
+
+            return Math.Max(0, recordStart);
+        }
+
+        /// <summary>
+        /// Gets the recording end time.
+        /// This time is computed based on the TimelineSequence editorial clip end and its parent (if any) editorial
+        /// clip end and clip-in values.
+        /// </summary>
+        /// <returns>The recording end time in second (double).</returns>
+        internal double GetRecordEnd()
+        {
+            if (parent == null)
+                return end;
+
+            var timelineParent = parent as TimelineSequence;
+            var parentClipIn = timelineParent.editorialClip?.clipIn ?? 0;
+            var recordStart = start - parentClipIn;
+            var recordEnd = recordStart + duration;
+
+            return Math.Min(timelineParent.GetRecordEnd(), recordEnd);
+        }
+
+        /// <summary>
         /// Tests if the given masterSequence clip is null or if its timeline is. If yes, this timeline masterSequence clip is
         /// unusable as is. Either it is corrupted or its initialization is not finished yet.
         /// </summary>

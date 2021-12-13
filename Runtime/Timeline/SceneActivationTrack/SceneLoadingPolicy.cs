@@ -119,7 +119,10 @@ namespace UnityEngine.Sequences
             // Add scene to Build settings.
             var scenes = EditorBuildSettings.scenes.ToList();
             var newScenesPath = sequenceFilter.masterSequence.rootSequence.GetRelatedScenes().ToList();
-            newScenesPath.Insert(0, gameObject.scene.path);
+
+            // In the case of creating a Prefab with a GameObject that has this component, the scene is null.
+            if (gameObject.scene != default)
+                newScenesPath.Insert(0, gameObject.scene.path);
 
             foreach (var scenePath in newScenesPath)
             {

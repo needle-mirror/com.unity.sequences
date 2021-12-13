@@ -18,6 +18,10 @@ Before you get started with the Sequences package:
 * Learn about its [concepts and terminology](concepts.md).
 * Explore its [features and integrations](features.md).
 
+## Samples and tutorials
+
+Various [samples and tutorials](samples.md) are available to help you discover the features included in the Sequences package.
+
 ## Package technical details
 
 ### Installation

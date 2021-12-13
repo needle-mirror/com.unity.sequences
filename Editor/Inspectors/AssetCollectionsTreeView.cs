@@ -30,6 +30,8 @@ namespace UnityEditor.Sequences
             }
         }
 
+        bool forceEndRename { get; set; }
+
         public AssetCollectionsTreeView(TreeViewState state, VisualElement container)
             : base(state)
         {
@@ -94,7 +96,7 @@ namespace UnityEditor.Sequences
         {
             // Deletion from the asset database.
             // Go over all the items and delete the ones with an invalid prefab reference.
-            for (int i = m_Items.Count - 1; i > 0; --i)
+            for (int i = m_Items.Count - 1; i >= 0; --i)
             {
                 var sequenceAssetItem = m_Items[i] as SequenceAssetTreeViewItem;
                 if (sequenceAssetItem != null && sequenceAssetItem.asset == null)
@@ -189,6 +191,12 @@ namespace UnityEditor.Sequences
             }
 
             OnGUI(m_VisualElementContainer.contentRect);
+        }
+
+        internal void ForceEndRename()
+        {
+            forceEndRename = true;
+            EndRename();
         }
 
         internal void CreateSequenceAssetInContext(string collectionType)
@@ -309,14 +317,21 @@ namespace UnityEditor.Sequences
         {
             var item = GetItem(args.itemID);
 
-            if (args.acceptedRename)
+            if (item == null)
             {
+                // Reset state as nothing happened.
+                forceEndRename = false;
+                return;
+            }
+
+            if (forceEndRename || args.acceptedRename)
+            {
+                forceEndRename = false;
+
                 if (item.state == TreeViewItemBase.State.Creation)
                 {
                     if (item.ValidateCreation(args.newName))
-                    {
                         Reload();
-                    }
                     else
                         DeleteItems(new int[] { args.itemID });
                 }

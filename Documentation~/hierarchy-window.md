@@ -2,7 +2,7 @@
 
 The Sequences package includes additional features that help you manage your Sequences from the Hierarchy window. The use of these features ensures a full compatibility with the Sequences package overall functionality.
 
-**Note:** This page provides straightforward instructions to guide you through the specific use of the Sequences features available from the Hierarchy window. For general information on the Hierarchy window and GameObjects management, see the [Unity Manual](https://docs.unity3d.com/Manual/index.html).
+>**Note:** This page provides straightforward instructions to guide you through the specific use of the Sequences features available from the Hierarchy window. For general information on the Hierarchy window and GameObjects management, see the [Unity Manual](https://docs.unity3d.com/Manual/index.html).
 
 ## Creating Sequences
 
@@ -11,6 +11,10 @@ Depending on the Sequence level you are starting from:
 * To create a Master Sequence, right-click in your current Scene and select **Sequences > Master Sequence**.
 
 * To create a Sequence, right-click on the GameObject that represents the Sequence (or Master Sequence) that should contain the one you want to create, and select **Sequences > Sequence**.
+
+## Converting a Sequence GameObject into a Prefab
+
+You can convert any Sequence GameObject into a Prefab. However, this choice comes with a few side effects you should be aware of. See [how to manage Sequences as Prefabs](sequences-as-prefabs.md).
 
 ## Deleting Sequence GameObjects <br />(not recommended)
 

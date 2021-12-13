@@ -57,6 +57,10 @@ namespace UnityEditor.Sequences
                 var scenes = GetScenes();
                 for (int i = 0; i < scenes.Count; ++i)
                 {
+                    // Skip scenes that are visible but unloaded in the Hierarchy.
+                    if (!scenes[i].isLoaded)
+                        continue;
+
                     scenes[i].GetRootGameObjects(s_RootGameObjectsBuffer);
                     foreach (GameObject root in s_RootGameObjectsBuffer)
                     {

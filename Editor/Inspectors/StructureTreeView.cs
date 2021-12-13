@@ -39,6 +39,8 @@ namespace UnityEditor.Sequences
             }
         }
 
+        bool forceEndRename { get; set; }
+
         public StructureTreeView(TreeViewState state, VisualElement container)
             : base(state)
         {
@@ -106,14 +108,17 @@ namespace UnityEditor.Sequences
         /// </summary>
         void OnSequenceDeleted()
         {
-            for (int i = m_Items.Count - 1; i > 0; --i)
+            for (int i = m_Items.Count - 1; i >= 0; --i)
             {
                 EditorialElementTreeViewItem editorialItem = m_Items[i] as EditorialElementTreeViewItem;
                 if (editorialItem == null)
                     continue;
 
                 if (TimelineSequence.IsNullOrEmpty(editorialItem.timelineSequence))
+                {
                     Detach(editorialItem);
+                    Reload();
+                }
             }
         }
 
@@ -182,7 +187,6 @@ namespace UnityEditor.Sequences
         public void OnGUI()
         {
             Event evt = Event.current;
-
             if (HasFocus() && HasSelection())
             {
                 if (evt.isKey && evt.type == EventType.KeyUp && evt.keyCode == KeyCode.Delete)
@@ -192,6 +196,12 @@ namespace UnityEditor.Sequences
             }
 
             OnGUI(m_VisualElementContainer.contentRect);
+        }
+
+        internal void ForceEndRename()
+        {
+            forceEndRename = true;
+            EndRename();
         }
 
         protected override void RowGUI(RowGUIArgs args)
@@ -273,8 +283,8 @@ namespace UnityEditor.Sequences
                 SetExpanded(state.expandedIDs);
             }
 
+            List<EditorialElementTreeViewItem> toDelete = new List<EditorialElementTreeViewItem>();
 
-            //foreach (var item in m_Items)
             for (int i = m_Items.Count - 1; i >= 0; --i)
             {
                 if (m_Items[i].depth == 0)
@@ -284,7 +294,7 @@ namespace UnityEditor.Sequences
                     // Detach invalid MasterSequence items.
                     if (item.state == TreeViewItemBase.State.Ok && item.masterSequence == null)
                     {
-                        Detach(item);
+                        toDelete.Add(item);
                         continue;
                     }
 
@@ -293,6 +303,7 @@ namespace UnityEditor.Sequences
                 }
             }
 
+            toDelete.ForEach(x => Detach(x));
             root.children.Sort();
 
             return root;
@@ -332,9 +343,17 @@ namespace UnityEditor.Sequences
         protected override void RenameEnded(RenameEndedArgs args)
         {
             var item = GetItem(args.itemID);
-
-            if (args.acceptedRename)
+            if (item == null)
             {
+                // Reset state as nothing happened.
+                forceEndRename = false;
+                return;
+            }
+
+            if (forceEndRename || args.acceptedRename)
+            {
+                forceEndRename = false;
+
                 if (item.state == TreeViewItemBase.State.Creation)
                     item.ValidateCreation(args.newName);
                 else if (item.state == TreeViewItemBase.State.Ok)
@@ -343,7 +362,10 @@ namespace UnityEditor.Sequences
             else
             {
                 if (item.state == TreeViewItemBase.State.Creation)
+                {
                     Detach(item);
+                    Reload();
+                }
             }
         }
 
@@ -465,8 +487,6 @@ namespace UnityEditor.Sequences
             item.parent.children.Remove(item);
             item.parent = null;
             m_Items.Remove(item);
-
-            Reload();
         }
 
         public bool SelectionContains(Sequence sequence)

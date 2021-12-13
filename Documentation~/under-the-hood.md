@@ -104,6 +104,8 @@ A Sequence GameObject includes the following components:
 
 ![](images/inspector-sequence-gameobject.png)
 
+>**Note:** You can convert any Sequence GameObject into a Prefab. However, this choice comes with a few side effects you should be aware of. See [how to manage Sequences as Prefabs](sequences-as-prefabs.md).
+
 
 ### Sequence Assets in Hierarchy
 

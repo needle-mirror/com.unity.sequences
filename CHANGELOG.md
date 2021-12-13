@@ -4,6 +4,22 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0-pre.2] - 2021-12-13
+
+### Added
+* New API method overload for `SequenceAssetUtility.RemoveFromSequence()` with an optional parameter `InteractionMode` that allows to skip the user confirmation pop-up.
+
+### Fixed
+* Make sure users can swap Sequence Asset Variants from the Sequence Assembly window in any scenario.
+* Make sure users can undo the "Match Editorial Content (Ripple)" action.
+* Avoid issues when creating a Master Sequence from the Add menu while an existing Sequence is being renamed.
+* Prevent the Structure view from showing an empty but selectable entry that might result from a sequence deletion.
+* Prevent Unity from throwing an exception on new Sequence creation from the GameObject menu.
+* Prevent Unity from throwing an exception when transforming a sequence's GameObject into a Prefab if the GameObject includes a Scene Loading Policy component.
+* Prevent Unity from throwing an exception on `Assets/Sequences/` folder deletion.
+* Prevent Unity from throwing an exception when finding in SceneManager a registered Scene that was actually unloaded but visible in the Hierarchy.
+* Fix the recording end frame of sub-sequence to respect the parent sequence frame end when it is earlier than the sub-sequence's one.
+
 ## [1.1.0-pre.1] - 2021-10-11
 
 ### Added
@@ -17,7 +33,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Make sure to update the Timeline context according to the current Hierarchy content when opening a Sequence in Prefab isolation mode.
 * Fix Timeline Window display when selecting a PlayableDirector inside a Sequence Asset, including related exception thrown in the Console.
 * In Play mode, make sure the Sequence Assembly window displays a read-only list of the Sequence Assets contained in the current selected Sequence.
-* Make sure users can still edit a Sequence that has been transformed into a Prefab. 
+* Make sure users can still edit a Sequence that has been transformed into a Prefab.
 
 ## [1.0.3] - 2021-09-09
 

@@ -38,7 +38,7 @@ namespace UnityEditor.Sequences
         public static bool DeleteSourceAsset(UnityEngine.GameObject source, bool deleteVariants = True);
         public static bool DeleteVariantAsset(UnityEngine.GameObject variant);
         public static UnityEngine.GameObject DuplicateVariant(UnityEngine.GameObject variant);
-        [System.Runtime.CompilerServices.IteratorStateMachine(typeof(UnityEditor.Sequences.SequenceAssetUtility.<FindAllSources>d__16))] public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> FindAllSources(string type = default(string));
+        [System.Runtime.CompilerServices.IteratorStateMachine(typeof(UnityEditor.Sequences.SequenceAssetUtility.<FindAllSources>d__17))] public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> FindAllSources(string type = default(string));
         public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> GetInstancesInSequence(UnityEngine.Playables.PlayableDirector sequenceDirector, string type = default(string));
         public static UnityEngine.GameObject GetSource(UnityEngine.GameObject prefab);
         public static string GetType(UnityEngine.GameObject prefab);
@@ -48,7 +48,8 @@ namespace UnityEditor.Sequences
         public static bool IsSequenceAsset(UnityEngine.GameObject prefab);
         public static bool IsSource(UnityEngine.GameObject prefab);
         public static bool IsVariant(UnityEngine.GameObject prefab);
-        public static void RemoveFromSequence(UnityEngine.GameObject instance, UnityEngine.Playables.PlayableDirector sequenceDirector, UnityEditor.InteractionMode interactionMode = 1);
+        public static void RemoveFromSequence(UnityEngine.GameObject instance, UnityEngine.Playables.PlayableDirector sequenceDirector);
+        public static void RemoveFromSequence(UnityEngine.GameObject instance, UnityEngine.Playables.PlayableDirector sequenceDirector, UnityEditor.InteractionMode interactionMode);
         public static string Rename(UnityEngine.GameObject prefab, string oldName, string newName, bool renameVariants = True, bool renameInstances = True);
         public static UnityEngine.GameObject UpdateInstanceInSequence(UnityEngine.GameObject oldInstance, UnityEngine.GameObject newPrefab, UnityEngine.Playables.PlayableDirector sequenceDirector, UnityEditor.InteractionMode interactionMode = 1);
     }

@@ -8,6 +8,7 @@ using UnityEngine.Sequences.Timeline;
 namespace UnityEditor.Sequences.Timeline
 {
     [MenuEntry("Match Editorial Content (Ripple)", MenuPriority.CustomTimelineActionSection.start)]
+    [ApplyDefaultUndo]
     class MatchEditorialContent : TimelineAction
     {
         public override ActionValidity Validate(ActionContext actionContext)

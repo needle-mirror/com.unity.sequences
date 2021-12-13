@@ -40,6 +40,7 @@ Depending on the Sequence level you are starting from:
 * To create a Master Sequence, select the **+** (plus) button at the top left of the Sequences window, then select **Create Master Sequence**.
 
 * To create a Sequence within another Sequence, right-click on the Sequence (or Master Sequence) that should contain the one you want to create, and select **Create Sequence**.
+  >**Note:** If the parent Sequence is a Prefab, you might need to apply overrides from the Prefab instance to the Prefab asset to keep them synchronized. See [how to manage Sequences as Prefabs](sequences-as-prefabs.md).
 
 When the new Sequence appears in the Structure, you can directly rename it and press the Enter key or click anywhere to complete the creation.
 
@@ -49,9 +50,15 @@ Once you have created a new Sequence, you can use the [Sequence Assembly window]
 
 To rename a Sequence, select it twice, then type the new name and press the Enter key or click anywhere to confirm the renaming.
 
+>**Note:**
+>* The Sequences window currently prevents you from renaming a Sequence that is a Prefab (see the [suggested workaround](known-issues.md)).
+>* If you rename a Sequence within a Sequence that is a Prefab, you might need to apply overrides from the Prefab instance to the Prefab asset to keep them synchronized. See [how to manage Sequences as Prefabs](sequences-as-prefabs.md).
+
 ### Deleting Sequences
 
 To delete a Sequence from your project, select it and press the Delete key or right-click on it and select **Delete**. This also automatically deletes from your project all Sequences the deleted Sequence may contain.
+
+>**Note:** If you want to delete a Sequence within a Sequence that is a Prefab, you might need to enter the Prefab Mode first. See [how to manage Sequences as Prefabs](sequences-as-prefabs.md).
 
 ### Browsing through Sequences
 
@@ -60,6 +67,8 @@ When you select a Sequence in the Structure section:
 * The [Sequence Assembly window](sequence-assembly-window.md) displays the properties of the selected Sequence. This is where you can add Sequence Assets to the selected Sequence.
 
 * The [Timeline window](timeline-window.md) displays the tracks contained in the selected Sequence. This is where you can trim and reorder the clips within the selected Sequence.
+
+>**Note:** If you open a Sequence in Prefab Mode, you can only browse through the structure of this Sequence. See [how to manage Sequences as Prefabs](sequences-as-prefabs.md).
 
 ### Setting up Scene activation in a Sequence
 

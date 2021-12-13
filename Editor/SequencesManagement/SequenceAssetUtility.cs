@@ -270,11 +270,21 @@ namespace UnityEditor.Sequences
         /// <param name="instance">The Sequence Asset Prefab instance to remove from the Scene.</param>
         /// <param name="sequenceDirector">The Sequence PlayableDirector in which the Sequence Asset is currently
         /// instantiated.</param>
+        public static void RemoveFromSequence(GameObject instance, PlayableDirector sequenceDirector)
+            => RemoveFromSequence(instance, sequenceDirector, InteractionMode.UserAction);
+
+        /// <summary>
+        /// Removes a Sequence Asset Prefab instance (Source or Variant) from a Sequence. This is the opposite of the
+        /// <see cref="InstantiateInSequence"/> action.
+        /// </summary>
+        /// <param name="instance">The Sequence Asset Prefab instance to remove from the Scene.</param>
+        /// <param name="sequenceDirector">The Sequence PlayableDirector in which the Sequence Asset is currently
+        /// instantiated.</param>
         /// <param name="interactionMode">Choose the mode of interaction, user or automated.</param>
         public static void RemoveFromSequence(
             GameObject instance,
             PlayableDirector sequenceDirector,
-            InteractionMode interactionMode = InteractionMode.UserAction)
+            InteractionMode interactionMode)
         {
             if (!Application.isBatchMode && interactionMode is InteractionMode.UserAction &&
                 PrefabUtility.IsPartOfPrefabInstance(sequenceDirector) &&

@@ -23,6 +23,11 @@ namespace UnityEditor.Sequences
             return result != null;
         }
 
+        internal bool HasTreeViewItem(TreeViewItem treeviewItem)
+        {
+            return m_Items.Contains(treeviewItem);
+        }
+
         internal EditorialElementTreeViewItem GetTreeViewItem(MasterSequence masterSequence, TimelineSequence timelineSequence)
         {
             var result = m_Items.Find(treeviewItem =>

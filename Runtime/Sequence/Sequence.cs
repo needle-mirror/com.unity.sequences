@@ -123,7 +123,6 @@ namespace UnityEngine.Sequences
         /// </summary>
         public double end => start + duration;
 
-
         /// <summary>
         /// Get or set the Sequence duration (in seconds).
         /// The Sequence duration is computed from it's children duration if any.

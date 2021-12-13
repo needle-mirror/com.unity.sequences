@@ -6,7 +6,7 @@ To open the Timeline window, from the main menu of the Editor, select **Window >
 
 ![](images/timeline-editorial-track-master-sequence.png)
 
-**Note:** This page only provides straightforward instructions to guide you through the specific use of the Sequences features available from the [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) window.
+>**Note:** This page only provides straightforward instructions to guide you through the specific use of the Sequences features available from the [Timeline](https://docs.unity3d.com/Packages/com.unity.timeline@latest) window.
 
 
 ## Navigation
@@ -20,6 +20,8 @@ You can also navigate through your Sequences from the Timeline window:
 * The breadcrumb trail at the top of the Timeline window allows you to access any parent Timeline of the currently displayed one.
 
 ![](images/timeline-breadcrumb-trail.png)
+
+>**Note:** If you open a Sequence in Prefab Mode, you can only navigate through the structure of this Sequence. See [how to manage Sequences as Prefabs](sequences-as-prefabs.md).
 
 
 ## Timeline track types
@@ -38,7 +40,7 @@ You can double-click on a Sequence clip to access the Timeline of this Sequence 
 
 The Sequences package automatically creates and configures Editorial tracks when you create Sequences through the Sequences window or through the Hierarchy.
 
-> **Note:** You can manually create an Editorial track through the Timeline Add Track menu: select the **+** (plus) button or right-click in an empty area of the track list, and then select **Sequencing > Editorial Track**. However, such a track would require some more advanced configuration to become usable in the context of Sequences.
+>**Note:** You can manually create an Editorial track through the Timeline Add Track menu: select the **+** (plus) button or right-click in an empty area of the track list, and then select **Sequencing > Editorial Track**. However, such a track would require some more advanced configuration to become usable in the context of Sequences.
 
 ### Sequence Asset track
 
@@ -56,7 +58,7 @@ You can double-click on each clip to directly access the Timeline of the corresp
 
 The Sequences package automatically creates and configures Sequence Asset tracks when you add Sequence Assets to a Sequence through the Sequence Assembly window or through the Hierarchy.
 
-> **Note:** You can manually create a Sequence Asset track through the Timeline Add Track menu: select the **+** (plus) button or right-click in an empty area of the track list, and then select **Sequencing > Sequence Asset Track**. However, such a track would require some more advanced configuration to become usable in the context of Sequences.
+>**Note:** You can manually create a Sequence Asset track through the Timeline Add Track menu: select the **+** (plus) button or right-click in an empty area of the track list, and then select **Sequencing > Sequence Asset Track**. However, such a track would require some more advanced configuration to become usable in the context of Sequences.
 
 ### Scene Activation track
 
@@ -88,7 +90,7 @@ You can also manually create and configure a Sequence Asset track through the Ti
 
 You can [move](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_position.html) and [trim](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_trim.html) any Sequence, Sequence Asset and Scene Activation clips within the Timeline track that contains them, as any other Timeline clip type.
 
-**Note:** The actual behavior of these actions depends on the [clip edit mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#clip-edit-modes) currently selected in Timeline.
+>**Note:** The actual behavior of these actions depends on the [clip edit mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#clip-edit-modes) currently selected in Timeline.
 
 | Example: Trimmed Sequence clip |
 |:---|
@@ -102,7 +104,7 @@ You can automatically adjust the length of any clip to [match its content](https
   1. Right click on the clip.
   2. select **Match Content**.
 
-**Note:** The actual behavior of this action depends on the [clip edit mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#clip-edit-modes) currently selected in Timeline.
+>**Note:** The actual behavior of this action depends on the [clip edit mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#clip-edit-modes) currently selected in Timeline.
 
 | Example: Match Content on Sequence clip |
 |:---|
@@ -113,7 +115,7 @@ You can automatically adjust the length of any clip to [match its content](https
 
 You can automatically adjust the length of Sequence clips to exclusively match their editorial content, that is, only the Sequence clips from their immediate sub-level.
 
-**Note:** This content matching process ignores any sub-items that are not Sequence clips. If the targeted Sequence contains clips of any other types that are longer than the total length of the sub-sequences, the process automatically cuts off the end of these clips. This is equivalent to selectively trimming the Sequence.
+>**Note:** This content matching process ignores any sub-items that are not Sequence clips. If the targeted Sequence contains clips of any other types that are longer than the total length of the sub-sequences, the process automatically cuts off the end of these clips. This is equivalent to selectively trimming the Sequence.
 
 * To adjust the length of **a single Sequence clip** to match its editorial content:
   1. Right click on the Sequence clip.
@@ -126,7 +128,7 @@ You can also perform the same action in batch at the track level.
   2. Select **Match Editorial Content (Ripple)**.
 
 
-  **Note:** In both cases, this action uses the [Ripple mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#ripple-mode) behavior, regardless to the selected mode in the Timeline view.
+>**Note:** In both cases, this action uses the [Ripple mode](https://docs.unity3d.com/Packages/com.unity.timeline@1.6/manual/clp_about.html#ripple-mode) behavior, regardless to the selected mode in the Timeline view.
 
 | Example: Match Editorial Content on single Sequence clip |
 |:---|
