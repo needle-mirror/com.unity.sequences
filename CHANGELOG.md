@@ -4,12 +4,25 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [1.0.3] - 2020-09-09
+## [1.0.4] - 2021-12-13
+
+### Fixed
+* Make sure users can swap Sequence Asset Variants from the Sequence Assembly window in any scenario.
+* Make sure users can undo the "Match Editorial Content (Ripple)" action.
+* Avoid issues when creating a Master Sequence from the Add menu while an existing Sequence is being renamed.
+* Prevent Unity from throwing an exception on new Sequence creation from the GameObject menu.
+* Prevent Unity from throwing an exception when transforming a sequence's GameObject into a Prefab if the GameObject includes a Scene Loading Policy component.
+* Prevent Unity from throwing an exception on `Assets/Sequences/` folder deletion.
+* In Play mode, make sure the Sequence Assembly window displays a read-only list of the Sequence Assets contained in the current selected Sequence.
+* Fix Timeline Window display when selecting a PlayableDirector inside a Sequence Asset, including related exception thrown in the Console.
+* Fix the recording end frame of sub-sequence to respect the parent sequence frame end when it is earlier than the sub-sequence's one.
+
+## [1.0.3] - 2021-09-09
 
 ### Changed
 * Change internal code to comply with UIToolkit changes in 2022.1.
 
-## [1.0.2] - 2020-08-25
+## [1.0.2] - 2021-08-25
 
 ### Changed
 * Update the help URL for the SequenceFilter, SequenceAsset and SceneLoadPolicy components.
@@ -23,7 +36,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Improved the handling of invalid sequence deletion from the Sequences window.
 * Make sure to properly rename a Sequence when the user only appends a suffix to the current name.
 
-## [1.0.0] - 2020-06-30
+## [1.0.0] - 2021-06-30
 
 ### Changed
 * Optimize the Sequence Asset search method to improve the Editor responsiveness when selecting a Sequence or performing simple operations on it.
@@ -43,8 +56,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Avoid throwing exception on prefabized Sequences when setting the Timeline breadcrumb.
 * Complete the public API Documentation.
 
-
-## [1.0.0-pre.6] - 2020-05-18
+## [1.0.0-pre.6] - 2021-05-18
 
 ### Changed
 * Consolidate the public API documentation generation.
@@ -59,12 +71,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Fix an issue that was throwing an exception when canceling the creation of a Sequence Asset.
 * Fix an issue that was throwing an exception when opening the Profiler window as a standalone process.
 
-## [1.0.0-pre.5] - 2020-04-27
+## [1.0.0-pre.5] - 2021-04-27
 
 ### Added
 * Added a Third Party Notices file in the package
 
-## [1.0.0-pre.4] - 2020-04-26
+## [1.0.0-pre.4] - 2021-04-26
 
 ### Changed
 * Minor update in the CHANGELOG.

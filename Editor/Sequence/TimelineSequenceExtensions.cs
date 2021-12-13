@@ -113,8 +113,18 @@ namespace UnityEditor.Sequences
         /// recorder, then the output record contains 1 extra frame at the end that is not wanted.</remarks>
         internal static void GetRecordFrameStartAndEnd(this TimelineSequence clip, out int frameStart, out int frameEnd)
         {
-            frameStart = (int)Math.Ceiling(clip.start * clip.fps);
-            frameEnd = (int)Math.Ceiling(clip.end * clip.fps) - 1;
+            frameStart = (int)Math.Ceiling(clip.GetRecordStart() * clip.fps);
+            frameEnd = (int)Math.Ceiling(clip.GetRecordEnd() * clip.fps) - 1;
+
+            if (frameEnd < frameStart)
+            {
+                // This can happen if the parent Sequence of 'clip' ends before 'clip' even starts.
+                // In this case, there is nothing to record.
+                // TODO: We could improve the UX here and simply not propose to record a Sequence if it is not in
+                //       range of its parent Sequence: https://jira.unity3d.com/browse/SEQ-896
+                frameStart = 0;
+                frameEnd = 0;
+            }
         }
 
         static string GetParentSequencePath(this Sequence clip)

@@ -53,25 +53,30 @@ namespace UnityEditor.Sequences
 
             // Header, search
             Button addDropdownButton = root.Q<Button>(Styles.k_SequencesWindowAddDropdownViewPath);
+            addDropdownButton.clicked += OnAddMenuClicked;
 
             // Hierarchy
             m_StructureTreeViewContainer = root.Q<IMGUIContainer>(Styles.k_StructureContentViewPath);
             m_Structure = new StructureTreeView(m_State, m_StructureTreeViewContainer);
-
             m_StructureTreeViewContainer.onGUIHandler = m_Structure.OnGUI;
 
             // Asset Collections
             m_AssetCollectionsTreeViewContainer = root.Q<IMGUIContainer>(Styles.k_AssetCollectionsContentViewPath);
             m_AssetCollectionsTreeView = new AssetCollectionsTreeView(m_AssetCollectionsState, m_AssetCollectionsTreeViewContainer);
-
             m_AssetCollectionsTreeViewContainer.onGUIHandler = m_AssetCollectionsTreeView.OnGUI;
 
             // Popup menus
             m_MainMenu = new SequencesWindowAddMenu();
             m_MainMenu.userClickedOnCreateMasterSequence += m_Structure.CreateNewMasterSequence;
             m_MainMenu.userClickedOnCreateSequenceAsset += m_AssetCollectionsTreeView.CreateSequenceAssetInContext;
+        }
 
-            addDropdownButton.clicked += m_MainMenu.Show;
+        void OnAddMenuClicked()
+        {
+            m_Structure.ForceEndRename();
+            m_AssetCollectionsTreeView.ForceEndRename();
+
+            m_MainMenu.Show();
         }
 
         void OnDestroy()

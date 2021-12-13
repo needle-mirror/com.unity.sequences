@@ -41,7 +41,7 @@ namespace UnityEditor.Sequences
         static bool NewSequenceValidate()
         {
             var go = Selection.activeGameObject;
-            if (go == null)
+            if (go == null || EditorUtility.IsPersistent(go))
                 return false;
 
             var comp = go.GetComponent<SequenceFilter>();
@@ -58,7 +58,7 @@ namespace UnityEditor.Sequences
         [MenuItem("GameObject/Sequences/Sequence", false, 11)]
         static void NewSequence(MenuCommand command)
         {
-            var parent = command.context as GameObject;
+            var parent = Selection.activeGameObject;
             SequenceFilter parentFilter = parent.GetComponent<SequenceFilter>();
             MasterSequence masterSequence = parentFilter.masterSequence;
             if (parentFilter.type == SequenceFilter.Type.MasterSequence)

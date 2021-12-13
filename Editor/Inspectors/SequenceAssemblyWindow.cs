@@ -54,13 +54,13 @@ namespace UnityEditor.Sequences
             if (director == null || director.playableAsset == null)
                 return;
 
-            // The new PlayableDirector selected is not the one of a Sequence so there is no need to change the view.
-            if (director.gameObject.GetComponent<SequenceFilter>() == null)
+            // The new PlayableDirector selected is already shown or is not the one of a Sequence so there is no
+            // need to change the view.
+            if (IsAlreadyShown(director) || director.gameObject.GetComponent<SequenceFilter>() == null)
                 return;
 
             ClearView();
-            if (!IsAlreadyShown(director))
-                CreateView(director);
+            CreateView(director);
         }
 
         bool IsAlreadyShown(PlayableDirector target)
@@ -95,6 +95,9 @@ namespace UnityEditor.Sequences
 
         void OnHierarchyChange()
         {
+            // This callback is called even when nothing else than the selection changed in the Hierarchy.
+            // This means that `m_CachedEditor.Refresh` is called way too often. This causes UX discomfort in some
+            // selection scenario.
             if (m_CachedEditor != null)
             {
                 var director = SelectionUtility.activePlayableDirector;

@@ -62,6 +62,11 @@ namespace UnityEditor.Sequences
                         PrefabUtility.UnpackPrefabInstance(filter.gameObject, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                         GameObject.DestroyImmediate(filter.gameObject);
                     }
+                    else if (PrefabUtility.IsPartOfAnyPrefab(filter.gameObject) &&
+                             PrefabUtility.IsPrefabAssetMissing(filter.gameObject))
+                    {
+                        // Sequence is part of a prefab with its asset missing. Can't destroy the GameObject automatically.
+                    }
                     else if (PrefabUtility.IsPartOfAnyPrefab(filter.gameObject))
                     {
                         string rootAssetPath = string.Empty;

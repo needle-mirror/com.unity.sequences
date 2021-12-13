@@ -32,9 +32,13 @@ namespace UnityEditor.Sequences
 
         protected void Initialize()
         {
+            m_AssetCollectionListsCache = new List<AssetCollectionList>();
+
+            if (target == null)
+                return;
+
             m_Director = (target as PlayableDirector);
             m_Timeline = m_Director.playableAsset as TimelineAsset;
-            m_AssetCollectionListsCache = new List<AssetCollectionList>();
         }
 
         void OnDisable()

@@ -30,6 +30,8 @@ namespace UnityEditor.Sequences
             }
         }
 
+        bool forceEndRename { get; set; }
+
         public AssetCollectionsTreeView(TreeViewState state, VisualElement container)
             : base(state)
         {
@@ -191,6 +193,12 @@ namespace UnityEditor.Sequences
             OnGUI(m_VisualElementContainer.contentRect);
         }
 
+        internal void ForceEndRename()
+        {
+            forceEndRename = true;
+            EndRename();
+        }
+
         internal void CreateSequenceAssetInContext(string collectionType)
         {
             var parent = m_Items.Find(x => (x is CollectionTypeTreeViewItem) && (x as CollectionTypeTreeViewItem).collectionType == collectionType);
@@ -309,14 +317,21 @@ namespace UnityEditor.Sequences
         {
             var item = GetItem(args.itemID);
 
-            if (args.acceptedRename)
+            if (item == null)
             {
+                // Reset state as nothing happened.
+                forceEndRename = false;
+                return;
+            }
+
+            if (forceEndRename || args.acceptedRename)
+            {
+                forceEndRename = false;
+
                 if (item.state == TreeViewItemBase.State.Creation)
                 {
                     if (item.ValidateCreation(args.newName))
-                    {
                         Reload();
-                    }
                     else
                         DeleteItems(new int[] { args.itemID });
                 }

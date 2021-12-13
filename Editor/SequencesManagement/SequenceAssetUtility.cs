@@ -570,6 +570,7 @@ namespace UnityEditor.Sequences
         ///
         /// </summary>
         /// <param name="sequenceDirector"></param>
+        /// <param name="type"></param>
         /// <returns></returns>
         /// <exception cref="SequenceAssetException"></exception>
         static IEnumerable<GameObject> GetInstancesInSequenceTimeline(PlayableDirector sequenceDirector, string type = null)
@@ -593,15 +594,17 @@ namespace UnityEditor.Sequences
         ///
         /// </summary>
         /// <param name="sequence"></param>
-        /// <returns></returns>
+        /// <param name="type"></param>
+        /// <returns>The list of Sequence Asset instances present under a sequence GameObject. Sequence Asset prefab
+        /// instance with no Prefab asset on disk are ignored except in PlayMode when the concept of "Prefab" doesn't
+        /// exists anymore.</returns>
         static IEnumerable<GameObject> GetInstancesUnderSequenceGameObject(GameObject sequence, string type = null)
         {
             for (var i = 0; i < sequence.transform.childCount; ++i)
             {
                 var instance = sequence.transform.GetChild(i).gameObject;
-                if (!PrefabUtility.IsPartOfPrefabInstance(instance) ||
-                    !IsSequenceAsset(instance) ||
-                    PrefabUtility.IsPrefabAssetMissing(instance))
+                if (!IsSequenceAsset(instance) || PrefabUtility.IsPrefabAssetMissing(instance) ||
+                    (!EditorApplication.isPlayingOrWillChangePlaymode && !PrefabUtility.IsAnyPrefabInstanceRoot(instance)))
                 {
                     continue;
                 }
