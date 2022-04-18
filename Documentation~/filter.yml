@@ -18,6 +18,12 @@
       uidRegex: ^UnityEngine\.Sequences\.SceneReference\.On.*\Serialize
       type: Method
   - exclude:
+      uidRegex: ^UnityEngine\.Sequences\.Timeline\.EditorialPlayableAsset\.OnAfterDeserialize
+      type: Method
+  - exclude:
+      uidRegex: ^UnityEngine\.Sequences\.Timeline\.EditorialPlayableAsset\.OnBeforeSerialize
+      type: Method
+  - exclude:
       uidRegex: ^(Samples)
   - exclude:
       uidRegex: ^(Tests)

@@ -32,12 +32,7 @@ To install this package, follow the instructions in the [Package Manager documen
 
 This version of the Sequences package is compatible with the following versions of the Unity Editor:
 
-* 2020.3 and later
-
-The Sequences package also requires specific minimum versions of the following packages (linked as dependencies):
-
-* Timeline 1.5.2
-* Unity Recorder 2.5.5
+* 2022.1 and later
 
 ### Known issues and limitations
 

@@ -11,7 +11,7 @@ To open the Timeline window, from the main menu of the Editor, select **Window >
 
 ## Navigation
 
-When you navigate through your Sequences from the Structure section of the Sequences window or from the Hierarchy window, the Timeline window displays the Timeline of the current selected Sequence.
+When you navigate through your Sequences from the Sequences window or from the Hierarchy window, the Timeline window displays the Timeline of the current selected Sequence.
 
 You can also navigate through your Sequences from the Timeline window:
 
@@ -38,7 +38,7 @@ You can double-click on a Sequence clip to access the Timeline of this Sequence 
 ![](images/timeline-editorial-track-sub-sequence.png)
 <br />*Example: In a Sequence timeline of 2nd level, the Editorial track (here, named "Sequences") with three Sequence clips.*
 
-The Sequences package automatically creates and configures Editorial tracks when you create Sequences through the Sequences window or through the Hierarchy.
+The Sequences package automatically creates and configures Editorial tracks when you create Sequences through the Sequences window.
 
 >**Note:** You can manually create an Editorial track through the Timeline Add Track menu: select the **+** (plus) button or right-click in an empty area of the track list, and then select **Sequencing > Editorial Track**. However, such a track would require some more advanced configuration to become usable in the context of Sequences.
 

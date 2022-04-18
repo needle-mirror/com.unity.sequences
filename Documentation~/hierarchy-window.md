@@ -1,16 +1,14 @@
 # Hierarchy window
 
-The Sequences package includes additional features that help you manage your Sequences from the Hierarchy window. The use of these features ensures a full compatibility with the Sequences package overall functionality.
+From the Sequences package perspective, the Hierarchy window contains all GameObjects that correspond to the sequences of the Editorial structure you created through the [Sequences window](sequences-window.md). It also contains the GameObjects or Prefabs that represent all the creative content you include in each sequence.
 
->**Note:** This page provides straightforward instructions to guide you through the specific use of the Sequences features available from the Hierarchy window. For general information on the Hierarchy window and GameObjects management, see the [Unity Manual](https://docs.unity3d.com/Manual/index.html).
+## Editing your Editorial structure
 
-## Creating Sequences
+To safely create sequences and edit your editorial structure, you should primarily use the [Sequences window](sequences-window.md).
 
-Depending on the Sequence level you are starting from:
+However, the Sequences package doesn't prevent you from using the Hierarchy window among others to manually solve any sequence functionality issues if you have a good knowledge of the Unity Editor base features.
 
-* To create a Master Sequence, right-click in your current Scene and select **Sequences > Master Sequence**.
-
-* To create a Sequence, right-click on the GameObject that represents the Sequence (or Master Sequence) that should contain the one you want to create, and select **Sequences > Sequence**.
+For general information about the Hierarchy window and the management of GameObjects, see the [Unity Manual](https://docs.unity3d.com/Manual/index.html).
 
 ## Converting a Sequence GameObject into a Prefab
 

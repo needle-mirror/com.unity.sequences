@@ -8,7 +8,7 @@ This section describes the underlying processes Unity automatically goes through
 
 ### Master Sequence creation
 
-When you create a Master Sequence from the Structure section of the Sequences window:
+When you create a Master Sequence from the Sequences window:
 
 -   In the Project, this creates a script asset *and* a Timeline asset:
     -   Named both after the Master Sequence
@@ -23,7 +23,7 @@ When you create a Master Sequence from the Structure section of the Sequences wi
 
 ### Sequence creation in another Sequence
 
-When you create a Sequence in another Sequence (here called "parent Sequence", which can be a Master Sequence) from the Structure section of the Sequences window:
+When you create a Sequence in another Sequence (here called "parent Sequence", which can be a Master Sequence) from the Sequences window:
 
 -   In the Project, this creates a Timeline asset:
     -   Named after the new Sequence
@@ -44,7 +44,7 @@ When you create a Sequence in another Sequence (here called "parent Sequence", w
 
 ### Sequence Asset creation
 
-When you create a Sequence Asset under a specific Asset Collection type in the Sequences window:
+When you create a Sequence Asset under a specific Asset Collection type in the Sequence Assets window:
 
 -   In the Project, this creates a Prefab *and* a Timeline asset:
     -   Both named after the Sequence Asset

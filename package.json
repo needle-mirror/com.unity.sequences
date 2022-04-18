@@ -1,25 +1,28 @@
 {
   "displayName": "Sequences",
   "name": "com.unity.sequences",
-  "unity": "2020.3",
-  "version": "1.1.0",
+  "unity": "2022.1",
+  "version": "2.0.0-pre.1",
   "dependencies": {
-    "com.unity.timeline": "1.5.2",
+    "com.unity.timeline": "1.6.3",
     "com.unity.recorder": "2.5.5",
     "com.unity.settings-manager": "1.0.3",
     "com.unity.ugui": "1.0.0"
   },
   "description": "Efficiently create movies, game cinematics or any other linear content.\nOrganize your project's editorial structure and your creative content, assemble the elements for easy authoring and collaboration, and try out new ideas in a non-destructive way.",
+  "upm": {
+    "changelog": "### Added\n* Sequence and Sequence Asset management features:\n  * New context menu action available from the empty area of the Sequences window to create a new Master Sequence.\n  * New context menu action in the Sequence Assets window to open and edit the Prefabs (base and variants).\n  * New context menu action in the Sequences window to instantiate an Editorial structure in the active Scene.\n  * Keyboard shortcut to duplicate a Sequence Asset Variant: control-D (Windows) / command-D (macOS).\n  * Ability to multi-select and bulk-delete sequences from the Sequences window.\n* Help icons with documentation links in the Sequences window, Sequence Assets window and Sequence Assembly window.\n* Possibility to use the regular Unity Editor features to manually fix invalid sequences if needed.\n\n### Changed\n* Update of the Unity Editor minimum supported version to 2022.1.\n* Users can now create Editorial structures with more than 3 levels.\n* Split of the Sequences window into two separate windows:\n  * The Sequences window is still the main entry point to use Sequences and focuses on managing editorial structures.\n  * The new Sequence Assets window replaces the Asset Collections panel and allows managing Sequence Assets and Variants.\n* Sequence recording functionality adjustments:\n  * A single Record option is now available in the Sequences window context menu to simplify the recording flow.\n  * The Record action of the Sequences window no longer automatically sets the output file path in the Recorder window.\n* Compliance with Unity standard namings and workflows:\n  * The default Sequences folder and file names no longer have spaces.\n  * Users can now rename Sequence Asset Variants on creation.\n  * Renaming a Sequence GameObject from the Hierarchy no longer renames the Sequence in the Sequences and Project windows.\n* UI consolidation and clean-up to streamline the user experience:\n  * Prevent users from editing an Editorial structure that is not loaded in the Hierarchy.\n  * Remove the Sequence/Master Sequence creation actions from the Hierarchy. The Sequences window is now the unique place to do it.\n  * Hide fields of the MasterSequence asset Inspector that don't currently have any effect.\n* Public API clean-up: remove unused/deprecated API elements.\n\n### Fixed\n* Prevent Unity from throwing an exception when deleting a Sequence after removing all clips from a Master Sequence's timeline."
+  },
   "relatedPackages": {
-    "com.unity.sequences.tests": "1.1.0"
+    "com.unity.sequences.tests": "2.0.0-pre.1"
   },
   "upmCi": {
-    "footprint": "b50adf4006e1694f92212711f5897cf757e0507e"
+    "footprint": "5803690ed30020b526a35c5a71ce225a5dcd4466"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.sequences.git",
     "type": "git",
-    "revision": "685648468e74bdb9849ce677c27a465b7cea53d5"
+    "revision": "9250867c92742226e8e79a34a243ebf266487163"
   },
   "samples": [
     {

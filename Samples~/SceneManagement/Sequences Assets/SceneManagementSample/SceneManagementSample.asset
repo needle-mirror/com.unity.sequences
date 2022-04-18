@@ -18,7 +18,7 @@ MonoBehaviour:
   references:
     version: 1
     00000000:
-      type: {class: CinematicClipManager, ns: UnityEngine.CinematicToolbox, asm: Unity.CinematicToolbox}
+      type: {class: SequenceManager, ns: UnityEngine.Sequences, asm: Unity.Sequences}
       data:
         m_Data:
         - id: 1
@@ -28,7 +28,7 @@ MonoBehaviour:
         m_AvailableIndices:
           id: 5
     00000001:
-      type: {class: TimelineCinematicClip, ns: UnityEngine.CinematicToolbox, asm: Unity.CinematicToolbox}
+      type: {class: TimelineSequence, ns: UnityEngine.Sequences, asm: Unity.Sequences}
       data:
         m_Name: SceneManagementSample
         m_Fps: 24
@@ -42,7 +42,7 @@ MonoBehaviour:
         m_DefaultChildrenTrackName: Sequences
         m_EditorialClipAsset: {fileID: 0}
     00000002:
-      type: {class: TimelineCinematicClip, ns: UnityEngine.CinematicToolbox, asm: Unity.CinematicToolbox}
+      type: {class: TimelineSequence, ns: UnityEngine.Sequences, asm: Unity.Sequences}
       data:
         m_Name: seq_001
         m_Fps: -1
@@ -57,7 +57,7 @@ MonoBehaviour:
         m_EditorialClipAsset: {fileID: 7910523975997855651, guid: ab678d195cdf5874a955a8a8916b11d2,
           type: 2}
     00000003:
-      type: {class: TimelineCinematicClip, ns: UnityEngine.CinematicToolbox, asm: Unity.CinematicToolbox}
+      type: {class: TimelineSequence, ns: UnityEngine.Sequences, asm: Unity.Sequences}
       data:
         m_Name: shot_10
         m_Fps: -1
@@ -71,7 +71,7 @@ MonoBehaviour:
         m_EditorialClipAsset: {fileID: 1452752838726358982, guid: 9412b1afef32bee41beb5b30dfe42f98,
           type: 2}
     00000004:
-      type: {class: TimelineCinematicClip, ns: UnityEngine.CinematicToolbox, asm: Unity.CinematicToolbox}
+      type: {class: TimelineSequence, ns: UnityEngine.Sequences, asm: Unity.Sequences}
       data:
         m_Name: shot_20
         m_Fps: -1

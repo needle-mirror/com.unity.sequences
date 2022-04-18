@@ -7,17 +7,6 @@ namespace UnityEditor.Sequences
     {
         [System.Runtime.CompilerServices.Extension] public static void Delete(UnityEngine.Sequences.MasterSequence masterSequence);
         [System.Runtime.CompilerServices.Extension] public static bool Rename(UnityEngine.Sequences.MasterSequence masterSequence, string newName);
-        [System.Runtime.CompilerServices.Extension] public static void Save(UnityEngine.Sequences.MasterSequence masterSequence, string folder = default(string));
-    }
-
-    public class SceneManagement
-    {
-        public SceneManagement() {}
-        public static bool AddNewScene(UnityEngine.Sequences.TimelineSequence sequence);
-        public static void CloseScene(string path);
-        public static bool IsLoaded(string path);
-        public static void OpenAllScenes(UnityEngine.Sequences.TimelineSequence sequence, bool deactivate = False);
-        public static void OpenScene(string path, bool deactivate = False);
     }
 
     public class SequenceAssetException : System.Exception
@@ -25,20 +14,14 @@ namespace UnityEditor.Sequences
         public SequenceAssetException(string message) {}
     }
 
-    [UnityEditor.CustomEditor(typeof(UnityEngine.Sequences.SequenceAsset))] public class SequenceAssetInspector : UnityEditor.Editor
-    {
-        public SequenceAssetInspector() {}
-        public virtual void OnInspectorGUI();
-    }
-
     [System.Runtime.CompilerServices.Extension] public static class SequenceAssetUtility
     {
         public static UnityEngine.GameObject CreateSource(string name, string type = default(string), bool animate = True, bool instantiate = False);
-        public static UnityEngine.GameObject CreateVariant(UnityEngine.GameObject source, bool instantiate = False);
+        public static UnityEngine.GameObject CreateVariant(UnityEngine.GameObject source, string name = default(string), bool instantiate = False);
         public static bool DeleteSourceAsset(UnityEngine.GameObject source, bool deleteVariants = True);
         public static bool DeleteVariantAsset(UnityEngine.GameObject variant);
         public static UnityEngine.GameObject DuplicateVariant(UnityEngine.GameObject variant);
-        [System.Runtime.CompilerServices.IteratorStateMachine(typeof(UnityEditor.Sequences.SequenceAssetUtility.<FindAllSources>d__17))] public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> FindAllSources(string type = default(string));
+        [System.Runtime.CompilerServices.IteratorStateMachine(typeof(UnityEditor.Sequences.SequenceAssetUtility.<FindAllSources>d__18))] public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> FindAllSources(string type = default(string));
         public static System.Collections.Generic.IEnumerable<UnityEngine.GameObject> GetInstancesInSequence(UnityEngine.Playables.PlayableDirector sequenceDirector, string type = default(string));
         public static UnityEngine.GameObject GetSource(UnityEngine.GameObject prefab);
         public static string GetType(UnityEngine.GameObject prefab);
@@ -66,25 +49,7 @@ namespace UnityEditor.Sequences
     [System.Runtime.CompilerServices.Extension] public static class TimelineSequenceExtensions
     {
         [System.Runtime.CompilerServices.Extension] public static void Delete(UnityEngine.Sequences.TimelineSequence clip);
-        [System.Runtime.CompilerServices.Extension] public static void Record(UnityEngine.Sequences.TimelineSequence clip, bool recordAs = False);
+        [System.Runtime.CompilerServices.Extension] public static void Record(UnityEngine.Sequences.TimelineSequence clip);
         [System.Runtime.CompilerServices.Extension] public static void Rename(UnityEngine.Sequences.TimelineSequence clip, string newName);
-        [System.Runtime.CompilerServices.Extension] public static void Save(UnityEngine.Sequences.TimelineSequence clip, string folder = default(string));
-    }
-}
-
-namespace UnityEditor.Sequences.Timeline
-{
-    [UnityEditor.Timeline.CustomTimelineEditor(typeof(UnityEngine.Sequences.Timeline.StoryboardPlayableAsset))] public class StoryboardClipEditor : UnityEditor.Timeline.ClipEditor
-    {
-        public StoryboardClipEditor() {}
-        public virtual void DrawBackground(UnityEngine.Timeline.TimelineClip clip, UnityEditor.Timeline.ClipBackgroundRegion region);
-        public virtual UnityEditor.Timeline.ClipDrawOptions GetClipOptions(UnityEngine.Timeline.TimelineClip clip);
-        public virtual void OnCreate(UnityEngine.Timeline.TimelineClip clip, UnityEngine.Timeline.TrackAsset track, UnityEngine.Timeline.TimelineClip clonedFrom);
-    }
-
-    [UnityEditor.Timeline.CustomTimelineEditor(typeof(UnityEngine.Sequences.Timeline.StoryboardTrack))] public class StoryboardTrackEditor : UnityEditor.Timeline.TrackEditor
-    {
-        public StoryboardTrackEditor() {}
-        public virtual UnityEditor.Timeline.TrackDrawOptions GetTrackOptions(UnityEngine.Timeline.TrackAsset track, UnityEngine.Object binding);
     }
 }

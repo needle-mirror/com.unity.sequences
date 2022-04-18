@@ -34,7 +34,7 @@ A Prefab or a Prefab Variant that has a Sequence Asset component represents a Se
 
 | Property | Description |
 |---|---|
-| **Type** | The [Asset Collection type](concepts.md#asset-collections) the Sequence Asset belongs to.<br /><br />**Note:** Unity automatically assigns the value of this property when you create a Sequence Asset from the [Asset Collections section](sequences-window.md#the-asset-collections-section) of the Sequences window. You shouldn't change it unless you exactly know what you're doing. |
+| **Type** | The [Asset Collection type](concepts.md#asset-collections) the Sequence Asset belongs to.<br /><br />**Note:** Unity automatically assigns the value of this property when you create a Sequence Asset from the [Sequence Assets window](sequence-assets-window.md). You shouldn't change it unless you exactly know what you're doing. |
 
 ## Sequence Filter
 

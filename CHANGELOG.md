@@ -4,6 +4,40 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-pre.1] - 2022-04-18
+
+### Added
+* Sequence and Sequence Asset management features:
+  * New context menu action available from the empty area of the Sequences window to create a new Master Sequence.
+  * New context menu action in the Sequence Assets window to open and edit the Prefabs (base and variants).
+  * New context menu action in the Sequences window to instantiate an Editorial structure in the active Scene.
+  * Keyboard shortcut to duplicate a Sequence Asset Variant: control-D (Windows) / command-D (macOS).
+  * Ability to multi-select and bulk-delete sequences from the Sequences window.
+* Help icons with documentation links in the Sequences window, Sequence Assets window and Sequence Assembly window.
+* Possibility to use the regular Unity Editor features to manually fix invalid sequences if needed.
+
+### Changed
+* Update of the Unity Editor minimum supported version to 2022.1.
+* Users can now create Editorial structures with more than 3 levels.
+* Split of the Sequences window into two separate windows:
+  * The Sequences window is still the main entry point to use Sequences and focuses on managing editorial structures.
+  * The new Sequence Assets window replaces the Asset Collections panel and allows managing Sequence Assets and Variants.
+* Sequence recording functionality adjustments:
+  * A single Record option is now available in the Sequences window context menu to simplify the recording flow.
+  * The Record action of the Sequences window no longer automatically sets the output file path in the Recorder window.
+* Compliance with Unity standard namings and workflows:
+  * The default Sequences folder and file names no longer have spaces.
+  * Users can now rename Sequence Asset Variants on creation.
+  * Renaming a Sequence GameObject from the Hierarchy no longer renames the Sequence in the Sequences and Project windows.
+* UI consolidation and clean-up to streamline the user experience:
+  * Prevent users from editing an Editorial structure that is not loaded in the Hierarchy.
+  * Remove the Sequence/Master Sequence creation actions from the Hierarchy. The Sequences window is now the unique place to do it.
+  * Hide fields of the MasterSequence asset Inspector that don't currently have any effect.
+* Public API clean-up: remove unused/deprecated API elements.
+
+### Fixed
+* Prevent Unity from throwing an exception when deleting a Sequence after removing all clips from a Master Sequence's timeline.
+
 ## [1.1.0] - 2022-01-11
 
 * Update package version to 1.1.0.

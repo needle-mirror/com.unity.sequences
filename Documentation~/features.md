@@ -4,10 +4,11 @@ The Sequences package includes cinematics-dedicated features and integrates with
 
 | **Window** | **Tasks** |
 |------------|--------------|
-| [Sequences window](sequences-window.md) | • Create, organize and browse through the Sequences you’re working on.<br />• Create and edit Sequence Assets and Variants to further use them in your Sequences.<br />• Load Scenes used in the context of specific Sequences.<br />• Record and export videos or other specific data from your Sequences. |
+| [Sequences window](sequences-window.md) | • Create, organize and browse through the Sequences you’re working on.<br />• Load Scenes used in the context of specific Sequences.<br />• Record and export videos or other specific data from your Sequences. |
+| [Sequence Assets window](sequence-assets-window.md) | • Create and edit Sequence Assets and Variants to further use them in your Sequences. |
 | [Sequence Assembly window](sequence-assembly-window.md) | • Populate your Sequences with Sequence Assets.<br />• Swap and manage Sequence Asset Variants in context. |
 | [Timeline window](timeline-window.md) | • Navigate through your Sequences and preview your assembled content in context.<br />• Edit, trim and reorder your Sequences.<br />• Manage the activation of Scenes used in specific Sequences. |
-| [Hierarchy window](hierarchy-window.md) | • Create and structure Sequences directly through GameObjects.<br />• Populate your Sequences with Sequence Assets directly under the Sequence GameObjects. |
+| [Hierarchy window](hierarchy-window.md) | • Populate your Sequences with creative content directly under the Sequence GameObjects. |
 
 **Note:** Under the hood, the Sequences package features automatically create, organize
 and adjust:
@@ -22,15 +23,15 @@ The following table lists the main high-level tasks that you can achieve with th
 
 | **Task** | **Recommended features** |
 |----------|--------------------------|
-| Create Sequences and structure the Editorial | • Sequences window (Structure section) |
-| Create Sequence Assets and Variants | • Sequences window (Asset Collections section), or<br />• Sequence Assembly window (Variants only, in context) |
-| Edit Sequence Assets and Variants | • Sequences window (Asset Collections section) |
+| Create Sequences and structure the Editorial | • Sequences window |
+| Create Sequence Assets and Variants | • Sequence Assets window, or<br />• Sequence Assembly window (Variants only, in context) |
+| Edit Sequence Assets and Variants | • Sequence Assets window |
 | Populate Sequences with Sequence Assets | • Sequence Assembly window |
 | Swap Sequence Asset Variants | • Sequence Assembly window |
 | Preview, trim and reorder Sequences | • Timeline window |
 | Manage Scene activations | • Timeline window |
-| Load Scenes used by Sequences | • Sequences window (Structure section) |
-| Record and export Sequences | • Sequences window (Structure section) |
+| Load Scenes used by Sequences | • Sequences window |
+| Record and export Sequences | • Sequences window |
 
 
 ## Recommended Editor layout
@@ -38,11 +39,10 @@ The following table lists the main high-level tasks that you can achieve with th
 To take full advantage of the Sequences package features, you might need to have the following windows open in the Editor:
 
 1.  Sequences window
-2.  Sequence Assembly window
-3.  Timeline window
-4.  Scene view
-5.  Game view
-6.  Hierarchy window
-7.  Inspector
-
-![](images/sequences-editor-layout.png)
+2.  Sequence Assets window
+3.  Sequence Assembly window
+4.  Timeline window
+5.  Scene view
+6.  Game view
+7.  Hierarchy window
+8.  Inspector

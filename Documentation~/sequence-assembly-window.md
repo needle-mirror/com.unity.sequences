@@ -12,8 +12,8 @@ The Sequence Assembly window acts as a simplified Inspector which displays the p
 
 | **Property** | **Description** |
 |--------------|-----------------|
-| **Name** | The name of the Sequence currently selected in the [Structure section](sequences-window.md#the-structure-section) of the Sequences window.<br /><br />**Note:** If you want to rename the Sequence, use the Sequences window. |
-| **Character**, **Fx**, **Lighting**, **Photography**, **Prop**, **Set**, **Audio** | These sections correspond to the Asset Collection types available in the [Asset Collections section](sequences-window.md#the-asset-collections-section) of the Sequences window.<br /><br />Through each section, you can add and edit Sequence Assets of the corresponding Asset Collection type for the selected Sequence. |
+| **Name** | The name of the Sequence currently selected in the [Sequences window](sequences-window.md).<br /><br />**Note:** If you want to rename the Sequence, use the Sequences window. |
+| **Character**, **Fx**, **Lighting**, **Photography**, **Prop**, **Set**, **Audio** | These sections correspond to the Asset Collection types available in the [Sequence Assets window](sequence-assets-window.md).<br /><br />Through each section, you can add and edit Sequence Assets of the corresponding Asset Collection type for the selected Sequence. |
 
 ## Adding a Sequence Asset
 
