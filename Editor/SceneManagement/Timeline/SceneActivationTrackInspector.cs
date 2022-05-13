@@ -18,17 +18,20 @@ namespace UnityEditor.Sequences.Timeline
             {
                 using (var change = new EditorGUI.ChangeCheckScope())
                 {
-                    EditorGUILayout.ObjectField(sceneRef);
+                    EditorGUILayout.ObjectField(sceneRef, typeof(SceneAsset));
                     if (change.changed)
                     {
                         serializedObject.ApplyModifiedProperties();
-                        TimelineEditor.Refresh(RefreshReason.SceneNeedsUpdate);
+                        TimelineEditor.Refresh(RefreshReason.ContentsModified);
                     }
                 }
 
                 SerializedProperty sceneAssetProperty = sceneProperty.FindPropertyRelative("m_SceneAsset");
-                var scenePath = sceneAssetProperty.objectReferenceValue == null ? string.Empty : AssetDatabase.GetAssetPath(sceneAssetProperty.objectReferenceValue);
-                using (new EditorGUI.DisabledScope(SceneManagement.IsLoaded(scenePath)))
+                var scenePath = sceneAssetProperty.objectReferenceValue == null ?
+                    string.Empty :
+                    AssetDatabase.GetAssetPath(sceneAssetProperty.objectReferenceValue);
+
+                using (new EditorGUI.DisabledScope(scenePath == string.Empty || SceneManagement.IsLoaded(scenePath)))
                 {
                     if (GUILayout.Button("Load", GUILayout.MaxWidth(60)))
                     {

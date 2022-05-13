@@ -38,12 +38,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 0.44456455, g: 0.494071, b: 0.5733468, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 11
+  serializedVersion: 12
   m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -118,6 +118,8 @@ NavMeshSettings:
     manualTileSize: 0
     tileSize: 256
     accuratePlacement: 0
+    maxJobWorkers: 0
+    preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
@@ -149,6 +151,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1803246336}
   m_RootOrder: 1
@@ -165,7 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb64a86df403d9a4fae107cca5d4cd04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Cinematic: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
+  m_MasterSequence: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
   m_ElementIndex: 3
   type: 2
 --- !u!320 &153821430
@@ -232,7 +235,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb64a86df403d9a4fae107cca5d4cd04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Cinematic: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
+  m_MasterSequence: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
   m_ElementIndex: 2
   type: 2
 --- !u!4 &234193511
@@ -245,6 +248,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1803246336}
   m_RootOrder: 0
@@ -328,6 +332,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0.86823326, z: -0, w: 0.49615628}
   m_LocalPosition: {x: 6.57, y: 1, z: 4.86}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -343,6 +348,7 @@ GameObject:
   - component: {fileID: 1059827738}
   - component: {fileID: 1059827737}
   - component: {fileID: 1059827736}
+  - component: {fileID: 1059827739}
   m_Layer: 0
   m_Name: SceneManagementSample
   m_TagString: Untagged
@@ -362,7 +368,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb64a86df403d9a4fae107cca5d4cd04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Cinematic: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
+  m_MasterSequence: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
   m_ElementIndex: 0
   type: 0
 --- !u!320 &1059827737
@@ -379,9 +385,7 @@ PlayableDirector:
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
-  m_SceneBindings:
-  - key: {fileID: 2681811849511300406, guid: ab678d195cdf5874a955a8a8916b11d2, type: 2}
-    value: {fileID: 0}
+  m_SceneBindings: []
   m_ExposedReferences:
     m_References:
     - 2a4dc8674839cc04b8b5662082fba386: {fileID: 1803246335}
@@ -395,11 +399,30 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1803246336}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1059827739
+MonoBehaviour:
+  m_ObjectHideFlags: 19
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1059827735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cec73fe07da4ee64bacedb29904dd616, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_CachedValues:
+  - 3.25
+  - 3.2916666666666665
+  - 3.2916666666666665
+  - 3.2916666666666665
+  - 3.2916666666666665
 --- !u!1 &1803246334
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,11 +455,7 @@ PlayableDirector:
   m_WrapMode: 2
   m_DirectorUpdateMode: 1
   m_InitialTime: 0
-  m_SceneBindings:
-  - key: {fileID: -24531947516035911, guid: 9412b1afef32bee41beb5b30dfe42f98, type: 2}
-    value: {fileID: 0}
-  - key: {fileID: 3898338125790921803, guid: 9412b1afef32bee41beb5b30dfe42f98, type: 2}
-    value: {fileID: 0}
+  m_SceneBindings: []
   m_ExposedReferences:
     m_References:
     - a3999ca314ff93e4ebfcd578f601c1e8: {fileID: 153821430}
@@ -451,6 +470,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 234193511}
   - {fileID: 153821428}
@@ -469,6 +489,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb64a86df403d9a4fae107cca5d4cd04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Cinematic: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
+  m_MasterSequence: {fileID: 11400000, guid: 1a8706dffb290a44c8357a3fe0f58c88, type: 2}
   m_ElementIndex: 1
   type: 1

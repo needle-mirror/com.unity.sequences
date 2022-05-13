@@ -9,7 +9,7 @@ namespace UnityEditor.Sequences
     /// Sequence Assets window).
     /// </summary>
     /// <typeparam name="T">The type of the TreeView class to create.</typeparam>
-    abstract class TreeViewEditorWindow<T> : BaseEditorWindow where T : TreeView, new()
+    abstract class TreeViewEditorWindow<T> : BaseEditorWindow where T : SequencesTreeView, new()
     {
         internal class Styles
         {
@@ -74,5 +74,13 @@ namespace UnityEditor.Sequences
         /// <param name="menu">The DropdownMenu to populate.</param>
         /// <param name="contextual">Whether the menu to populate is a contextual menu or not.</param>
         protected abstract void PopulateAddMenu(DropdownMenu menu, bool contextual = false);
+
+        void OnFocus()
+        {
+            if (treeView == null)
+                return;
+
+            treeView.OnWindowFocused();
+        }
     }
 }

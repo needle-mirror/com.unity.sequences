@@ -166,12 +166,19 @@ namespace UnityEditor.Sequences
             if (sequences.Count == 0)
                 return;
 
-            foreach (var sequence in sequences)
+            var newSequences = sequences.Where(sequence => !m_Sequences.Contains(sequence)).ToArray();
+            var updatedSequences = sequences.Where(sequence => m_Sequences.Contains(sequence)).ToArray();
+
+            m_Sequences.AddRange(newSequences);
+            Save(true);
+
+            if (!disableEvents)
             {
-                if (m_Sequences.Contains(sequence))
-                    UpdateSequence(sequence);
-                else
-                    RegisterSequence(sequence);
+                foreach (var sequence in newSequences)
+                    sequenceRegistered?.Invoke(sequence);
+
+                foreach (var sequence in updatedSequences)
+                    sequenceUpdated?.Invoke(sequence);
             }
         }
 
@@ -205,25 +212,6 @@ namespace UnityEditor.Sequences
                 return null;
 
             return m_Sequences[idx];
-        }
-
-        // Add a new SequenceNode to the indexer.
-        void RegisterSequence(SequenceNode sequence)
-        {
-            m_Sequences.Add(sequence);
-            Save(true);
-
-            if (!disableEvents)
-                sequenceRegistered?.Invoke(sequence);
-        }
-
-        // Update an existing SequenceNode in the indexer.
-        void UpdateSequence(SequenceNode sequence)
-        {
-            Save(true);
-
-            if (!disableEvents)
-                sequenceUpdated?.Invoke(sequence);
         }
 
         // Recompute the validity status and loading status of all sequences.

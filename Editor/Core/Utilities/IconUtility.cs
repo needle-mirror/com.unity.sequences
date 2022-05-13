@@ -10,7 +10,7 @@ namespace UnityEditor.Sequences
         /// <summary>
         /// Store previously loaded icons in this cache for re-usage.
         /// </summary>
-        static Dictionary<string, Texture2D> s_CachedIcons = new Dictionary<string, Texture2D>();
+        static readonly Dictionary<string, Texture2D> s_CachedIcons = new Dictionary<string, Texture2D>();
 
         static string k_DefaultCollectionTypeIconName = "CustomType";
 
@@ -40,29 +40,35 @@ namespace UnityEditor.Sequences
         }
 
         /// <summary>
+        /// Empties the icon cache.
+        /// </summary>
+        public static void ClearIconCache()
+        {
+            s_CachedIcons.Clear();
+        }
+
+        /// <summary>
         /// Load Icon from Editor Default Resources.
         /// File must contain extension.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
+        /// <param name="path">Path of the icon texture to load.</param>
+        /// <param name="type">Skin type.</param>
+        /// <returns>Icon texture, or null if no icon is found.</returns>
         public static Texture2D LoadIcon(string path, IconType type)
         {
             if (string.IsNullOrEmpty(path))
                 throw new System.NullReferenceException("path");
 
-            Texture2D icon = null;
-            if (s_CachedIcons.TryGetValue(path, out icon))
+            if (s_CachedIcons.TryGetValue(path, out var icon))
                 return icon;
 
             string fullPath = BuildFullPath(path, type);
+            icon = EditorGUIUtility.Load(fullPath) as Texture2D;
 
-            Texture2D loadedIcon = EditorGUIUtility.Load(fullPath) as Texture2D;
-
-            if (loadedIcon == null)
+            if (icon == null)
                 return null;
 
-            s_CachedIcons.Add(path, loadedIcon);
-
+            s_CachedIcons.Add(path, icon);
             return icon;
         }
 

@@ -22,6 +22,8 @@ namespace UnityEditor.Sequences
         /// </summary>
         internal static readonly int itemCreationId = 0;
 
+        bool m_DidFocusWindowThisFrame;
+
         VisualElement m_ScrollViewContainer;
 
         EventCallback<PointerDownEvent> m_PointerDownEventCallback;
@@ -338,7 +340,21 @@ namespace UnityEditor.Sequences
                 return;
             }
 
+            // This fixes a minor annoyance where clicking on an already-selected sequence doesn't trigger
+            // TreeView.onSelectionChange. Previously if you navigated away from the window, opened a different
+            // timeline, then clicked on the selected sequence again, the Timeline window wouldn't switch to the
+            // sequence you clicked.
+            //
+            // It's a hacky workaround, and only necessary for tree views that support multiple selections.
+            // https://fogbugz.unity3d.com/f/cases/1416144/
+            if (index == selectedIndex && selectedIndices.Count() == 1)
+                SetSelection(index);
+
             if (!(evt.target is Label))
+                return;
+
+            // If the user focused the window with this same click, we don't want to immediately start renaming.
+            if (m_DidFocusWindowThisFrame)
                 return;
 
             // Handle double click on an item.
@@ -390,6 +406,12 @@ namespace UnityEditor.Sequences
                     evt.imguiEvent?.Use();
                     break;
             }
+        }
+
+        internal void OnWindowFocused()
+        {
+            m_DidFocusWindowThisFrame = true;
+            EditorApplication.delayCall += () => m_DidFocusWindowThisFrame = false;
         }
 
         void OnExecuteCommandEvent(ExecuteCommandEvent evt)

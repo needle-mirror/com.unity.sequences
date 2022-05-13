@@ -4,6 +4,23 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-pre.2] - 2022-05-13
+
+### Changed
+* Systematically remove from the Sequences window any Master Sequence that has no corresponding asset.
+* The "Load" button in the Scene Activation Track Inspector is now disabled until the user specifies a valid Scene.
+
+### Fixed
+* Adapt the Scene Management Sample to make it properly work according to Sequences 2.0.0-pre.1 feature changes.
+* Ensure Sequence timeline opens after clicking an already-selected item in the Sequences window.
+* Prevent entering rename mode when clicking on a Sequence in an unfocused Sequences window.
+* Substitute invalid filename characters in Sequence and Sequence Asset names.
+* Seamlessly ignore any renaming of a Sequence to a whitespace-only name.
+* Ensure the Scene Asset picker of the Scene Activation Track only shows Scenes.
+* Prevent Unity from throwing an exception when the user clicks on the "Load" button in a Scene Activation Track immediately after assigning a Scene.
+* Prevent Unity from throwing an exception when adding a manually-created Sequence to a Master Sequence Timeline.
+* Ensure the icons appear in all Sequences window tabs when the Unity Editor opens.
+
 ## [2.0.0-pre.1] - 2022-04-18
 
 ### Added

@@ -210,7 +210,6 @@ namespace UnityEditor.Sequences
             var root = GetRootElementForId(id);
             var label = root.Q<RenameableLabel>();
             var newName = label.text;
-
             var assetTreeView = GetItemDataForId<AssetCollectionTreeViewItem>(id);
 
             canceled |= assetTreeView != null && string.IsNullOrWhiteSpace(newName);
@@ -223,6 +222,9 @@ namespace UnityEditor.Sequences
                 RefreshItem(index);
                 return;
             }
+
+            newName = SequencesAssetDatabase.SanitizeFileName(newName);
+            label.text = newName;
 
             // An asset creation is requested from the user.
             if (assetTreeView == null)

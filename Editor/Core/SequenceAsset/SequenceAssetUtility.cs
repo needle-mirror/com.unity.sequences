@@ -956,19 +956,6 @@ namespace UnityEditor.Sequences
         }
 
         /// <summary>
-        /// Replaces all invalid file characters by underscores in the provided string.
-        /// </summary>
-        /// <param name="newName"></param>
-        /// <returns></returns>
-        static string SanitizeName(string newName)
-        {
-            char[] invalidChars = Path.GetInvalidFileNameChars();
-            Array.ForEach<char>(invalidChars, c => newName = newName.Replace(c, '_'));
-
-            return newName;
-        }
-
-        /// <summary>
         /// Sanitizes the specified new name by replacing invalid file characters by underscores and then verifies that
         /// it is a valid name (i.e. it is not empty or only white spaces and not equals to the old name).
         /// </summary>
@@ -978,7 +965,7 @@ namespace UnityEditor.Sequences
         /// <returns>Returns True if the sanitized new name is valid.</returns>
         internal static bool SanitizeAndValidateName(string oldName, string newName, out string sanitizedName)
         {
-            sanitizedName = SanitizeName(newName);
+            sanitizedName = SequencesAssetDatabase.SanitizeFileName(newName);
             return !string.IsNullOrWhiteSpace(sanitizedName) && oldName != sanitizedName;
         }
 

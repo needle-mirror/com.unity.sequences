@@ -32,6 +32,11 @@ namespace UnityEditor.Sequences
                     ProcessMovedPrefab(path);
             }
 
+            // A deleted .asset file might have been a master sequence; we can't actually tell at this stage.
+            // Fortunately a false positive is harmless.
+            if (Array.Exists(deletedAssets, a => Path.GetExtension(a) == ".asset"))
+                MasterSequenceUtility.LegacyMasterSequenceRemoved();
+
             // If there is at least one deleted prefab, check the indexed prefab to remove all the deleted ones.
             if (Array.Exists(deletedAssets, a => Path.GetExtension(a) == ".playable"))
                 SequenceIndexer.instance.PruneDeletedElement();

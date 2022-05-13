@@ -134,7 +134,7 @@ namespace UnityEditor.Sequences
             var label = root.Q<RenameableLabel>();
             var newName = label.text;
 
-            canceled |= itemData != null && string.IsNullOrEmpty(newName);
+            canceled |= itemData != null && string.IsNullOrWhiteSpace(newName);
             if (canceled)
             {
                 if (itemData == null)
@@ -145,9 +145,12 @@ namespace UnityEditor.Sequences
                 return;
             }
 
+            newName = SequencesAssetDatabase.SanitizeFileName(newName);
+            label.text = newName;
+
             if (itemData == null)
             {
-                if (string.IsNullOrEmpty(newName))
+                if (string.IsNullOrWhiteSpace(newName))
                 {
                     // TODO: This validation (and more) should be dealt with when actually creating or renaming a sequence.
                     var index = viewController.GetIndexForId(id);
@@ -357,7 +360,7 @@ namespace UnityEditor.Sequences
             SequenceIndexer.sequenceUpdated -= OnSequenceUpdated;
             MasterSequenceUtility.masterSequencesRemoved -= OnMasterSequencesRemoved;
             SequenceIndexer.validityChanged -= RefreshItems;
-            SequenceIndexer.sequencesRemoved -= RefreshItems;
+            SequenceIndexer.sequencesRemoved -= OnSequencesRemoved;
         }
 
         void OnSelectionChanged(IEnumerable<int> indices)
@@ -480,15 +483,22 @@ namespace UnityEditor.Sequences
 
         void OnMasterSequencesRemoved()
         {
+            var legacyMasterSequences = MasterSequenceUtility.GetLegacyMasterSequences().ToList();
+            var didRemoveItem = false;
+
             foreach (var id in viewController.GetRootItemIds())
             {
                 var itemData = GetItemDataForId(id);
-                if (itemData.timeline == null)
-                    viewController.TryRemoveItem(id, false);
+
+                if (!legacyMasterSequences.Exists(masterSequence => masterSequence.masterTimeline == itemData.timeline))
+                    didRemoveItem |= viewController.TryRemoveItem(id, false);
             }
 
-            viewController.RebuildTree();
-            RefreshItems();
+            if (didRemoveItem)
+            {
+                viewController.RebuildTree();
+                RefreshItems();
+            }
         }
 
         void InitializeRootItems()

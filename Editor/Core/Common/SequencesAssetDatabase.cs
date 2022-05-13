@@ -16,6 +16,15 @@ namespace UnityEditor.Sequences
     {
         internal static readonly string k_SequenceBaseFolder = "Sequences";
 
+        /// <summary>
+        /// Characters that are not allowed in filenames. Path.GetInvalidFileNameChars is inconsistent across platforms
+        /// and omits some invalid characters on macOS, so we use this instead.
+        /// Copied from https://github.cds.internal.unity3d.com/unity/unity/blob/ed0ccb93f471897bfd854e129c3873e3a4dbe06f/Runtime/Utilities/PathNameUtility.cpp#L467
+        /// </summary>
+        static readonly char[] k_InvalidFileNameChars = "/?<>\\:*|\"".ToCharArray();
+
+        static readonly char k_InvalidFileNameCharReplacement = '_';
+
         public static string GenerateUniqueMasterSequencePath(string name, string subFolders = "", string extension = ".asset")
         {
             return GetNewAssetPath(name, k_SequenceBaseFolder, subFolders, extension);
@@ -110,7 +119,7 @@ namespace UnityEditor.Sequences
 
         public static bool IsRenameValid(string oldName, string newName)
         {
-            return !(string.IsNullOrEmpty(newName) || newName == oldName);
+            return !(string.IsNullOrWhiteSpace(newName) || newName == oldName);
         }
 
         internal static string GetSequenceFolder(TimelineSequence sequence)
@@ -185,14 +194,17 @@ namespace UnityEditor.Sequences
             return AssetDatabase.GenerateUniqueAssetPath(assetPath);
         }
 
-        static string SanitizeFileName(string fileName)
+        /// <summary>
+        /// Trims whitespace and substitutes invalid characters in the provided file name.
+        /// </summary>
+        /// <param name="fileName">File name.</param>
+        /// <returns>File name with invalid characters replaced.</returns>
+        internal static string SanitizeFileName(string fileName)
         {
-            char[] invalidCharacters = Path.GetInvalidFileNameChars();
+            foreach (var c in k_InvalidFileNameChars)
+                fileName = fileName.Replace(c, k_InvalidFileNameCharReplacement);
 
-            foreach (char c in invalidCharacters)
-                fileName.Replace(c, '_');
-
-            return fileName;
+            return fileName.Trim();
         }
 
         static void ValidatePath<T>(string path, T asset, string expectedExtension)
