@@ -2,7 +2,7 @@
   "displayName": "Sequences",
   "name": "com.unity.sequences",
   "unity": "2022.1",
-  "version": "2.0.0-pre.2",
+  "version": "2.0.0",
   "dependencies": {
     "com.unity.timeline": "1.6.3",
     "com.unity.recorder": "2.5.5",
@@ -10,19 +10,16 @@
     "com.unity.ugui": "1.0.0"
   },
   "description": "Efficiently create movies, game cinematics or any other linear content.\nOrganize your project's editorial structure and your creative content, assemble the elements for easy authoring and collaboration, and try out new ideas in a non-destructive way.",
-  "_upm": {
-    "changelog": "### Changed\n* Systematically remove from the Sequences window any Master Sequence that has no corresponding asset.\n* The \"Load\" button in the Scene Activation Track Inspector is now disabled until the user specifies a valid Scene.\n\n### Fixed\n* Adapt the Scene Management Sample to make it properly work according to Sequences 2.0.0-pre.1 feature changes.\n* Ensure Sequence timeline opens after clicking an already-selected item in the Sequences window.\n* Prevent entering rename mode when clicking on a Sequence in an unfocused Sequences window.\n* Substitute invalid filename characters in Sequence and Sequence Asset names.\n* Seamlessly ignore any renaming of a Sequence to a whitespace-only name.\n* Ensure the Scene Asset picker of the Scene Activation Track only shows Scenes.\n* Prevent Unity from throwing an exception when the user clicks on the \"Load\" button in a Scene Activation Track immediately after assigning a Scene.\n* Prevent Unity from throwing an exception when adding a manually-created Sequence to a Master Sequence Timeline.\n* Ensure the icons appear in all Sequences window tabs when the Unity Editor opens."
-  },
   "relatedPackages": {
-    "com.unity.sequences.tests": "2.0.0-pre.2"
+    "com.unity.sequences.tests": "2.0.0"
   },
   "upmCi": {
-    "footprint": "f2a0d4e2571e46b2f359fa1c083968b04ec16229"
+    "footprint": "137bc50e13188d6c4ef61655660aa6f32f1e7c12"
   },
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.sequences.git",
     "type": "git",
-    "revision": "e20b869871485df3b7d9d944d363d208396f9304"
+    "revision": "ccf2bd02eec81039597862da1cf587fedf9060fc"
   },
   "samples": [
     {

@@ -432,12 +432,14 @@ namespace UnityEditor.Sequences
         public static IEnumerable<GameObject> FindAllSources(string type = null)
         {
             var indexes = SequenceAssetIndexer.instance.indexes;
+            var isTypeNullOrEmpty = string.IsNullOrEmpty(type);
+
             foreach (var index in indexes)
             {
-                if (index == null || index.mainPrefab == null || !IsSource(index.mainPrefab))
+                if (index == null || index.mainPrefab == null)
                     continue;
 
-                if (string.IsNullOrEmpty(type) || GetType(index.mainPrefab) == type)
+                if (isTypeNullOrEmpty || GetType(index.mainPrefab) == type)
                     yield return index.mainPrefab;
             }
         }

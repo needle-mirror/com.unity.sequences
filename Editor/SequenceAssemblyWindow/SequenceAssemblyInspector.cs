@@ -2,8 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.Sequences;
 using UnityEngine.Playables;
+using UnityEngine.Sequences;
 using UnityEngine.Timeline;
 using UnityEngine.UIElements;
 
@@ -16,39 +16,41 @@ namespace UnityEditor.Sequences
             public static readonly string k_UXMLFilePath = "Packages/com.unity.sequences/Editor/SequenceAssemblyWindow/UIData/SequenceAssemblyInspector.uxml";
         }
 
-        internal VisualElement m_RootVisualElement;
+        internal VisualElement rootVisualElement;
         protected PlayableDirector m_Director;
-        protected TimelineAsset m_Timeline;
-        protected List<AssetCollectionList> m_AssetCollectionListsCache;
 
-        void OnEnable()
-        {
-            Initialize();
-            SequenceAssetIndexer.sequenceAssetImported += OnSequenceAssetImported;
-            SequenceAssetIndexer.sequenceAssetUpdated += OnSequenceAssetUpdated;
-            SequenceAssetIndexer.sequenceAssetDeleted += OnSequenceAssetDeleted;
-        }
+        List<AssetCollectionList> m_AssetCollectionListsCache;
 
-        protected void Initialize()
+        internal virtual void Initialize()
         {
+            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(Styles.k_UXMLFilePath);
+            rootVisualElement = visualTree.CloneTree();
+            StyleSheetUtility.SetStyleSheets(rootVisualElement, "SequenceAssemblyInspector");
+
             m_AssetCollectionListsCache = new List<AssetCollectionList>();
 
             if (target == null)
                 return;
 
             m_Director = (target as PlayableDirector);
-            m_Timeline = m_Director.playableAsset as TimelineAsset;
+
+            SetSequenceAssemblyData();
+
+            SequenceAssetIndexer.sequenceAssetImported += OnSequenceAssetImported;
+            SequenceAssetIndexer.sequenceAssetUpdated += OnSequenceAssetUpdated;
+            SequenceAssetIndexer.sequenceAssetDeleted += OnSequenceAssetDeleted;
         }
 
-        void OnDisable()
+        internal virtual void Unload()
         {
             SequenceAssetIndexer.sequenceAssetImported -= OnSequenceAssetImported;
             SequenceAssetIndexer.sequenceAssetUpdated -= OnSequenceAssetUpdated;
             SequenceAssetIndexer.sequenceAssetDeleted -= OnSequenceAssetDeleted;
+
             ClearCollectionsCache();
         }
 
-        protected void ClearCollectionsCache()
+        void ClearCollectionsCache()
         {
             foreach (var assetCollectionList in m_AssetCollectionListsCache)
                 assetCollectionList.Dispose();
@@ -58,24 +60,14 @@ namespace UnityEditor.Sequences
 
         public override VisualElement CreateInspectorGUI()
         {
-            var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(Styles.k_UXMLFilePath);
-            m_RootVisualElement = visualTree.CloneTree();
-            StyleSheetUtility.SetStyleSheets(m_RootVisualElement, "SequenceAssemblyInspector");
-
-            SetSequenceAssemblyData();
-
-            return m_RootVisualElement;
+            return rootVisualElement;
         }
 
         void SetSequenceAssemblyData()
         {
-            m_RootVisualElement.Bind(new SerializedObject(m_Director.gameObject));
+            rootVisualElement.Bind(new SerializedObject(m_Director.gameObject));
 
-            var sequenceDirector = m_Timeline.FindDirector();
-            if (sequenceDirector == null)
-                return;
-
-            var instances = SequenceAssetUtility.GetInstancesInSequence(sequenceDirector);
+            var instances = SequenceAssetUtility.GetInstancesInSequence(m_Director);
             SetAssetCollections(instances);
         }
 
@@ -105,14 +97,14 @@ namespace UnityEditor.Sequences
 
         protected virtual void SetAssetCollection(string type, IEnumerable<GameObject> sequenceAssetSelections)
         {
-            AssetCollectionList newAssetCollectionList = new AssetCollectionList(m_Director, type);
-            AddCollectionList(sequenceAssetSelections, newAssetCollectionList);
+            var assetCollectionList = AssetCollectionList.Get(m_Director, type, false);
+            AddCollectionList(sequenceAssetSelections, assetCollectionList);
         }
 
         protected void AddCollectionList(IEnumerable<GameObject> sequenceAssetSelections, AssetCollectionList newAssetCollectionList)
         {
             AddSequenceAssetToCollection(sequenceAssetSelections, newAssetCollectionList);
-            VisualElement assetCollectionsRoot = m_RootVisualElement.Q<VisualElement>("seq-asset-collections");
+            VisualElement assetCollectionsRoot = rootVisualElement.Q<VisualElement>("seq-asset-collections");
             assetCollectionsRoot.Add(newAssetCollectionList);
             m_AssetCollectionListsCache.Add(newAssetCollectionList);
         }
@@ -122,7 +114,7 @@ namespace UnityEditor.Sequences
             if (m_Director == null || (m_Director.playableAsset as TimelineAsset) == null)
                 return;
 
-            VisualElement assetCollectionsRoot = m_RootVisualElement.Q<VisualElement>("seq-asset-collections");
+            VisualElement assetCollectionsRoot = rootVisualElement.Q<VisualElement>("seq-asset-collections");
             foreach (var child in assetCollectionsRoot.Children())
             {
                 var assetCollectionList = child as AssetCollectionList;

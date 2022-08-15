@@ -21,7 +21,7 @@ Sequences are structural containers that help you organize and manage your cinem
 
 ### Editorial structure
 
-You can structure your Editorial with a depth of up to 3 levels of Sequences:
+You can structure your Editorial with Sequences containing other Sequences:
 
 ![](images/editorial-structure.png)
 
@@ -29,7 +29,7 @@ The Master Sequence represents the top level of your cinematic. You can create m
 
 The Master Sequence can contain several Sequences, which can also contain several Sequences. All of them work the same way and benefit from the same functionality, according to their hierarchical position.
 
-You could use this 3-level structure the following way, for example:
+You can use nested Sequences to organize your creative content, for example:
 * The Master Sequence could represent a film, a piece of a film, a series episode, a game cinematic, an archviz, or a design cinematic.
 * The second level of Sequences could represent a different unit of time and place according to the story you are telling.
 * The third level of Sequences could represent a section of animation from one cut to the next cut.

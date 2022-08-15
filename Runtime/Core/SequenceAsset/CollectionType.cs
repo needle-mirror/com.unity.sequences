@@ -32,7 +32,7 @@ namespace UnityEngine.Sequences
             }
         }
 
-        public IEnumerable<string> types => m_Types;
+        public IReadOnlyList<string> types => m_Types;
         public static string undefined => "Undefined";
 
         public string[] GetTypes()

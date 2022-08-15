@@ -1,18 +1,18 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace UnityEditor.Sequences
 {
-    internal static class IconUtility
+    internal static partial class IconUtility
     {
         /// <summary>
         /// Store previously loaded icons in this cache for re-usage.
         /// </summary>
         static readonly Dictionary<string, Texture2D> s_CachedIcons = new Dictionary<string, Texture2D>();
-
-        static string k_DefaultCollectionTypeIconName = "CustomType";
 
         /// <summary>
         /// Indicates if the icon is unique to a skin or common to all.
@@ -24,6 +24,7 @@ namespace UnityEditor.Sequences
         }
 
         [InitializeOnLoadMethod]
+        [ExcludeFromCoverage]
         static void PreloadIconsOnStart()
         {
             EditorApplication.delayCall += PreloadIconsWithDelay;
@@ -40,24 +41,16 @@ namespace UnityEditor.Sequences
         }
 
         /// <summary>
-        /// Empties the icon cache.
-        /// </summary>
-        public static void ClearIconCache()
-        {
-            s_CachedIcons.Clear();
-        }
-
-        /// <summary>
         /// Load Icon from Editor Default Resources.
         /// File must contain extension.
         /// </summary>
-        /// <param name="path">Path of the icon texture to load.</param>
+        /// <param name="path">Path of the icon texture to load, with a forward slash as the directory separator.</param>
         /// <param name="type">Skin type.</param>
         /// <returns>Icon texture, or null if no icon is found.</returns>
         public static Texture2D LoadIcon(string path, IconType type)
         {
             if (string.IsNullOrEmpty(path))
-                throw new System.NullReferenceException("path");
+                throw new NullReferenceException("path");
 
             if (s_CachedIcons.TryGetValue(path, out var icon))
                 return icon;
@@ -74,93 +67,56 @@ namespace UnityEditor.Sequences
 
         static string BuildFullPath(string path, IconType type)
         {
-            string fullIconPath = PackageUtility.editorResourcesFolder;
+            var scaleSuffix = EditorGUIUtility.pixelsPerPoint > 1f ? "@2x" : "";
 
-            string typeFolder = (type == IconType.UniqueToSkin) ? EditorGUIUtility.isProSkin ? "Dark" : "Light" : "Common";
-
-            fullIconPath = Path.Combine(fullIconPath, "Icons");
-            fullIconPath = Path.Combine(fullIconPath, typeFolder);
-            fullIconPath = Path.Combine(fullIconPath, path);
-            fullIconPath += (EditorGUIUtility.pixelsPerPoint > 1.0f) ? "@2x" : "";
-            fullIconPath += ".png";
-
-            return fullIconPath;
+            return Path.Combine(
+                PackageUtility.editorResourcesFolder,
+                "Icons",
+                GetThemeFolder(type),
+                $"{path}{scaleSuffix}.png");
         }
 
         static string BuildBasePath(IconType type)
         {
-            string fullIconPath = PackageUtility.editorResourcesFolder;
-
-            string typeFolder = (type == IconType.UniqueToSkin) ? EditorGUIUtility.isProSkin ? "Dark" : "Light" : "Common";
-            fullIconPath = Path.Combine(fullIconPath, "Icons");
-            fullIconPath = Path.Combine(fullIconPath, typeFolder);
-
-            return fullIconPath;
+            return Path.Combine(
+                PackageUtility.editorResourcesFolder,
+                "Icons",
+                GetThemeFolder(type));
         }
 
         static IEnumerable<string> GetIconsFilePath()
         {
-            string folderPath = IconUtility.BuildBasePath(IconType.UniqueToSkin);
-            // Regex to detect files with @2x, @4x, etc.
-            Regex reg = new Regex(@"(@\d*\w)(.png)");
+            // Captures file path from "Editor Default Resources/Icons/<theme>", with optional scale suffix (e.g. @2x).
+            var regex = new Regex(@"(?<baseName>\w*/\w*)(?<scaleSuffix>@\dx)?.png");
 
-            // Regex to capture only the filepath from the Editor Default Resources/Icons folder.
-            Regex regCapture = new Regex(@"(\w*[\/\\]\w*).png");
+            var basePath = BuildBasePath(IconType.UniqueToSkin);
+            var files = Directory.GetFiles(basePath, "*.png", SearchOption.AllDirectories);
 
-            string[] files = Directory.GetFiles(folderPath, "*.png", SearchOption.AllDirectories);
-            foreach (string file in files)
+            foreach (var file in files)
             {
+                // Standardize on forward slashes as directory separators.
+                var path = file.Replace(Path.DirectorySeparatorChar, '/');
+
+                var match = regex.Match(path);
+
                 // Skip all files ending with a size number. Example: "@2x.png"
-                var match = reg.Match(file);
-                if (match.Success)
+                if (match.Groups["scaleSuffix"].Success)
                     continue;
 
-                var capture = regCapture.Match(file);
-
-                // Ensure there is a match.
-                if (!capture.Success)
-                    continue;
-
-                // Remove the file extension from the path.
-                string finalResult = capture.Value.Replace(".png", string.Empty);
-
-                yield return finalResult;
+                var baseName = match.Groups["baseName"];
+                Debug.Assert(baseName.Success, $"Found icon file with unexpected path: {file}.");
+                yield return baseName.Value;
             }
         }
 
-        /// <summary>
-        /// Try to load the associated icon for the given Collection type name.
-        /// If it cannot find any valid icon, it returns a generic icon.
-        /// </summary>
-        /// <param name="name">Collection type name as shown in the Asset Collections tree view.</param>
-        /// <returns></returns>
-        public static Texture2D LoadAssetCollectionIcon(string name, IconType type)
+        static string GetThemeFolder(IconType type)
         {
-            if (string.IsNullOrEmpty(name))
-                name = k_DefaultCollectionTypeIconName;
-
-            Texture2D icon;
-
-            icon = LoadIcon(Path.Combine("CollectionType", name), type);
-            if (icon == null)
-                icon = LoadIcon(Path.Combine("CollectionType", k_DefaultCollectionTypeIconName), type);
-
-            return icon;
-        }
-
-        public static Texture2D LoadPrefabIcon(PrefabAssetType prefabType)
-        {
-            var iconName = $"Prefab{prefabType.ToString()} Icon";
-            iconName = iconName.Replace("Regular", "");
-            return LoadEditorIcon(iconName);
-        }
-
-        public static Texture2D LoadEditorIcon(string iconName)
-        {
-            if (EditorGUIUtility.isProSkin)
-                iconName = $"d_{iconName}";
-
-            return (Texture2D)EditorGUIUtility.IconContent(iconName).image;
+            return type switch
+            {
+                IconType.CommonToAllSkin => "Common",
+                IconType.UniqueToSkin => EditorGUIUtility.isProSkin ? "Dark" : "Light",
+                _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
+            };
         }
     }
 }

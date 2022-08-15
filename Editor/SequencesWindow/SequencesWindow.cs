@@ -8,6 +8,9 @@ namespace UnityEditor.Sequences
     [PackageHelpURL("sequences-window")]
     internal class SequencesWindow : TreeViewEditorWindow<StructureTreeView>
     {
+        internal const string k_CreateMasterSequenceMenuActionName = "Create Master Sequence";
+        internal const string k_CreateSequenceMenuActionName = "Create Sequence";
+
         protected override void SetupView()
         {
             base.SetupView();
@@ -26,10 +29,10 @@ namespace UnityEditor.Sequences
 
         protected override void PopulateAddMenu(DropdownMenu menu, bool contextual = false)
         {
-            menu.AppendAction("Create Master Sequence", CreateMasterSequenceAction);
+            menu.AppendAction(k_CreateMasterSequenceMenuActionName, CreateMasterSequenceAction);
 
             if (!contextual)
-                menu.AppendAction("Create Sequence", CreateSequenceAction, CreateSequenceActionStatus);
+                menu.AppendAction(k_CreateSequenceMenuActionName, CreateSequenceAction, CreateSequenceActionStatus);
         }
 
         void CreateMasterSequenceAction(DropdownMenuAction action)

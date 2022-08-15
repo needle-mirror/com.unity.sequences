@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine.UIElements;
-using UnityEngine.Timeline;
-using UnityEngine.Playables;
 using UnityEngine;
+using UnityEngine.Playables;
+using UnityEngine.Pool;
+using UnityEngine.Sequences;
+using UnityEngine.Timeline;
+using UnityEngine.UIElements;
 
 namespace UnityEditor.Sequences
 {
@@ -13,57 +15,38 @@ namespace UnityEditor.Sequences
         static readonly string k_UXMLFilePath = Path.Combine(k_UIBasePath, "AssetCollectionList.uxml");
         static readonly string k_USSFilePath = Path.Combine(k_UIBasePath, "AssetCollectionList.uss");
 
-        VisualElement m_RootVisualElement;
-        SelectableScrollView m_ContentContainer;
+        static readonly ObjectPool<AssetCollectionList> s_Pool = new(
+            () => new AssetCollectionList(),
+            defaultCapacity : CollectionType.instance.types.Count);
+
+        internal string collectionType { get; private set; }
+
+        readonly SelectableScrollView m_ContentContainer;
+        readonly List<GameObject> m_Items = new();
+        readonly VisualElement m_Footer;
+        readonly Label m_Label;
 
         SequenceAssetAddMenu m_AddMenu;
         PlayableDirector m_Director;
         TimelineAsset m_Timeline;
-        string m_CollectionType;
 
-        List<GameObject> m_Items;
-
-        internal string collectionType => m_CollectionType;
-
-        public AssetCollectionList(PlayableDirector director, string type, bool playMode = false)
+        AssetCollectionList()
         {
-            m_Director = director;
-            m_Timeline = m_Director.playableAsset as TimelineAsset;
-            m_CollectionType = type;
-            m_Items = new List<GameObject>();
-
             var visualTree = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(k_UXMLFilePath);
-            m_RootVisualElement = visualTree.CloneTree();
+            visualTree.CloneTree(this);
 
-            // Set style
-            StyleSheetUtility.SetStyleSheets(m_RootVisualElement);
-            m_RootVisualElement.styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(k_USSFilePath));
+            StyleSheetUtility.SetStyleSheets(this);
+            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>(k_USSFilePath));
 
-            m_ContentContainer = m_RootVisualElement.Q<SelectableScrollView>("seq-sequence-asset-list");
+            m_ContentContainer = this.Q<SelectableScrollView>("seq-sequence-asset-list");
+            m_Footer = this.Q("seq-list-footer");
+            m_Label = this.Q<Label>("seq-asset-collection");
 
-            Label label = m_RootVisualElement.Q<Label>("seq-asset-collection");
-            label.text = type;
+            var addButton = this.Q<Button>("seq-sequence-asset-add");
+            addButton.clicked += OpenAddMenu;
 
-            if (playMode)
-            {
-                var footer = m_RootVisualElement.Q<VisualElement>("seq-list-footer");
-                footer.style.display = new StyleEnum<DisplayStyle>(DisplayStyle.None);
-            }
-            else
-            {
-                Button button = m_RootVisualElement.Q<Button>("seq-sequence-asset-add");
-                button.clicked += OpenAddMenu;
-
-                Button removeButton = m_RootVisualElement.Q<Button>("seq-sequence-asset-remove");
-                removeButton.clicked += RemoveSelectedSequenceAsset;
-
-                m_AddMenu = new SequenceAssetAddMenu();
-                m_AddMenu.Populate(type);
-                m_AddMenu.userClickedOnCreateSequenceAsset += CreateSequenceAssetAndInstantiate;
-                m_AddMenu.userClickedOnAddSequenceAsset += InstantiateSequenceAsset;
-            }
-
-            Add(m_RootVisualElement);
+            var removeButton = this.Q<Button>("seq-sequence-asset-remove");
+            removeButton.clicked += RemoveSelectedSequenceAsset;
         }
 
         public void Dispose()
@@ -72,6 +55,7 @@ namespace UnityEditor.Sequences
                 (m_ContentContainer[i] as SelectableScrollViewItem).Dispose();
 
             RemoveAllItems();
+            s_Pool.Release(this);
         }
 
         public void RemoveAllItems()
@@ -112,7 +96,21 @@ namespace UnityEditor.Sequences
 
         void OpenAddMenu()
         {
+            if (m_AddMenu == null)
+                m_AddMenu = new SequenceAssetAddMenu(collectionType, InstantiateSequenceAsset, CreateSequenceAssetAndInstantiate);
+
             m_AddMenu.Show();
+        }
+
+        public static AssetCollectionList Get(PlayableDirector director, string type, bool playMode)
+        {
+            var assetCollectionList = s_Pool.Get();
+            assetCollectionList.collectionType = type;
+            assetCollectionList.m_Director = director;
+            assetCollectionList.m_Footer.style.display = playMode ? DisplayStyle.None : DisplayStyle.Flex;
+            assetCollectionList.m_Label.text = type;
+            assetCollectionList.m_Timeline = director.playableAsset as TimelineAsset;
+            return assetCollectionList;
         }
     }
 }

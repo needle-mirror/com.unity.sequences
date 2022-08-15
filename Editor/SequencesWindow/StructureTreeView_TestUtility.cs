@@ -7,6 +7,16 @@ namespace UnityEditor.Sequences
 {
     internal partial class StructureTreeView
     {
+        internal bool CanDeleteSelection_Test()
+        {
+            return CanDeleteSelection();
+        }
+
+        internal bool CanRename_Test(int index)
+        {
+            return CanRename(index);
+        }
+
         internal void DeleteItem(TimelineAsset timeline)
         {
             ExpandAll(); // Ensures that we can find the corresponding index.

@@ -443,6 +443,8 @@ namespace UnityEditor.Sequences
             var childIndex = -1;
             if (parentId == -1)
                 childIndex = GetChildIndexForRootItem(sequence);
+            else
+                childIndex = viewController.GetChildIndexForId(id);
 
             viewController.TryRemoveItem(id, false);
             var newItemData = GenerateDataItem(sequence);
@@ -452,9 +454,21 @@ namespace UnityEditor.Sequences
 
         void OnSequencesRemoved()
         {
+            RemoveBrokenMasterSequences();
             RemoveBrokenChildren();
             viewController.RebuildTree();
             RefreshItems();
+        }
+
+        void RemoveBrokenMasterSequences()
+        {
+            foreach (var id in viewController.GetRootItemIds())
+            {
+                var itemData = GetItemDataForId(id);
+
+                if (itemData.timeline == null)
+                    viewController.TryRemoveItem(id, false);
+            }
         }
 
         void RemoveBrokenChildren(int id = -1)

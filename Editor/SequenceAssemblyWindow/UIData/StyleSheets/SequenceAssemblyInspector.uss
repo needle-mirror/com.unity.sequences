@@ -17,15 +17,33 @@
     align-items: auto;
 }
 
-.seq-header {
-    flex-grow: 0;
-    min-height: 50px;
+#seq-header-content {
+    padding: 10px 0 10px 14px;
 }
 
-#seq-header-content {
-    flex-grow: 1;
-    flex-shrink: 1;
-    align-items: stretch;
+#seq-header-content Label {
     align-self: center;
-    margin-left: 14px;
+    margin: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.seq-empty-state-msg {
+    height: 417px;
+    position: relative;
+    overflow: hidden;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+}
+
+.seq-empty-state-msg > TextElement {
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    flex-basis: initial;
+    flex-direction: row;
+    overflow: visible;
+    align-items: auto;
+    justify-content: flex-start;
 }

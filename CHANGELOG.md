@@ -4,6 +4,21 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2022-08-15
+
+### Added
+* Add an empty state message to the Sequence Assembly Window when no sequence is selected.
+
+### Changed
+* Unity now preserves the Sequence Assembly's view upon domain reload.
+* Systematically remove from the Sequences window any Master Sequence that has no corresponding timeline.
+
+### Fixed
+* Prevent Unity from throwing an exception when going into Play Mode while the Sequence Assembly Window is opened.
+* Prevent the Sequence Assembly window from clearing after deleting a Sequence Asset.
+* Ensure the Sequence Assets window always displays specific icons for all Asset Collection types.
+* After adding a sub-sequence, ensure that the order in the Sequences window is maintained when saving.
+
 ## [2.0.0-pre.2] - 2022-05-13
 
 ### Changed

@@ -130,6 +130,9 @@ namespace UnityEditor.Sequences
             var icon = GetIconElement(ve);
             foreach (var itemClass in Styles.itemIconClassNames)
                 icon.EnableInClassList(itemClass.Value, false);
+
+            icon.EnableInClassList(Styles.prefabItemIconClassName, false);
+            icon.EnableInClassList(Styles.prefabVariantItemIconClassName, false);
         }
 
         protected override void DoubleClicked(int index)
@@ -345,7 +348,6 @@ namespace UnityEditor.Sequences
         /// Listens for deletion of Sequence Assets in the AssetDatabse.
         /// It detaches TreeView items affected by this deletion.
         /// </summary>
-        /// <param name="gameObject"></param>
         void OnSequenceAssetDeleted()
         {
             // Deletion from the asset database.
