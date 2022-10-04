@@ -39,7 +39,7 @@ Once you added a Sequence Asset to a Sequence, the Sequence Assembly window allo
 
 | **Property** || **Description** |
 |:---|:---|:---|
-| Name field || The name of the Sequence Asset.<br /><br />You can rename the Sequence Asset through this field. The new name is applied everywhere the Sequence Asset appears in the Editor. |
+| Name field || The name of the Sequence Asset.<br /><br />You can rename the Sequence Asset through this field. The new name is applied everywhere the Sequence Asset appears in the Editor.<br/><br/>To rename the Sequence Asset, click on its field, type the new name, press Enter, and then click **Rename** to confirm the change. |
 | **Variant** || Use this list to select the Sequence Asset Variant that you want to use in the selected Sequence, if the Sequence Asset has Variants.<br /><br />By default, the Sequence Assembly window sets this property to "Original", which corresponds to the base Sequence Asset. |
 | Options button ( **⋮** ) || Allows you to create, duplicate, and delete Sequence Asset Variants in context. |
 || Create new variant | Creates a new Variant from the current Sequence Asset.<br /><br />If you want to use this Variant in the current Sequence, you must still select it in the **Variant** list. |

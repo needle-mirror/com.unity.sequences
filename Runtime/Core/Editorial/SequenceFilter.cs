@@ -129,13 +129,24 @@ namespace UnityEngine.Sequences
             if (childClip.editorialClip == null) return;
 
             var clipAsset = childClip.editorialClip.asset as EditorialPlayableAsset;
-            // TODO: ttu - 2020-08-10: look for a clean solution
+
+            if (clipAsset.director.exposedName == 0)
+            {
+                // Only generate a new exposedName if there is none already.
+                // The clip could have been already bind to another director in a different scene. In that case, the
+                // exposedName is different than 0 and we should re-use it, otherwise we will loose binding in the
+                // other scenes.
+
+                // TODO: ttu - 2020-08-10: look for a clean solution
 #if UNITY_EDITOR
-            var guid = UnityEditor.GUID.Generate().ToString();
+                var guid = UnityEditor.GUID.Generate().ToString();
 #else
-            var guid = System.Guid.NewGuid().ToString();
+                var guid = System.Guid.NewGuid().ToString();
 #endif
-            clipAsset.director.exposedName = new PropertyName(guid);
+                // Don't create a PropertyName each time. If the director already have an exposed name, re-use it.
+                clipAsset.director.exposedName = new PropertyName(guid);
+            }
+
             parentDirector.SetReferenceValue(clipAsset.director.exposedName, childDirector);
         }
 

@@ -44,21 +44,21 @@ namespace UnityEditor.Sequences
             return -1;
         }
 
-        internal int GetIdOfAssetCollectionOfName(string name)
+        internal int GetIndexOfAssetCollectionOfName(string name)
         {
             return GetIndexOf<AssetCollectionTreeViewItem>(item =>
                 item.treeViewItemType == AssetCollectionTreeViewItem.Type.Header
                 && item.collectionName == name);
         }
 
-        internal int GetIdOfSequenceAssetOfName(string name)
+        internal int GetIndexOfSequenceAssetOfName(string name)
         {
             return GetIndexOf<AssetCollectionTreeViewItem>(item =>
                 item.treeViewItemType == AssetCollectionTreeViewItem.Type.Item
                 && item.asset.name == name);
         }
 
-        internal int GetIdOfSequenceAsset(GameObject asset)
+        internal int GetIndexOfSequenceAsset(GameObject asset)
         {
             return GetIndexOf<AssetCollectionTreeViewItem>(item =>
                 item.treeViewItemType == AssetCollectionTreeViewItem.Type.Item

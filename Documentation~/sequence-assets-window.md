@@ -42,7 +42,7 @@ This action automatically names the duplicate Variant after the name of the sour
 
 ### Editing a Sequence Asset or Variant
 
-To edit a Sequence Asset or a Sequence Asset Variant, double-click on it.
+To edit a Sequence Asset or Sequence Asset Variant, right-click on it and select **Open**. 
 
 This opens the corresponding Prefab or Prefab Variant in isolation in the Scene view so that you can edit its content.
 
@@ -50,7 +50,10 @@ This opens the corresponding Prefab or Prefab Variant in isolation in the Scene 
 
 ### Renaming a Sequence Asset or Variant
 
-To rename a Sequence Asset or a Sequence Asset Variant, select it twice, then type the new name and press the Enter key or click anywhere to confirm the renaming.
+To rename a Sequence Asset or Sequence Asset Variant:
+1. Right-click it and select **Rename**.
+2. Type the new name.
+3. Press the Enter key or click anywhere to confirm the renaming.
 
 When you rename a Sequence Asset, this also renames its Variants if they were still named after it.
 

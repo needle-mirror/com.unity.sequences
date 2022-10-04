@@ -257,7 +257,7 @@ namespace UnityEngine.Sequences
         /// and the <seealso cref="Sequence.parent"/> setter.
         /// </summary>
         /// <param name="childClip">The child Sequence to add.</param>
-        /// <returns>The actual start time of the added clip.</returns>
+        /// <returns>The actual global start time of the added clip.</returns>
         internal override double AddChildClip(Sequence childClip)
         {
             var timelineChildClip = childClip as TimelineSequence;
@@ -274,7 +274,8 @@ namespace UnityEngine.Sequences
             // CreateEditorialClip function above.
             base.AddChildClip(childClip);
 
-            return startTime;
+            // Return global start time.
+            return start + startTime;
         }
 
         /// <summary>

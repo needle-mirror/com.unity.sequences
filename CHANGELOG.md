@@ -4,6 +4,13 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2022-10-04
+
+### Fixed
+* When creating a new sequence, ensure that its clip is always placed after any existing sequence clip in the same editorial track.
+* Prevent the Sequence Assets window from being in error when the user deletes a Sequence Asset from the Project window.
+* Make sure users can instantiate an editorial structure in multiple scenes without getting issues.
+
 ## [2.0.0] - 2022-08-15
 
 ### Added

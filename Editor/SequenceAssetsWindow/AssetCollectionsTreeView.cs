@@ -352,9 +352,9 @@ namespace UnityEditor.Sequences
         {
             // Deletion from the asset database.
             // Go over all the items and delete the ones with an invalid prefab reference.
-            for (int index = viewController.GetItemsCount() - 1; index >= 0; --index)
+            var ids = viewController.GetAllItemIds().ToArray();
+            foreach (var id in ids)
             {
-                int id = GetIdForIndex(index);
                 var data = GetItemDataForId<AssetCollectionTreeViewItem>(id);
 
                 if (data.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
