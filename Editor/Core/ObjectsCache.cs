@@ -205,12 +205,12 @@ namespace UnityEditor.Sequences
                 m_Internal.SwapToPrefabStageCache();
         }
 
-        private static void PrefabStage_prefabStageClosing(PrefabStage stage)
+        static void PrefabStage_prefabStageClosing(PrefabStage stage)
         {
             m_Internal.SwapToMainStageCache();
         }
 
-        private static void PrefabStage_prefabStageOpened(PrefabStage stage)
+        static void PrefabStage_prefabStageOpened(PrefabStage stage)
         {
             m_Internal.SwapToPrefabStageCache();
         }

@@ -45,7 +45,7 @@ namespace UnityEditor.Sequences
             if (TimelineSequence.IsNullOrEmpty(clip) || !SequencesAssetDatabase.IsRenameValid(clip.name, newName))
                 return;
 
-            SequencesAssetDatabase.RenameAsset(clip.timeline, newName);
+            newName = SequencesAssetDatabase.RenameAsset(clip.timeline, newName);
             SequencesAssetDatabase.RenameSequenceFolder(clip, newName);
 
             // Parent track hold the name of the editorial clip.

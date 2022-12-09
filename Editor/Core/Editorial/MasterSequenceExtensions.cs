@@ -69,6 +69,8 @@ namespace UnityEditor.Sequences
 
             SequencesAssetDatabase.DeleteAsset(masterSequence);
             SequencesAssetDatabase.DeleteFolder(directoryName);
+
+            MasterSequenceRegistryUtility.PruneRegistries();
         }
     }
 }

@@ -4,7 +4,7 @@ This page lists some known issues and limitations that you might experience with
 
 #### All sequences suffixed with _\_Timeline_ in the Sequences window
 
-**Issue:** Upgrading the Sequences package to version 2.0.0 has the side effect of adding a _\_Timeline_ suffix to the display name of all your existing sequences in the Sequences window.
+**Issue:** Upgrading the Sequences package from version 1.x has the side effect of adding a _\_Timeline_ suffix to the display name of all your existing sequences in the Sequences window.
 
 **Note:** This behavior doesn't affect the Sequences functionality in your project. If needed, you can safely rename each sequence as you wish.
 

@@ -6,7 +6,6 @@ namespace UnityEngine.Sequences
 {
     class MasterSequenceNotFoundException : Exception
     {
-        public MasterSequenceNotFoundException() {}
     }
 
     [CreateAssetMenu(fileName = "MasterSequenceRegistry", menuName = "Sequences/Master Sequence Registry", order = 460)]
@@ -31,7 +30,7 @@ namespace UnityEngine.Sequences
         /// </summary>
         /// <param name="masterTimeline"></param>
         /// <param name="scenePath"></param>
-        internal void AddMasterTimeline(TimelineAsset masterTimeline, string scenePath)
+        internal void Register(TimelineAsset masterTimeline, string scenePath)
         {
             if (masterTimeline == null)
                 throw new ArgumentNullException("masterTimeline");
@@ -81,12 +80,22 @@ namespace UnityEngine.Sequences
         /// The user registry stay untouched, this registry is managed manually by the user and so any destructive
         /// operation is at the discretion of the user and the user only.
         /// </summary>
-        internal void PruneNullMasterTimelines()
+        internal bool PruneNullMasterTimelines()
         {
-            m_MasterSequences.RemoveAll(entry => entry.timeline == null);
+            var removed = m_MasterSequences.RemoveAll(entry => entry.timeline == null);
+            if (removed > 0)
+                return true;
+
+            return false; // Nothing was removed from the base registry.
         }
 
-        bool Contains(TimelineAsset masterTimeline)
+        /// <summary>
+        /// Tells if the instance of <see cref="MasterSequenceRegistry"/> contains an entry
+        /// for the provided <see cref="TimelineAsset>"/>.
+        /// </summary>
+        /// <param name="masterTimeline"></param>
+        /// <returns></returns>
+        internal bool Contains(TimelineAsset masterTimeline)
         {
             if (masterTimeline == null)
                 return false;

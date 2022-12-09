@@ -16,15 +16,6 @@ namespace UnityEditor.Sequences
     {
         internal static readonly string k_SequenceBaseFolder = "Sequences";
 
-        /// <summary>
-        /// Characters that are not allowed in filenames. Path.GetInvalidFileNameChars is inconsistent across platforms
-        /// and omits some invalid characters on macOS, so we use this instead.
-        /// Copied from https://github.cds.internal.unity3d.com/unity/unity/blob/ed0ccb93f471897bfd854e129c3873e3a4dbe06f/Runtime/Utilities/PathNameUtility.cpp#L467
-        /// </summary>
-        static readonly char[] k_InvalidFileNameChars = "/?<>\\:*|\"".ToCharArray();
-
-        static readonly char k_InvalidFileNameCharReplacement = '_';
-
         public static string GenerateUniqueMasterSequencePath(string name, string subFolders = "", string extension = ".asset")
         {
             return GetNewAssetPath(name, k_SequenceBaseFolder, subFolders, extension);
@@ -66,21 +57,30 @@ namespace UnityEditor.Sequences
 
             foreach (var directory in Directory.EnumerateDirectories(path))
             {
-                if (IsEmpty(directory, true))
+                if (FilePathUtility.IsFolderEmpty(directory))
                     AssetDatabase.DeleteAsset(directory);
             }
 
-            return IsEmpty(path, true) && AssetDatabase.DeleteAsset(path);
+            return FilePathUtility.IsFolderEmpty(path) && AssetDatabase.DeleteAsset(path);
         }
 
-        public static void RenameAsset<T>(T asset, string newName) where T : Object
+        public static string RenameAsset<T>(T asset, string newName) where T : Object
         {
             if (asset == null)
-                return;
+                throw new NullReferenceException("Cannot rename null asset.");
 
             var path = AssetDatabase.GetAssetPath(asset);
-            AssetDatabase.RenameAsset(path, newName);
-            AssetDatabase.SaveAssets();
+            var folder = Path.GetDirectoryName(path);
+            var newpath = Path.Combine(folder, newName + Path.GetExtension(path));
+
+            newpath = AssetDatabase.GenerateUniqueAssetPath(newpath);
+            newName = Path.GetFileNameWithoutExtension(newpath);
+
+            var errorMessage = AssetDatabase.RenameAsset(path, newName);
+            if (!string.IsNullOrEmpty(errorMessage))
+                throw new OperationCanceledException("Rename Asset failed.\n" + errorMessage);
+
+            return newName;
         }
 
         public static IEnumerable<T> FindAsset<T>(string name = null) where T : Object
@@ -162,21 +162,6 @@ namespace UnityEditor.Sequences
             return Path.Combine(path, contextSequence.name);
         }
 
-        internal static bool IsEmpty(string folderPath, bool includeFolder = false)
-        {
-            var files = includeFolder ?
-                Directory.EnumerateFileSystemEntries(folderPath).ToArray() :
-                Directory.EnumerateFiles(folderPath).ToArray();
-
-            if (files.Length == 1 && files[0].EndsWith(".meta"))
-                return true;
-
-            if (files.Length >= 1)
-                return false;
-
-            return true;
-        }
-
         static string GetNewAssetPath(string name, string basePath, string subFolders = "", string extension = ".asset")
         {
             string folderPath = Path.Combine("Assets", basePath);
@@ -186,25 +171,12 @@ namespace UnityEditor.Sequences
 
             string absoluteFolderPath = Path.Combine(Path.GetDirectoryName(Application.dataPath), folderPath);
 
-            string assetPath = Path.Combine(folderPath, SanitizeFileName(name) + extension);
+            string assetPath = Path.Combine(folderPath, FilePathUtility.SanitizeFileName(name) + extension);
 
             if (!Directory.Exists(absoluteFolderPath))
                 Directory.CreateDirectory(folderPath);
 
             return AssetDatabase.GenerateUniqueAssetPath(assetPath);
-        }
-
-        /// <summary>
-        /// Trims whitespace and substitutes invalid characters in the provided file name.
-        /// </summary>
-        /// <param name="fileName">File name.</param>
-        /// <returns>File name with invalid characters replaced.</returns>
-        internal static string SanitizeFileName(string fileName)
-        {
-            foreach (var c in k_InvalidFileNameChars)
-                fileName = fileName.Replace(c, k_InvalidFileNameCharReplacement);
-
-            return fileName.Trim();
         }
 
         static void ValidatePath<T>(string path, T asset, string expectedExtension)

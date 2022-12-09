@@ -176,7 +176,7 @@ namespace UnityEditor.Sequences
         void OnSequenceAssetNameChange(ChangeEvent<string> changeEvent)
         {
             var isValid =
-                SequenceAssetUtility.SanitizeAndValidateName(
+                FilePathUtility.SanitizeAndValidateName(
                     changeEvent.previousValue,
                     changeEvent.newValue,
                     out var sanitizedName);

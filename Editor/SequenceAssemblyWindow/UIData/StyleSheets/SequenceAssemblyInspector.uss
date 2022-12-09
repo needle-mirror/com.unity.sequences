@@ -23,7 +23,7 @@
 
 #seq-header-content Label {
     align-self: center;
-    margin: auto;
+    margin: auto auto auto 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }

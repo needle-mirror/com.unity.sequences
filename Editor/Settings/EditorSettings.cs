@@ -13,6 +13,17 @@ namespace UnityEditor.Sequences
             EditorApplication.quitting += Save;
         }
 
+        [SettingsProvider]
+        static SettingsProvider CreateSettingsProvider()
+        {
+            var provider = new UserSettingsProvider("Project/Sequences",
+                instance,
+                new[] { typeof(EditorSettings).Assembly },
+                SettingsScope.Project);
+
+            return provider;
+        }
+
         internal static Settings instance
         {
             get

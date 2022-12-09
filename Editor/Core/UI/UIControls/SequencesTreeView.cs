@@ -22,9 +22,9 @@ namespace UnityEditor.Sequences
         /// </summary>
         internal static readonly int itemCreationId = 0;
 
-        bool m_DidFocusWindowThisFrame;
+        internal readonly VisualElement scrollViewContainer;
 
-        VisualElement m_ScrollViewContainer;
+        bool m_DidFocusWindowThisFrame;
 
         EventCallback<PointerDownEvent> m_PointerDownEventCallback;
 
@@ -49,8 +49,9 @@ namespace UnityEditor.Sequences
             bindItem = BindItem;
             unbindItem = UnbindItem;
 
+            scrollViewContainer = this.Q<ScrollView>().contentContainer;
+
             m_Manipulators = new Dictionary<VisualElement, IManipulator>();
-            m_ScrollViewContainer = this.Q<ScrollView>().contentContainer;
             m_PointerDownEventCallback = OnPointerDownEvent;
 
             RegisterCallback<AttachToPanelEvent>(OnAttachToPanel);
@@ -134,9 +135,15 @@ namespace UnityEditor.Sequences
         /// </summary>
         protected virtual void RegisterEvents()
         {
-            m_ScrollViewContainer.RegisterCallback<KeyDownEvent>(OnKeyDownEvent);
-            m_ScrollViewContainer.RegisterCallback<ValidateCommandEvent>(OnValidateCommandEvent);
-            m_ScrollViewContainer.RegisterCallback<ExecuteCommandEvent>(OnExecuteCommandEvent);
+            scrollViewContainer.RegisterCallback<KeyDownEvent>(OnKeyDownEvent);
+            scrollViewContainer.RegisterCallback<ValidateCommandEvent>(OnValidateCommandEvent);
+            scrollViewContainer.RegisterCallback<ExecuteCommandEvent>(OnExecuteCommandEvent);
+            scrollViewContainer.RegisterCallback<FocusEvent>(OnFocusEvent);
+#if UNITY_2022_2_OR_NEWER
+            selectionChanged += OnSelectionChanged;
+#else
+            onSelectionChange  += OnSelectionChanged;
+#endif
         }
 
         /// <summary>
@@ -144,10 +151,22 @@ namespace UnityEditor.Sequences
         /// </summary>
         protected virtual void UnregisterEvents()
         {
-            m_ScrollViewContainer.UnregisterCallback<KeyDownEvent>(OnKeyDownEvent);
-            m_ScrollViewContainer.UnregisterCallback<ValidateCommandEvent>(OnValidateCommandEvent);
-            m_ScrollViewContainer.UnregisterCallback<ExecuteCommandEvent>(OnExecuteCommandEvent);
+            scrollViewContainer.UnregisterCallback<KeyDownEvent>(OnKeyDownEvent);
+            scrollViewContainer.UnregisterCallback<ValidateCommandEvent>(OnValidateCommandEvent);
+            scrollViewContainer.UnregisterCallback<ExecuteCommandEvent>(OnExecuteCommandEvent);
+            scrollViewContainer.UnregisterCallback<FocusEvent>(OnFocusEvent);
+#if UNITY_2022_2_OR_NEWER
+            selectionChanged -= OnSelectionChanged;
+#else
+            onSelectionChange  -= OnSelectionChanged;
+#endif
         }
+
+        /// <summary>
+        /// Define what should be the behavior when the selection in the tree view change.
+        /// </summary>
+        /// <param name="objects">The list of the new selected objects</param>
+        protected virtual void OnSelectionChanged(IEnumerable<object> objects) {}
 
         /// <summary>
         /// When creating a new tree view item, the user can specify a name. This function allows to begin the
@@ -194,7 +213,7 @@ namespace UnityEditor.Sequences
         /// </summary>
         /// <param name="index">The item's index.</param>
         /// <returns>The RenameableLabel at the specified index or null if no element is found.</returns>
-        protected RenameableLabel GetLabelAtIndex(int index)
+        RenameableLabel GetLabelAtIndex(int index)
         {
             var root = GetRootElementForIndex(index);
             return root?.Q<RenameableLabel>();
@@ -340,16 +359,6 @@ namespace UnityEditor.Sequences
                 return;
             }
 
-            // This fixes a minor annoyance where clicking on an already-selected sequence doesn't trigger
-            // TreeView.onSelectionChange. Previously if you navigated away from the window, opened a different
-            // timeline, then clicked on the selected sequence again, the Timeline window wouldn't switch to the
-            // sequence you clicked.
-            //
-            // It's a hacky workaround, and only necessary for tree views that support multiple selections.
-            // https://fogbugz.unity3d.com/f/cases/1416144/
-            if (index == selectedIndex && selectedIndices.Count() == 1)
-                SetSelection(index);
-
             if (!(evt.target is Label))
                 return;
 
@@ -432,6 +441,12 @@ namespace UnityEditor.Sequences
                     BeginRenameAtIndex(selectedIndex);
                     break;
             }
+        }
+
+        void OnFocusEvent(FocusEvent evt)
+        {
+            // Force a "re-selection" when the TreeView re-gain the focus.
+            OnSelectionChanged(selectedItems);
         }
 
         void ContextClickedInternal(ContextualMenuPopulateEvent evt)

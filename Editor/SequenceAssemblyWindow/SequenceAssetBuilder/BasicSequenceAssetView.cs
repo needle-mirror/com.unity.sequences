@@ -53,6 +53,7 @@ namespace UnityEditor.Sequences
         public void GenerateVariantsDropdown(GameObject instanceSelection)
         {
             var variants = SequenceAssetUtility.GetVariants(m_Data).ToList();
+            variants.Sort((x, y) => x.name.CompareTo(y.name));
             variants.Insert(0, m_Data);
 
             var assetSelection = SequenceAssetUtility.GetAssetFromInstance(instanceSelection);

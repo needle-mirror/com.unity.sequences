@@ -34,11 +34,5 @@ namespace UnityEditor.Sequences
         internal GameObject selectedAsset => m_SequenceAssetSelected;
         internal GameObject selectedInstance => m_SequenceAssetSelectedInstance;
     }
-
-    internal partial class BasicSequenceAssetView
-    {
-        internal GameObject selected => variantsSelector.value;
-        internal List<GameObject> variants => variantsSelector.choices;
-    }
 }
 #endif

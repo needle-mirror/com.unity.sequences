@@ -4,27 +4,34 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [2.0.1] - 2022-10-04
-
-### Fixed
-* When creating a new sequence, ensure that its clip is always placed after any existing sequence clip in the same editorial track.
-* Prevent the Sequence Assets window from being in error when the user deletes a Sequence Asset from the Project window.
-* Make sure users can instantiate an editorial structure in multiple scenes without getting issues.
-
-## [2.0.0] - 2022-08-15
+## [2.1.0-pre.1] - 2022-12-09
 
 ### Added
-* Add an empty state message to the Sequence Assembly Window when no sequence is selected.
+* New search field in the Sequences window.
+* New MasterSequenceRegistry asset to store references to all Master Sequence timelines of the project and their associated Master Scenes.
+* New Project Settings property allowing to change the default MasterSequenceRegistry asset (Unity creates one by default on first Master Sequence creation).
+* New option to open the Master Scene associated to an editorial structure from the Sequences window.
+* Ability to multi-select and bulk-delete Sequence Assets from the Sequence Assets window.
+* Ability to clear an Asset Collection (i.e. delete all Sequence Assets it contains) in one single action.
+* Use of an empty state message to the Sequence Assembly Window when no sequence is selected.
 
 ### Changed
-* Unity now preserves the Sequence Assembly's view upon domain reload.
+* Unity now preserves the Sequence Assembly's view on domain reload.
 * Systematically remove from the Sequences window any Master Sequence that has no corresponding timeline.
+* Sequence Assets are now sorted alphabetically in menus and selection lists.
+* Sequence Assets and their variants are now sorted alphabetically in the Sequence Assets window.
+* Sequences and their children are now sorted alphabetically in the Sequences window.
 
 ### Fixed
 * Prevent Unity from throwing an exception when going into Play Mode while the Sequence Assembly Window is opened.
+* Make sure that the "Unload" button is always disabled in the Scene Activation Track Inspector when no valid Scene is specified.
+* Make sure that the Sequence Assets window always displays specific icons for all Asset Collection types.
+* When creating a new sequence, make sure that its Timeline clip doesn't overlap with existing sequence clips in the same editorial track.
+* After creating a sub-sequence, make sure that the order in the Sequences window is maintained when saving.
+* When deleting an invalid sequence, make sure to systematically delete its corresponding GameObject in the Hierarchy.
+* Prevent the Sequence Assets window from being in error when the user deletes a Sequence Asset from the Project window.
 * Prevent the Sequence Assembly window from clearing after deleting a Sequence Asset.
-* Ensure the Sequence Assets window always displays specific icons for all Asset Collection types.
-* After adding a sub-sequence, ensure that the order in the Sequences window is maintained when saving.
+* Make sure that users can instantiate an editorial structure in multiple scenes without getting issues.
 
 ## [2.0.0-pre.2] - 2022-05-13
 

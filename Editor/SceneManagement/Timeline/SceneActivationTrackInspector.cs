@@ -31,7 +31,7 @@ namespace UnityEditor.Sequences.Timeline
                     string.Empty :
                     AssetDatabase.GetAssetPath(sceneAssetProperty.objectReferenceValue);
 
-                using (new EditorGUI.DisabledScope(scenePath == string.Empty || SceneManagement.IsLoaded(scenePath)))
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(scenePath) || SceneManagement.IsLoaded(scenePath)))
                 {
                     if (GUILayout.Button("Load", GUILayout.MaxWidth(60)))
                     {
@@ -40,7 +40,7 @@ namespace UnityEditor.Sequences.Timeline
                     }
                 }
 
-                using (new EditorGUI.DisabledScope(!SceneManagement.IsLoaded(scenePath)))
+                using (new EditorGUI.DisabledScope(string.IsNullOrEmpty(scenePath) || !SceneManagement.IsLoaded(scenePath)))
                 {
                     if (GUILayout.Button("Unload", GUILayout.MaxWidth(60)))
                         SceneManagement.CloseScene(scenePath);

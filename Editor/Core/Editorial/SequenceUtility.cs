@@ -98,6 +98,11 @@ namespace UnityEditor.Sequences
 
             fps = fps < 0.0 ? (float)TimelineUtility.GetProjectFrameRate() : fps;
             var masterSequence = MasterSequence.CreateInstance(name, fps);
+
+            ProjectSettings.CreateDefaultMasterSequenceRegistryIfNeeded();
+            ProjectSettings.defaultMasterSequenceRegistry.Register(masterSequence.rootSequence.timeline, string.Empty);
+            ProjectSettings.SaveAssetSetting(ProjectSettings.defaultMasterSequenceRegistry);
+
             masterSequence.Save();
 
             sequenceCreated?.Invoke(masterSequence.rootSequence, masterSequence);
@@ -161,7 +166,7 @@ namespace UnityEditor.Sequences
                 removedSequence.Delete();
             }
 
-            if (!string.IsNullOrEmpty(sequenceFolderPath) && SequencesAssetDatabase.IsEmpty(sequenceFolderPath, true))
+            if (!string.IsNullOrEmpty(sequenceFolderPath) && FilePathUtility.IsFolderEmpty(sequenceFolderPath))
                 AssetDatabase.DeleteAsset(sequenceFolderPath);
 
             masterSequence.Save();

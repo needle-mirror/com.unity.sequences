@@ -8,13 +8,26 @@ namespace UnityEditor.Sequences
 {
     partial class StructureTreeView : SequencesTreeView
     {
-        public static readonly string masterSequenceClassName = itemIconClassName + "-master-sequence";
-        public static readonly string sequenceClassName = itemIconClassName + "-sequence";
-        public static readonly string shotClassName = itemIconClassName + "-shot";
+        public static readonly string masterSequenceIconClassName = itemIconClassName + "-master-sequence";
+        public static readonly string sequenceIconClassName = itemIconClassName + "-sequence";
+        public static readonly string shotIconClassName = itemIconClassName + "-shot";
         public static readonly string itemInvalidClassName = itemLabelClassName + "-invalid";
         public static readonly string itemNotLoadedClassName = itemLabelClassName + "-not-loaded";
 
         bool m_PreventSelectionLoop = false;
+        string m_SearchQuery;
+        IComparer<SequenceNode> m_Comparer = new SequenceNodeNameComparer();
+
+        internal class SequenceNodeNameComparer : IComparer<SequenceNode>
+        {
+            public int Compare(SequenceNode x, SequenceNode y)
+            {
+                if (x == null) return -1;
+                if (y == null) return 1;
+
+                return x.GetDisplayName().CompareTo(y.GetDisplayName());
+            }
+        }
 
         public StructureTreeView() : base()
         {
@@ -22,7 +35,7 @@ namespace UnityEditor.Sequences
             {
                 // If the indexer is not yet initialized, delay the tree view data generation.
                 SequenceIndexer.indexerInitialized += InitializeRootItems;
-                SetRootItems(new List<TreeViewItemData<StructureItem>>());
+                SetRootItems(new List<TreeViewItemData<SequenceNode>>());
                 return;
             }
 
@@ -32,9 +45,9 @@ namespace UnityEditor.Sequences
 
         protected override string GetItemTextForIndex(int index)
         {
-            var itemData = GetItemDataForIndex<StructureItem>(index);
-            if (!itemData.IsNull())
-                return itemData.displayName;
+            var itemData = GetItemDataForIndex<SequenceNode>(index);
+            if (itemData != default)
+                return itemData.GetDisplayName();
 
             var parentId = GetParentIdForIndex(index);
             return parentId == -1
@@ -56,7 +69,7 @@ namespace UnityEditor.Sequences
         void DeleteSelectedItemsInternal()
         {
             var timelinesToDelete = new List<TimelineAsset>();
-            var items = GetSelectedItems<StructureItem>().ToArray();
+            var items = GetSelectedItems<SequenceNode>().ToArray();
 
             foreach (var item in items)
             {
@@ -99,11 +112,14 @@ namespace UnityEditor.Sequences
             if (parentId != -1 && IsSelected(viewController.GetIndexForId(parentId)))
                 return;
 
+            var itemData = GetItemDataForIndex(index);
+            if (itemData == null)
+                return;
+
             Undo.IncrementCurrentGroup();
             Undo.SetCurrentGroupName("Delete invalid sequence");
             var groupIndex = Undo.GetCurrentGroup();
 
-            var itemData = GetItemDataForIndex(index);
             if (itemData.gameObject != null)
                 Undo.DestroyObjectImmediate(itemData.gameObject);
 
@@ -128,7 +144,7 @@ namespace UnityEditor.Sequences
 
         protected override void RenameEnded(int id, bool canceled = false)
         {
-            var itemData = GetItemDataForId(id).timeline;
+            var itemData = GetItemDataForId(id);
 
             var root = GetRootElementForId(id);
             var label = root.Q<RenameableLabel>();
@@ -145,7 +161,7 @@ namespace UnityEditor.Sequences
                 return;
             }
 
-            newName = SequencesAssetDatabase.SanitizeFileName(newName);
+            newName = FilePathUtility.SanitizeFileName(newName);
             label.text = newName;
 
             if (itemData == null)
@@ -159,8 +175,7 @@ namespace UnityEditor.Sequences
 
                 // Create a new MasterSequence or Sequence.
                 var parentId = viewController.GetParentId(id);
-                viewController.TryRemoveItem(id,
-                    false); // Remove the dummy item. Don't rebuild the tree, it will be rebuilt when creating a definitive item.
+                viewController.TryRemoveItem(id, false); // Remove the dummy item. Don't rebuild the tree, it will be rebuilt when creating a definitive item.
 
                 if (parentId == -1)
                 {
@@ -183,9 +198,8 @@ namespace UnityEditor.Sequences
             else
             {
                 // Rename
-                MasterSequenceUtility.GetLegacyData(itemData, out var masterSequence, out var timelineSequence);
-                var sequence = SequenceIndexer.instance.GetSequence(itemData);
-                if (sequence.parent != null)
+                MasterSequenceUtility.GetLegacyData(itemData.timeline, out var masterSequence, out var timelineSequence);
+                if (itemData.parent != null)
                 {
                     timelineSequence.Rename(newName);
                 }
@@ -198,24 +212,27 @@ namespace UnityEditor.Sequences
 
         protected override void InitClassListAtIndex(VisualElement ve, int index)
         {
+            var itemData = GetItemDataForIndex(index);
+            var isItemBeingCreated = itemData == null;
+
+            var itemDepth = isItemBeingCreated
+                ? GetDepthOfItemBeingCreated(index)
+                : GetDepthOfItem(itemData);
+
+            var iconClassName = itemDepth switch
+            {
+                0 => masterSequenceIconClassName,
+                1 => sequenceIconClassName,
+                _ => shotIconClassName,
+            };
+
             var icon = GetIconElement(ve);
-            var parentId = GetParentIdForIndex(index);
-            string classToEnable;
-
-            if (parentId == -1)
-                classToEnable = masterSequenceClassName;
-            else if (viewController.GetParentId(parentId) == -1)
-                classToEnable = sequenceClassName;
-            else
-                classToEnable = shotClassName;
-
-            icon.EnableInClassList(classToEnable, true);
+            icon.EnableInClassList(iconClassName, true);
 
             // Check validity/loading state of data
             var label = GetLabelElement(ve);
 
-            var itemData = GetItemDataForIndex<StructureItem>(index);
-            if (itemData.IsNull())
+            if (itemData == default)
             {
                 label.EnableInClassList(itemInvalidClassName, false);
                 label.EnableInClassList(itemNotLoadedClassName, false);
@@ -240,9 +257,9 @@ namespace UnityEditor.Sequences
         protected override void ResetClassListAtIndex(VisualElement ve, int index)
         {
             var icon = GetIconElement(ve);
-            icon.EnableInClassList(masterSequenceClassName, false);
-            icon.EnableInClassList(sequenceClassName, false);
-            icon.EnableInClassList(shotClassName, false);
+            icon.EnableInClassList(masterSequenceIconClassName, false);
+            icon.EnableInClassList(sequenceIconClassName, false);
+            icon.EnableInClassList(shotIconClassName, false);
 
             var label = GetLabelElement(ve);
             label.EnableInClassList(itemInvalidClassName, false);
@@ -251,8 +268,8 @@ namespace UnityEditor.Sequences
 
         protected override string GetTooltipForIndex(int index)
         {
-            var itemData = GetItemDataForIndex<StructureItem>(index);
-            if (itemData.IsNull())
+            var itemData = GetItemDataForIndex<SequenceNode>(index);
+            if (itemData == default)
                 return string.Empty;
 
             var tooltips = string.Empty;
@@ -287,8 +304,8 @@ namespace UnityEditor.Sequences
                 return false;
 
             var itemData = GetItemDataForIndex(index);
-            if (itemData.IsNull())
-                return true; // Item is being created, it can be rename.
+            if (itemData == default)
+                return true; // Item is being created, it can be renamed.
 
             if (itemData.timeline == null)
                 return false;
@@ -322,13 +339,9 @@ namespace UnityEditor.Sequences
         protected override void RegisterEvents()
         {
             base.RegisterEvents();
+            RegisterCallback<SearchEvent>(OnSearched);
 
             // Ensure to reflect selections in all views.
-#if UNITY_2022_2_OR_NEWER
-            selectedIndicesChanged += OnSelectionChanged;
-#else
-            onSelectedIndicesChange += OnSelectionChanged;
-#endif
             SelectionUtility.sequenceSelectionChanged += OnSequenceSelectionChanged;
 
             // Add or remove tree view items when sequences are created or deleted from API.
@@ -348,11 +361,8 @@ namespace UnityEditor.Sequences
         protected override void UnregisterEvents()
         {
             base.UnregisterEvents();
-#if UNITY_2022_2_OR_NEWER
-            selectedIndicesChanged -= OnSelectionChanged;
-#else
-            onSelectedIndicesChange -= OnSelectionChanged;
-#endif
+            UnregisterCallback<SearchEvent>(OnSearched);
+
             SelectionUtility.sequenceSelectionChanged -= OnSequenceSelectionChanged;
             HierarchyDataChangeVerifier.sequenceCreated -= OnSequenceCreated;
             SequenceUtility.sequenceDeleted -= OnSequenceDeleted;
@@ -363,17 +373,27 @@ namespace UnityEditor.Sequences
             SequenceIndexer.sequencesRemoved -= OnSequencesRemoved;
         }
 
-        void OnSelectionChanged(IEnumerable<int> indices)
+        void OnSearched(SearchEvent evt)
         {
-            if (m_PreventSelectionLoop || !indices.Any())
+            m_SearchQuery = evt.query;
+
+            if (string.IsNullOrEmpty(evt.query))
+                ResetSearchFilter();
+            else
+                ApplySearchFilter();
+        }
+
+        protected override void OnSelectionChanged(IEnumerable<object> objects)
+        {
+            if (m_PreventSelectionLoop || !objects.Any())
             {
                 m_PreventSelectionLoop = false;
                 return;
             }
 
             // Select the first index if any.
-            var itemData = GetItemDataForIndex<StructureItem>(indices.First());
-            if (itemData.timeline != null)
+            var itemData = objects.First() as SequenceNode;
+            if (itemData != null && itemData.timeline != null)
                 SelectionUtility.TrySelectSequenceWithoutNotify(itemData.timeline);
         }
 
@@ -403,16 +423,21 @@ namespace UnityEditor.Sequences
 
         void AddItemForSequence(SequenceNode sequence)
         {
+            // When a search is active it's safer to reapply the filter and rebuild the tree than selectively update it.
+            if (!string.IsNullOrEmpty(m_SearchQuery))
+            {
+                ApplySearchFilter();
+                return;
+            }
+
             var parentId = -1;
             if (sequence.parent != null)
                 parentId = sequence.parent.timeline.GetHashCode();
 
-            var childIndex = -1;
-            if (parentId == -1)
-                childIndex = GetChildIndexForRootItem(sequence);
+            var childIndex = GetChildIndex(sequence, parentId);
 
             var id = sequence.timeline.GetHashCode();
-            var item = new TreeViewItemData<StructureItem>(id, new StructureItem(sequence));
+            var item = new TreeViewItemData<SequenceNode>(id, sequence);
             AddItem(item, parentId, childIndex);
 
             viewController.ExpandItem(parentId, false);
@@ -425,7 +450,7 @@ namespace UnityEditor.Sequences
             foreach (var id in allIds)
             {
                 var itemData = GetItemDataForId(id);
-                if (itemData.timeline == null)
+                if (itemData == null || itemData.timeline == null)
                 {
                     viewController.TryRemoveItem(id, false);
                 }
@@ -437,16 +462,19 @@ namespace UnityEditor.Sequences
 
         void OnSequenceUpdated(SequenceNode sequence)
         {
+            // When a search is active it's safer to reapply the filter and rebuild the tree than selectively update it.
+            if (!string.IsNullOrEmpty(m_SearchQuery))
+            {
+                ApplySearchFilter();
+                return;
+            }
+
             var id = sequence.timeline.GetHashCode();
             var parentId = viewController.GetParentId(id);
 
-            var childIndex = -1;
-            if (parentId == -1)
-                childIndex = GetChildIndexForRootItem(sequence);
-            else
-                childIndex = viewController.GetChildIndexForId(id);
+            var removeSuccess = viewController.TryRemoveItem(id, false);
+            var childIndex = GetChildIndex(sequence, parentId);
 
-            viewController.TryRemoveItem(id, false);
             var newItemData = GenerateDataItem(sequence);
 
             AddItem(newItemData, parentId, childIndex);
@@ -454,29 +482,30 @@ namespace UnityEditor.Sequences
 
         void OnSequencesRemoved()
         {
-            RemoveBrokenMasterSequences();
-            RemoveBrokenChildren();
+            RemoveBrokenItems();
             viewController.RebuildTree();
             RefreshItems();
         }
 
-        void RemoveBrokenMasterSequences()
+        void RemoveBrokenItems()
         {
             foreach (var id in viewController.GetRootItemIds())
             {
                 var itemData = GetItemDataForId(id);
+                if (itemData == null)
+                    continue;
 
                 if (itemData.timeline == null)
                     viewController.TryRemoveItem(id, false);
+
+                else
+                    RemoveBrokenChildrenItems(id);
             }
         }
 
-        void RemoveBrokenChildren(int id = -1)
+        void RemoveBrokenChildrenItems(int id)
         {
-            var childrenIds = id == -1 ?
-                viewController.GetRootItemIds().ToArray() :
-                viewController.GetChildrenIds(id).ToArray();
-
+            var childrenIds = viewController.GetChildrenIds(id).ToArray();
             foreach (var childId in childrenIds)
             {
                 var itemData = GetItemDataForId(childId);
@@ -484,7 +513,7 @@ namespace UnityEditor.Sequences
                     TryRemoveChildren(childId);
 
                 else
-                    RemoveBrokenChildren(childId);
+                    RemoveBrokenChildrenItems(childId);
             }
         }
 
@@ -521,9 +550,9 @@ namespace UnityEditor.Sequences
             SetRootItems(rootItems);
         }
 
-        List<TreeViewItemData<StructureItem>> GenerateDataTree()
+        List<TreeViewItemData<SequenceNode>> GenerateDataTree()
         {
-            var rootItems = new List<TreeViewItemData<StructureItem>>();
+            var rootItems = new List<TreeViewItemData<SequenceNode>>();
 
             foreach (var legacyMasterSequence in MasterSequenceUtility.GetLegacyMasterSequences())
             {
@@ -538,53 +567,105 @@ namespace UnityEditor.Sequences
             return rootItems;
         }
 
-        TreeViewItemData<StructureItem> GenerateDataItem(SequenceNode sequence)
+        TreeViewItemData<SequenceNode> GenerateDataItem(SequenceNode sequence)
         {
             var id = sequence.timeline.GetHashCode();
-            var childItems = new List<TreeViewItemData<StructureItem>>();
+            var childItems = new List<TreeViewItemData<SequenceNode>>();
 
             foreach (var child in sequence.children)
                 childItems.Add(GenerateDataItem(child));
 
             foreach (var invalidChild in sequence.GetEmptyClips())
-                childItems.Add(GenerateDataItem(invalidChild, id));
+                childItems.Add(GenerateDataItem(invalidChild, sequence, id));
 
-            return new TreeViewItemData<StructureItem>(id, new StructureItem(sequence), childItems);
+            childItems.Sort((x, y) => m_Comparer.Compare(x.data, y.data));
+            return new TreeViewItemData<SequenceNode>(id, sequence, childItems);
         }
 
-        TreeViewItemData<StructureItem> GenerateDataItem(KeyValuePair<TimelineClip, GameObject> clip, int parentId)
+        TreeViewItemData<SequenceNode> GenerateDataItem(KeyValuePair<TimelineClip, GameObject> clip, SequenceNode parent, int parentId)
         {
             var id = parentId + clip.Key.GetHashCode();
-            return new TreeViewItemData<StructureItem>(id, new StructureItem(clip.Key, clip.Value));
+            var sequence = new SequenceNode {editorialClip = clip.Key, gameObject = clip.Value, parent = parent};
+            return new TreeViewItemData<SequenceNode>(id, sequence);
         }
 
-        StructureItem GetItemDataForId(int id)
+        SequenceNode GetItemDataForId(int id)
         {
-            return GetItemDataForId<StructureItem>(id);
+            return GetItemDataForId<SequenceNode>(id);
         }
 
-        StructureItem GetItemDataForIndex(int index)
+        SequenceNode GetItemDataForIndex(int index)
         {
-            return GetItemDataForIndex<StructureItem>(index);
+            return GetItemDataForIndex<SequenceNode>(index);
         }
 
         internal void BeginItemCreation(int parentId = -1)
         {
-            BeginItemCreation<StructureItem>(parentId);
+            BeginItemCreation<SequenceNode>(parentId);
         }
 
-        int GetChildIndexForRootItem(SequenceNode sequence)
+        int GetChildIndex(SequenceNode sequence, int parentId)
         {
-            foreach (var rootId in GetRootIds())
+            var idList = parentId == -1 ? GetRootIds() : viewController.GetChildrenIds(parentId);
+
+            foreach (var siblingId in idList)
             {
-                var rootItem = GetItemDataForId(rootId);
-                if (sequence.timeline.name.CompareTo(rootItem.displayName) <= 0)
+                if (siblingId == itemCreationId)
+                    continue;
+
+                var siblingSequence = GetItemDataForId(siblingId);
+
+                if (siblingSequence == null)
+                    continue;
+
+                if (m_Comparer.Compare(sequence, siblingSequence) < 0)
                 {
-                    return viewController.GetChildIndexForId(rootId);
+                    return viewController.GetChildIndexForId(siblingId);
                 }
             }
 
             return -1;
+        }
+
+        void ApplySearchFilter()
+        {
+            var rootItems = GenerateDataTree()
+                .SelectMany(TreeViewUtilities.TraverseItemData)
+                .Where(item => SearchUtility.DoesTextMatchQuery(item.data.GetDisplayName(), m_SearchQuery))
+                .ToList();
+
+            SetRootItems(rootItems);
+            Rebuild();
+        }
+
+        void ResetSearchFilter()
+        {
+            var selectedItemIds = selectedIndices.Select(viewController.GetIdForIndex).ToArray();
+
+            var rootItems = GenerateDataTree();
+            SetRootItems(rootItems);
+            Rebuild();
+
+            // When searching you can select an item that was previously buried in the tree view hierarchy.
+            // We want to show selected items in an expanded state.
+            foreach (var id in selectedItemIds)
+                this.ExpandItemParents(id);
+        }
+
+        static int GetDepthOfItem(SequenceNode sequence)
+        {
+            return sequence.parent == null ? 0 : GetDepthOfItem(sequence.parent) + 1;
+        }
+
+        int GetDepthOfItemBeingCreated(int index)
+        {
+            var parentId = GetParentIdForIndex(index);
+
+            if (parentId == -1)
+                return 0;
+
+            var parentSequence = GetItemDataForId(parentId);
+            return GetDepthOfItem(parentSequence) + 1;
         }
     }
 }

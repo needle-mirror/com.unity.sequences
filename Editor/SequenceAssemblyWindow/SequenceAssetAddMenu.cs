@@ -76,6 +76,8 @@ namespace UnityEditor.Sequences
             if (m_SequenceAssets == null)
                 m_SequenceAssets = SequenceAssetUtility.FindAllSources(m_Type).ToList();
 
+            m_SequenceAssets.Sort((x, y) => x.name.CompareTo(y.name));
+
             m_Menu = new GenericMenu { allowDuplicateNames = true };
 
             foreach (var sequenceAsset in m_SequenceAssets)

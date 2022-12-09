@@ -240,15 +240,20 @@ namespace UnityEditor.Sequences
             if (parentGameObject == null)
                 return;
 
-            // The inspected Sequence has been deleted.
-            if ((m_CachedEditor != null && m_CachedEditor.target == null))
+            // No sequence is inspected, nothing to do.
+            if (m_CachedEditor == null)
+                return;
+
+            var director = m_CachedEditor.target as PlayableDirector;
+            if (director == null)
             {
+                // The inspected Sequence has been deleted.
                 ClearView();
                 return;
             }
 
             // A GameObject within a Sequence tree has been deleted.
-            var directorGameObject = (m_CachedEditor.target as PlayableDirector).gameObject;
+            var directorGameObject = director.gameObject;
             if (parentGameObject == directorGameObject || IsChildOf(parentGameObject, directorGameObject))
                 m_CachedEditor.Refresh();
         }

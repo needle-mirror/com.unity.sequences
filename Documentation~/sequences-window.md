@@ -101,7 +101,7 @@ To do this:
 
 ### Recording a Sequence
 
-You can access the Recorder window directly from a selected Sequence. The FPS rate and the Start-and-End frames of the Sequence are automatically applied to any Recorders created for it.  A Recorder can export rendered video, an animation, audio, or a specific render pas.
+You can access the Recorder window directly from a selected Sequence. The FPS rate and the Start-and-End frames of the Sequence are automatically applied to any Recorders created for it.  A Recorder can export rendered video, an animation, audio, or a specific render pass.
 
 >**Note:** The minimum version of the Recorder package supported by the Editor you're using is installed automatically when you install Sequences. For current and previous versions of Recorder documentation, see [Unity Recorder](https://docs.unity3d.com/Packages/com.unity.recorder@latest/index.html).<br/>
 Depending on the data type you need to export, you may need other packages.
@@ -119,7 +119,7 @@ If a Sequence structure (a Master Sequence and its Sequences) in the Sequences w
 
 >**Note:**
 >* The instantiated Sequence structure contains all the Sequences and Timelines in the original Scene, but the structure does not contain any creative content.
->* The instantiated Sequence is independent of other instances of the same Sequence in other Scenes. Changes to one instance of a Sequence have no effect on other instances.
+>* The instantiated Sequence is independent of other instances of the same Sequence that might exist in other Scenes. Changes to one instance of a Sequence have no effect on other instances.
 
 To create an instance of a grayed-out Master Sequence and its Sequences in the active Scene:
 

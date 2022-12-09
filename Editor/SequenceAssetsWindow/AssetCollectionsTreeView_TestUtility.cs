@@ -1,6 +1,7 @@
 #if UNITY_INCLUDE_TESTS
 using System;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace UnityEditor.Sequences
 {
@@ -51,18 +52,36 @@ namespace UnityEditor.Sequences
                 && item.collectionName == name);
         }
 
-        internal int GetIndexOfSequenceAssetOfName(string name)
-        {
-            return GetIndexOf<AssetCollectionTreeViewItem>(item =>
-                item.treeViewItemType == AssetCollectionTreeViewItem.Type.Item
-                && item.asset.name == name);
-        }
-
         internal int GetIndexOfSequenceAsset(GameObject asset)
         {
             return GetIndexOf<AssetCollectionTreeViewItem>(item =>
                 item.treeViewItemType == AssetCollectionTreeViewItem.Type.Item
                 && item.asset == asset);
+        }
+
+        internal VisualElement GetVisualElementFromIndex(int index)
+        {
+            ExpandAll();
+
+            var rootElement = GetRootElementForIndex(index);
+            return rootElement.Q<VisualElement>(itemClassName);
+        }
+
+        internal void BeginRenameItem(int index)
+        {
+            BeginRenameAtIndex(index, 0);
+        }
+
+        internal void BeginItemCreation(int index)
+        {
+            BeginItemCreation<AssetCollectionTreeViewItem>(index);
+        }
+
+        internal GameObject GetAssetForIndex(int index)
+        {
+            var itemData = GetItemDataForIndex<AssetCollectionTreeViewItem>(index);
+
+            return itemData.asset;
         }
     }
 }

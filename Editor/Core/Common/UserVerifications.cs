@@ -75,24 +75,29 @@ namespace UnityEditor.Sequences
                 !PrefabUtility.IsAddedGameObjectOverride(gameObject);
         }
 
-        internal static bool ValidateSequenceAssetDeletion(GameObject deletedSequenceAsset)
+        internal static bool ValidateSequenceAssetDeletion(List<GameObject> sequenceAssets, bool areCollections = false)
         {
             if (skipUserVerification)
                 return true;
 
-            var hasVariantMessage = "";
-            if (SequenceAssetUtility.HasVariants(deletedSequenceAsset))
-                hasVariantMessage = " and its Variants";
+            var customizedMessage = "";
+            if (areCollections) // Only collections were selected.
+            {
+                customizedMessage = $"Do you want to delete the {sequenceAssets.Count} Sequence Asset(s) " +
+                    "from the selected Asset Collection(s)?";
+            }
+            else
+            {
+                customizedMessage = "Do you want to delete the selected Sequence Asset(s) and/or variant(s)?";
+            }
 
-            var deleteAssets = EditorUtility.DisplayDialog(
+            return EditorUtility.DisplayDialog(
                 "Sequence Asset deletion",
-                $"Do you want to delete the \"{deletedSequenceAsset.name}\" Sequence Asset{hasVariantMessage}?\n\n" +
-                "You cannot undo this action.",
+                customizedMessage +
+                "\n\nYou cannot undo this action.",
                 "Delete",
                 "Cancel"
             );
-
-            return deleteAssets;
         }
 
         internal static bool ValidateInstanceChange(GameObject instance)

@@ -1,5 +1,7 @@
+using System.IO;
 using System.Linq;
 using UnityEditor.SceneManagement;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Sequences;
 using UnityEngine.Timeline;
@@ -67,6 +69,7 @@ namespace UnityEditor.Sequences
 
         void UnloadedSequenceContextMenu(DropdownMenu menu, TimelineAsset masterTimeline)
         {
+            menu.AppendAction("Open Master Scene", LoadMasterSceneAction, LoadMasterSceneActionStatus, masterTimeline);
             menu.AppendAction("Instantiate in active Scene", InstantiateInHierarchyAction, InstantiateInHierarchyActionStatus, masterTimeline);
         }
 
@@ -79,7 +82,7 @@ namespace UnityEditor.Sequences
         {
             var index = (int)action.userData;
             var id = GetIdForIndex(index);
-            BeginItemCreation<StructureItem>(id);
+            BeginItemCreation(id);
         }
 
         DropdownMenuAction.Status CreateSequenceActionStatus(DropdownMenuAction action)
@@ -162,9 +165,36 @@ namespace UnityEditor.Sequences
             return DropdownMenuAction.Status.Disabled;
         }
 
+        void LoadMasterSceneAction(DropdownMenuAction action)
+        {
+            var masterTimeline = action.userData as TimelineAsset;
+            var path = MasterSequenceRegistryUtility.GetMasterScene(masterTimeline);
+
+            if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            {
+                EditorSceneManager.OpenScene(path);
+                RefreshItems();
+            }
+        }
+
+        DropdownMenuAction.Status LoadMasterSceneActionStatus(DropdownMenuAction action)
+        {
+            if (inPlaymode)
+                return DropdownMenuAction.Status.Disabled;
+
+            var masterTimeline = action.userData as TimelineAsset;
+            var path = MasterSequenceRegistryUtility.GetMasterScene(masterTimeline);
+
+            if (string.IsNullOrEmpty(path) || SceneManagement.IsLoaded(path))
+                return DropdownMenuAction.Status.Disabled;
+
+            return DropdownMenuAction.Status.Normal;
+        }
+
         void InstantiateInHierarchyAction(DropdownMenuAction action)
         {
             var masterTimeline = action.userData as TimelineAsset;
+            var scenePath = MasterSequenceRegistryUtility.GetMasterScene(masterTimeline);
             var activeScene = SceneManager.GetActiveScene();
 
             MasterSequenceUtility.GetLegacyData(masterTimeline, out var masterSequence, out _);
@@ -172,6 +202,19 @@ namespace UnityEditor.Sequences
             SelectionUtility.TrySelectSequenceWithoutNotify(masterTimeline);
             EditorSceneManager.MarkSceneDirty(activeScene);
             RefreshItems();
+
+            if (scenePath != string.Empty && scenePath != activeScene.path)
+            {
+                var registry = MasterSequenceRegistryUtility.GetRegistry(masterTimeline);
+                var registryPath = AssetDatabase.GetAssetPath(registry);
+                var sceneName = Path.GetFileNameWithoutExtension(scenePath);
+
+                Debug.LogWarning($"Editorial structure \"{masterTimeline.name}\" has a different Master Scene " +
+                    $"(\"{sceneName}\") than the current active scene. Having the structure in multiple scenes may " +
+                    "affect the result of create, rename and delete operations on its sequences.\n\n" +
+                    $"You can change the Master Scene associated to \"{masterTimeline.name}\" in its " +
+                    $"MasterSequenceRegistry asset at: {registryPath}.\n");
+            }
         }
 
         DropdownMenuAction.Status InstantiateInHierarchyActionStatus(DropdownMenuAction action)

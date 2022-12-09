@@ -184,7 +184,7 @@ namespace UnityEditor.Sequences
             isSuccess &= DeleteSequenceAsset(source);
 
             // Also delete the parent folder if it is empty.
-            if (SequencesAssetDatabase.IsEmpty(sourceFolder, true))
+            if (FilePathUtility.IsFolderEmpty(sourceFolder))
                 isSuccess &= AssetDatabase.DeleteAsset(sourceFolder);
 
             AssetDatabase.SaveAssets();
@@ -404,7 +404,7 @@ namespace UnityEditor.Sequences
             bool renameVariants = true,
             bool renameInstances = true)
         {
-            if (!SanitizeAndValidateName(oldName, newName, out var sanitizedName))
+            if (!FilePathUtility.SanitizeAndValidateName(oldName, newName, out var sanitizedName))
                 return oldName;
 
             var actualNewName = sanitizedName;
@@ -955,20 +955,6 @@ namespace UnityEditor.Sequences
 
             AssetDatabase.RenameAsset(folderPath, actualNewName);
             return actualNewName;
-        }
-
-        /// <summary>
-        /// Sanitizes the specified new name by replacing invalid file characters by underscores and then verifies that
-        /// it is a valid name (i.e. it is not empty or only white spaces and not equals to the old name).
-        /// </summary>
-        /// <param name="oldName"></param>
-        /// <param name="newName"></param>
-        /// <param name="sanitizedName"></param>
-        /// <returns>Returns True if the sanitized new name is valid.</returns>
-        internal static bool SanitizeAndValidateName(string oldName, string newName, out string sanitizedName)
-        {
-            sanitizedName = SequencesAssetDatabase.SanitizeFileName(newName);
-            return !string.IsNullOrWhiteSpace(sanitizedName) && oldName != sanitizedName;
         }
 
         /// <summary>

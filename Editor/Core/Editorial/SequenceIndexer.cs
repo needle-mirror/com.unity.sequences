@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Sequences;
 using UnityEngine.Sequences.Timeline;
 using UnityEngine.Timeline;
+using UnityEditor.SceneManagement;
 
 namespace UnityEditor.Sequences
 {
@@ -76,6 +77,7 @@ namespace UnityEditor.Sequences
         void RegisterCallbacks()
         {
             EditorApplication.update += RecomputeSequencesValidity;
+            EditorSceneManager.sceneSaved += UpdateMasterScenesInRegistry;
         }
 
         int GetIndexOf(TimelineAsset timeline)
@@ -139,11 +141,11 @@ namespace UnityEditor.Sequences
 
                 foreach (var clip in editorialTrack.GetClips())
                 {
-                    var editorialAssetClip = clip.asset as EditorialPlayableAsset;
-                    if (editorialAssetClip == null || editorialAssetClip.timeline == null)
+                    var clipAsset = clip.asset as EditorialPlayableAsset;
+                    if (clipAsset == null || clipAsset.timeline == null)
                         continue;
 
-                    var children = Traverse(editorialAssetClip.timeline, sequence);
+                    var children = Traverse(clipAsset.timeline, sequence);
 
                     children[0].editorialClip = clip;
                     if (!sequence.IsParentOf(children[0]))
@@ -153,7 +155,7 @@ namespace UnityEditor.Sequences
                 }
             }
 
-            if (!hasEditorialTrack && sequence.parent == null && !MasterSequenceUtility.IsLegacyMasterTimeline(timeline))
+            if (!hasEditorialTrack && sequence.parent == null && !MasterSequenceRegistryUtility.IsMasterTimeline(timeline))
                 results.Clear();
 
             return results;
@@ -225,6 +227,55 @@ namespace UnityEditor.Sequences
                 validityChanged?.Invoke();
         }
 
+        void UpdateMasterScenesInRegistry(UnityEngine.SceneManagement.Scene scene)
+        {
+            var timelinesWithoutMasterScene = new List<TimelineAsset>();
+            var timelinesWithThisMasterScene = new List<MasterSequenceRegistry.MasterSequence>();
+
+            foreach (var masterSequence in MasterSequenceRegistryUtility.GetMasterSequences())
+            {
+                if (masterSequence.masterScene != null && masterSequence.masterScene.path == scene.path)
+                {
+                    // Get the master sequences timeline that already have this scene as their master scene.
+                    timelinesWithThisMasterScene.Add(masterSequence);
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(masterSequence.masterScene.path))
+                    continue;
+
+                timelinesWithoutMasterScene.Add(masterSequence.timeline);
+            }
+
+            foreach (var timeline in timelinesWithoutMasterScene)
+            {
+                var sequence = GetSequence(timeline);
+                if (sequence.gameObject != null && sequence.gameObject.scene == scene)
+                {
+                    // A new editorial structure is in the saved scene, update its registry to set a master scene.
+                    MasterSequenceRegistryUtility.SetMasterScene(timeline, scene.path);
+                }
+            }
+
+            foreach (var masterSequence in timelinesWithThisMasterScene)
+            {
+                var sequence = GetSequence(masterSequence.timeline);
+                if (sequence.gameObject == null)
+                {
+                    // The editorial structure is removed from its master scene, clear the registry.
+                    MasterSequenceRegistryUtility.SetMasterScene(masterSequence.timeline, String.Empty);
+                }
+                else if (sequence.gameObject.scene.path != masterSequence.masterScene.path &&
+                         SceneManagement.IsLoaded(masterSequence.masterScene.path))
+                {
+                    // The editorial structure's master scene changed, update the registry with the new master scene.
+                    // This can happen if 2 scenes are open in the Hierarchy and the user move the editorial structure's
+                    // GameObjects from one scene to another.
+                    MasterSequenceRegistryUtility.SetMasterScene(masterSequence.timeline, sequence.gameObject.scene.path);
+                }
+            }
+        }
+
         /// <summary>
         /// Removes all Sequences with a null reference to a <see cref="TimelineAsset"/>.
         /// </summary>
@@ -251,7 +302,10 @@ namespace UnityEditor.Sequences
             {
                 Save(true);
                 if (!disableEvents)
+                {
                     sequencesRemoved?.Invoke();
+                    MasterSequenceRegistryUtility.PruneRegistries();
+                }
             }
         }
 

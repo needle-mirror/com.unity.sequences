@@ -122,6 +122,7 @@ namespace UnityEditor.Sequences
 
                 return m_GameObject;
             }
+            set => m_GameObject = value;
         }
 
         /// <summary>
@@ -254,6 +255,20 @@ namespace UnityEditor.Sequences
             var recordEnd = recordStart + editorialClip.duration;
 
             return Math.Min(timelineParent.GetRecordEnd(), recordEnd);
+        }
+
+        internal string GetDisplayName()
+        {
+            if (timeline != null)
+                return timeline.name;
+
+            if (editorialClip != null)
+                return editorialClip.displayName;
+
+            if (gameObject != null)
+                return gameObject.name;
+
+            return string.Empty;
         }
 
         internal bool ComputeValidity()

@@ -1,4 +1,5 @@
 using System.Linq;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.Sequences;
 using UnityEngine.UIElements;
@@ -20,6 +21,27 @@ namespace UnityEditor.Sequences
                 IconUtility.LoadIcon("MasterSequence/MasterSequence", IconUtility.IconType.UniqueToSkin));
 
             AddManipulator(new ContextualMenuManipulator(OnContextMenuClick));
+
+#if UNITY_2022_2_OR_NEWER
+            var searchField = new DebouncedToolbarSearchField();
+#else
+            var searchField = new ToolbarSearchField();
+#endif
+            searchField.RegisterValueChangedCallback(evt => SendSearchEvent(evt.newValue));
+            SetHeaderContent(searchField);
+
+            // Clear search on escape and intercept the event that deselects tree view items.
+            treeView.scrollViewContainer.RegisterCallback<NavigationCancelEvent>(evt =>
+            {
+                var isSearching = !string.IsNullOrEmpty(searchField.value);
+
+                if (isSearching)
+                {
+                    evt.PreventDefault();
+                    evt.StopImmediatePropagation();
+                    searchField.value = string.Empty;
+                }
+            }, TrickleDown.TrickleDown);
         }
 
         protected override string GetAddMenuTooltip()
@@ -62,6 +84,13 @@ namespace UnityEditor.Sequences
         void OnContextMenuClick(ContextualMenuPopulateEvent evt)
         {
             PopulateAddMenu(evt.menu, true);
+        }
+
+        void SendSearchEvent(string query)
+        {
+            using var searchEvent = SearchEvent.GetPooled(query);
+            searchEvent.target = treeView;
+            treeView.SendEvent(searchEvent);
         }
     }
 }

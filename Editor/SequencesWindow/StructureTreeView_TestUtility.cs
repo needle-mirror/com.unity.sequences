@@ -54,7 +54,7 @@ namespace UnityEditor.Sequences
 
         internal TimelineAsset GetSelectedItemTimeline()
         {
-            var item = (StructureItem)selectedItem;
+            var item = selectedItem as SequenceNode;
             return item.timeline;
         }
     }

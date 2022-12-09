@@ -1,5 +1,5 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Sequences;
 using PopupField = UnityEngine.UIElements.PopupField<UnityEngine.GameObject>;
 
 namespace UnityEditor.Sequences
@@ -71,7 +71,7 @@ namespace UnityEditor.Sequences
 
         void DeleteVariant()
         {
-            if (!UserVerifications.ValidateSequenceAssetDeletion(selectionAsset))
+            if (!UserVerifications.ValidateSequenceAssetDeletion(new List<GameObject> {selectionAsset}))
                 return;
 
             variantSelector.value = sourceAsset;

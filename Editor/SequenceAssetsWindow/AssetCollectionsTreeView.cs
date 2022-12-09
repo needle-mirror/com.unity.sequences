@@ -59,12 +59,11 @@ namespace UnityEditor.Sequences
         // Keep an indexer to assign unique ID to new TreeViewItem.
         // ID starts at 1 as the root item's ID is 0.
         [SerializeField]
-        int m_IndexGenerator = 1;
+        int m_IdGenerator = 1;
 
         public AssetCollectionsTreeView() : base()
         {
-            // TODO: handle multi-selection.
-            selectionType = SelectionType.Single;
+            selectionType = SelectionType.Multiple;
 
             var rootItems = GenerateDataTree();
             SetRootItems(rootItems);
@@ -77,11 +76,6 @@ namespace UnityEditor.Sequences
             SequenceAssetIndexer.sequenceAssetImported += OnSequenceAssetImported;
             SequenceAssetIndexer.sequenceAssetDeleted += OnSequenceAssetDeleted;
             SequenceAssetIndexer.sequenceAssetUpdated += OnSequenceAssetUpdated;
-#if UNITY_2022_2_OR_NEWER
-            selectionChanged += OnTreeViewSelectionChanged;
-#else
-            onSelectionChange += OnTreeViewSelectionChanged;
-#endif
         }
 
         protected override void UnregisterEvents()
@@ -91,12 +85,6 @@ namespace UnityEditor.Sequences
             SequenceAssetIndexer.sequenceAssetImported -= OnSequenceAssetImported;
             SequenceAssetIndexer.sequenceAssetDeleted -= OnSequenceAssetDeleted;
             SequenceAssetIndexer.sequenceAssetUpdated -= OnSequenceAssetUpdated;
-
-#if UNITY_2022_2_OR_NEWER
-            selectionChanged -= OnTreeViewSelectionChanged;
-#else
-            onSelectionChange -= OnTreeViewSelectionChanged;
-#endif
         }
 
         protected override void InitClassListAtIndex(VisualElement ve, int index)
@@ -105,7 +93,7 @@ namespace UnityEditor.Sequences
             var data = GetItemDataForIndex<AssetCollectionTreeViewItem>(index);
             string classToEnable;
 
-            if (data != null && data.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+            if (data != null && IsItemACollection(data))
                 classToEnable = Styles.itemIconClassNames[data.collectionName];
             else if (data != null && data.treeViewItemType == AssetCollectionTreeViewItem.Type.Item)
             {
@@ -117,7 +105,7 @@ namespace UnityEditor.Sequences
             else
             {
                 var parent = GetItemDataForId<AssetCollectionTreeViewItem>(GetParentIdForIndex(index));
-                classToEnable = (parent.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+                classToEnable = IsItemACollection(parent)
                     ? Styles.prefabItemIconClassName
                     : Styles.prefabVariantItemIconClassName;
             }
@@ -161,8 +149,12 @@ namespace UnityEditor.Sequences
             var indices = selectedIndices.ToArray();
             var data = GetItemDataForIndex<AssetCollectionTreeViewItem>(indices[0]);
 
-            if (data.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+            if (selectedIndices.Count() > 1)
+                PopulateContextMenuForMultiSelection(menu);
+
+            else if (IsItemACollection(data))
                 PopulateContextMenuForAssetCollection(menu, indices[0]);
+
             else
             {
                 if (SequenceAssetUtility.IsSource(data.asset))
@@ -174,22 +166,19 @@ namespace UnityEditor.Sequences
 
         protected override void DeleteSelectedItems()
         {
-            int[] indices = selectedIndices.ToArray();
+            var items = GetSelectedItems<AssetCollectionTreeViewItem>().ToList();
+            var areCollections = items.All(item => IsItemACollection(item.data));
 
-            for (int i = indices.Length - 1; i >= 0; --i)
+            var sequenceAssets = GetSequenceAssetToDelete(items).ToList();
+            if (sequenceAssets.Count > 0 && !UserVerifications.ValidateSequenceAssetDeletion(sequenceAssets.ToList(), areCollections))
+                return;
+
+            foreach (var sequenceAsset in sequenceAssets)
             {
-                var data = GetItemDataForIndex<AssetCollectionTreeViewItem>(indices[i]);
-                if (data == null || data.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
-                    continue;
-
-                if (!UserVerifications.ValidateSequenceAssetDeletion(data.asset))
-                    return;
-
-                var parent = GetItemDataForId<AssetCollectionTreeViewItem>(GetParentIdForIndex(indices[i]));
-                if (parent.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
-                    SequenceAssetUtility.DeleteSourceAsset(data.asset);
+                if (SequenceAssetUtility.IsSource(sequenceAsset))
+                    SequenceAssetUtility.DeleteSourceAsset(sequenceAsset);
                 else
-                    SequenceAssetUtility.DeleteVariantAsset(data.asset);
+                    SequenceAssetUtility.DeleteVariantAsset(sequenceAsset);
             }
         }
 
@@ -202,7 +191,7 @@ namespace UnityEditor.Sequences
             var parentId = GetParentIdForIndex(index);
             var parent = GetItemDataForId<AssetCollectionTreeViewItem>(parentId);
 
-            if (parent.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+            if (IsItemACollection(parent))
                 return SequenceAssetUtility.GetDefaultSequenceAssetName(parent.collectionName);
 
             return SequenceAssetUtility.GetVariantName(parent.asset);
@@ -213,12 +202,12 @@ namespace UnityEditor.Sequences
             var root = GetRootElementForId(id);
             var label = root.Q<RenameableLabel>();
             var newName = label.text;
-            var assetTreeView = GetItemDataForId<AssetCollectionTreeViewItem>(id);
+            var itemData = GetItemDataForId<AssetCollectionTreeViewItem>(id);
 
-            canceled |= assetTreeView != null && string.IsNullOrWhiteSpace(newName);
+            canceled |= itemData != null && string.IsNullOrWhiteSpace(newName);
             if (canceled)
             {
-                if (assetTreeView == null)
+                if (itemData == null)
                     TryRemoveItem(id);
 
                 var index = viewController.GetIndexForId(id);
@@ -226,11 +215,11 @@ namespace UnityEditor.Sequences
                 return;
             }
 
-            newName = SequencesAssetDatabase.SanitizeFileName(newName);
+            newName = FilePathUtility.SanitizeFileName(newName);
             label.text = newName;
 
             // An asset creation is requested from the user.
-            if (assetTreeView == null)
+            if (itemData == null)
             {
                 if (string.IsNullOrWhiteSpace(newName))
                 {
@@ -245,7 +234,7 @@ namespace UnityEditor.Sequences
                 viewController.TryRemoveItem(id, false);
 
                 var parentItem = GetItemDataForId<AssetCollectionTreeViewItem>(parentId);
-                if (parentItem.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+                if (IsItemACollection(parentItem))
                     SequenceAssetUtility.CreateSource(newName, parentItem.collectionName);
                 else
                 {
@@ -253,7 +242,7 @@ namespace UnityEditor.Sequences
                 }
             }
             else
-                SequenceAssetUtility.Rename(assetTreeView.asset, assetTreeView.asset.name, newName);
+                SequenceAssetUtility.Rename(itemData.asset, itemData.asset.name, newName);
         }
 
         protected override bool CanRename(int index)
@@ -281,40 +270,43 @@ namespace UnityEditor.Sequences
 
         TreeViewItemData<AssetCollectionTreeViewItem> GenerateDataItem(string collection)
         {
+            var sources = SequenceAssetUtility.FindAllSources(collection).ToList();
+            sources.Sort((x, y) => x.name.CompareTo(y.name));
+
             var children = new List<TreeViewItemData<AssetCollectionTreeViewItem>>();
-            foreach (var sourcePrefab in SequenceAssetUtility.FindAllSources(collection))
+            foreach (var sourcePrefab in sources)
             {
                 children.Add(GenerateDataItem(collection, sourcePrefab));
             }
 
             var itemData = new AssetCollectionTreeViewItem(AssetCollectionTreeViewItem.Type.Header, collection);
-            var item = new TreeViewItemData<AssetCollectionTreeViewItem>(
-                GetNextId(),
-                itemData,
-                children);
+            var item = new TreeViewItemData<AssetCollectionTreeViewItem>(GetNextId(), itemData, children);
 
             return item;
         }
 
         TreeViewItemData<AssetCollectionTreeViewItem> GenerateDataItem(string collection, GameObject prefab)
         {
-            var itemData = new AssetCollectionTreeViewItem(AssetCollectionTreeViewItem.Type.Item, collection, prefab);
+            var variantSources = SequenceAssetUtility.GetVariants(prefab).ToList();
+            variantSources.Sort((x, y) => x.name.CompareTo(y.name));
 
             var variants = new List<TreeViewItemData<AssetCollectionTreeViewItem>>();
-            foreach (var variant in SequenceAssetUtility.GetVariants(prefab))
+            foreach (var variant in variantSources)
             {
                 var childItemData = new AssetCollectionTreeViewItem(AssetCollectionTreeViewItem.Type.Item, collection, variant);
                 var childItem = new TreeViewItemData<AssetCollectionTreeViewItem>(GetNextId(), childItemData);
                 variants.Add(childItem);
             }
 
+            var itemData = new AssetCollectionTreeViewItem(AssetCollectionTreeViewItem.Type.Item, collection, prefab);
             var item = new TreeViewItemData<AssetCollectionTreeViewItem>(GetNextId(), itemData, variants);
+
             return item;
         }
 
         int GetNextId()
         {
-            return m_IndexGenerator++;
+            return m_IdGenerator++;
         }
 
         /// <summary>
@@ -328,20 +320,22 @@ namespace UnityEditor.Sequences
 
             string type = SequenceAssetUtility.GetType(gameObject);
 
+            int parentId, childIndex;
+            AssetCollectionTreeViewItem itemData;
+
             // Duplicated Prefab or Prefab variant created from the Project View.
             if (SequenceAssetUtility.IsSource(gameObject))
-            {
-                int parentId = GetIdFor(type);
-                var itemData = new AssetCollectionTreeViewItem(AssetCollectionTreeViewItem.Type.Item, type, gameObject);
-                AddItem(new TreeViewItemData<AssetCollectionTreeViewItem>(GetNextId(), itemData), parentId);
-            }
-            else if (SequenceAssetUtility.IsVariant(gameObject))
+                parentId = GetIdFor(type);
+            else
             {
                 GameObject baseObject = SequenceAssetUtility.GetSource(gameObject);
-                int parentId = GetIdFor(baseObject);
-                var itemData = new AssetCollectionTreeViewItem(AssetCollectionTreeViewItem.Type.Item, type, gameObject);
-                AddItem(new TreeViewItemData<AssetCollectionTreeViewItem>(GetNextId(), itemData), parentId);
+                parentId = GetIdFor(baseObject);
             }
+
+            itemData = new AssetCollectionTreeViewItem(AssetCollectionTreeViewItem.Type.Item, type, gameObject);
+            childIndex = GetChildIndex(itemData.asset.name, parentId);
+
+            AddItem(new TreeViewItemData<AssetCollectionTreeViewItem>(GetNextId(), itemData), parentId, childIndex);
         }
 
         /// <summary>
@@ -357,7 +351,7 @@ namespace UnityEditor.Sequences
             {
                 var data = GetItemDataForId<AssetCollectionTreeViewItem>(id);
 
-                if (data.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+                if (IsItemACollection(data))
                     continue;
 
                 if (data.asset == null)
@@ -372,22 +366,24 @@ namespace UnityEditor.Sequences
             foreach (var id in viewController.GetAllItemIds())
             {
                 var data = GetItemDataForId<AssetCollectionTreeViewItem>(id);
-                if (data.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+                if (IsItemACollection(data))
                     continue;
 
                 if (data.asset == sequenceAsset)
                 {
-                    RefreshItem(viewController.GetIndexForId(id));
-                    break;
+                    var parentId = viewController.GetParentId(id);
+                    var childIndex = GetChildIndex(sequenceAsset.name, parentId);
+                    viewController.Move(id, parentId, childIndex);
+                    return;
                 }
             }
         }
 
-        void OnTreeViewSelectionChanged(IEnumerable<object> objs)
+        protected override void OnSelectionChanged(IEnumerable<object> objects)
         {
-            foreach (AssetCollectionTreeViewItem item in objs)
+            foreach (AssetCollectionTreeViewItem item in objects)
             {
-                if (item == null || item.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+                if (item == null || IsItemACollection(item))
                     continue;
 
                 SelectionUtility.SetSelection(item.asset);
@@ -415,7 +411,7 @@ namespace UnityEditor.Sequences
             foreach (var id in viewController.GetAllItemIds())
             {
                 var data = GetItemDataForId<AssetCollectionTreeViewItem>(id);
-                if (data.treeViewItemType == AssetCollectionTreeViewItem.Type.Header)
+                if (IsItemACollection(data))
                     continue;
 
                 if (data.asset == asset)
@@ -425,10 +421,69 @@ namespace UnityEditor.Sequences
             return -1;
         }
 
+        int GetChildIndex(string assetName, int parentId)
+        {
+            var idList = viewController.GetChildrenIds(parentId);
+
+            foreach (var siblingId in idList)
+            {
+                var siblingItem = GetItemDataForId<AssetCollectionTreeViewItem>(siblingId);
+                if (siblingItem == null)
+                    continue;
+
+                if (assetName.CompareTo(siblingItem.asset.name) < 0)
+                    return viewController.GetChildIndexForId(siblingId);
+            }
+
+            return -1;
+        }
+
         internal void BeginSequenceAssetCreation(string assetCollection)
         {
             int id = GetIdFor(assetCollection);
             BeginItemCreation<AssetCollectionTreeViewItem>(id);
+        }
+
+        bool IsItemACollection(AssetCollectionTreeViewItem item)
+        {
+            return item.treeViewItemType == AssetCollectionTreeViewItem.Type.Header;
+        }
+
+        /// <summary>
+        /// Return the actual list of sequence assets to delete.
+        /// - If there is a collection in the selection, then we return all its child sequence asset if any.
+        /// - If a sequence asset source and one or multiple of its variant are selected, we only return the source.
+        /// </summary>
+        IEnumerable<GameObject> GetSequenceAssetToDelete(IList<TreeViewItemData<AssetCollectionTreeViewItem>> selection)
+        {
+            var selectedSequenceAssets = selection.Select(item => item.data.asset).ToList();
+            foreach (var item in selection)
+            {
+                if (!IsItemACollection(item.data))
+                {
+                    var sequenceAsset = item.data.asset;
+                    if (SequenceAssetUtility.IsVariant(sequenceAsset))
+                    {
+                        // If the selected item is a Sequence Asset variant only yield it if its parent source asset is
+                        // not as well in the list of asset to delete.
+                        var sourceAsset = SequenceAssetUtility.GetSource(sequenceAsset);
+                        if (!selectedSequenceAssets.Contains(sourceAsset))
+                            yield return sequenceAsset;
+                    }
+                    else
+                        yield return sequenceAsset;
+
+                    continue;
+                }
+
+                // If the selected item is a collection, yield all its Sequence Asset children.
+                foreach (var childItem in item.children)
+                {
+                    var sequenceAsset = childItem.data.asset;
+                    if (!selectedSequenceAssets.Contains(sequenceAsset))
+                        yield return sequenceAsset;
+                }
+            }
         }
     }
 }
