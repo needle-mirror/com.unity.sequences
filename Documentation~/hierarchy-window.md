@@ -18,7 +18,7 @@ You can convert any Sequence GameObject into a Prefab. However, this choice come
 
 The Unity Editor does not prevent you from deleting GameObjects that represent Sequences in the Hierarchy window.
 
-However, as these GameObjects use specific functional assets (Timelines and script) that make them compatible with the Sequences package features, you should preferably [delete your Sequences through the Sequences window](sequences-window.md#deleting-sequences) to prevent them from becoming invalid.
+However, as these GameObjects use specific functional assets (Timelines and script) that make them compatible with the Sequences package features, you should preferably [delete your Sequences through the Sequences window](create-and-manage-sequences.md#deleting-sequences) to prevent them from becoming invalid.
 
 ![](images/sequences-window-missing-gameobject.png)
 <br />_Example: Sequence and Sequence child that became invalid in the Sequences window after deletion of their GameObjects from the Hierarchy._

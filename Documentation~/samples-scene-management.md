@@ -58,7 +58,7 @@ The activation/deactivation of each Scene in the sample is driven through a Scen
 3. In the Sequences window, select **shot_20**, and notice it also has a Scene Activation track. This track drives the activation of the **shot_20_lights.unity** Scene during the **shot_20** Sequence time range.
 
 >**See also:**
->* [Setting up Scene activation in a Sequence](sequences-window.md#setting-up-scene-activation-in-a-sequence)
+>* [Setting up Scene activation in a Sequence](scene-management.md#setting-up-scene-activation-in-a-sequence)
 >* [Scene Activation track in Timeline](timeline-window.md#scene-activation-track).
 
 
@@ -95,6 +95,6 @@ To understand how a Scene Loading Policy works in the Play mode context:
   Notice the **shot_20_lights.unity** Scene is unloaded, as it was before you entered the Play mode.
 
 >**See also:**
->* [Loading Scenes contextually](sequences-window.md#loading-scenes-contextually)
->* [Setting up a Scene Loading Policy](sequences-window.md#setting-up-a-scene-loading-policy)
+>* [Loading Scenes contextually](scene-management.md#loading-scenes-contextually)
+>* [Setting up a Scene Loading Policy](scene-management.md#setting-up-a-scene-loading-policy)
 >* [Scene Loading Policy component](ref-components.md#scene-loading-policy)

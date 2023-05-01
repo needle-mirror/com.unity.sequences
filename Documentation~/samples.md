@@ -10,14 +10,7 @@ The Sequences package includes a sample that helps you practice with Scene Activ
 
 A short cartoon called MICH-L, made with Sequences, is available for free to Unity users.
 
-To get it:
-
-* **With Unity Editor 2020.3 LTS only:**
-  <br />Download the _Cinematic Studio Sample_ from the [Unity Asset Store](https://u3d.as/2sMa) and import it in your current project.
-
-* **With Unity Editor 2021.2.2 and later:**
-  <br />Create a new project using the _Cinematic Studio Template_ from the [Unity Hub](https://docs.unity3d.com/Manual/GettingStartedUnityHub.html).
-  <br />**Note:** The Cinematic Studio Template is not compatible with Unity Editor 2021.2.1.
+To get it, create a new project using the _Cinematic Studio Template_ from the [Unity Hub](https://docs.unity3d.com/Manual/GettingStartedUnityHub.html).
 
 ## Unity Learn tutorials
 

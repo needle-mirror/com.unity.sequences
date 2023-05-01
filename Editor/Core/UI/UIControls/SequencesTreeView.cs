@@ -138,7 +138,7 @@ namespace UnityEditor.Sequences
             scrollViewContainer.RegisterCallback<KeyDownEvent>(OnKeyDownEvent);
             scrollViewContainer.RegisterCallback<ValidateCommandEvent>(OnValidateCommandEvent);
             scrollViewContainer.RegisterCallback<ExecuteCommandEvent>(OnExecuteCommandEvent);
-            scrollViewContainer.RegisterCallback<FocusEvent>(OnFocusEvent);
+            scrollViewContainer.RegisterCallback<FocusEvent>(OnFocusEvent, TrickleDown.TrickleDown);
 #if UNITY_2022_2_OR_NEWER
             selectionChanged += OnSelectionChanged;
 #else

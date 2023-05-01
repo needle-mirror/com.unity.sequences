@@ -67,7 +67,7 @@ When a Sequence uses a Scene that needs to be activated in its specific context,
 ![](images/timeline-scene-activation-track.png)
 <br />*Example: Timeline of a Sequence with one Scene Activation track.*
 
->**Important:** To actually see a Scene in your Scene and Game views when Unity activates it through a Scene Activation track, you must ensure to have previously additively loaded it along with the Scene that contains your Sequences structure. For convenience, the Sequences package allows you to [load Scenes in context](sequences-window.md#loading-scenes-contextually).
+>**Important:** To actually see a Scene in your Scene and Game views when Unity activates it through a Scene Activation track, you must ensure to have previously additively loaded it along with the Scene that contains your Sequences structure. For convenience, the Sequences package allows you to [load Scenes in context](scene-management.md#loading-scenes-contextually).
 
 The Sequences package automatically creates and configures Scene Activation tracks when you create a Scene for a Sequence through the Sequences window.
 

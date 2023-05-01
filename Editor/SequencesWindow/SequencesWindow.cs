@@ -37,7 +37,9 @@ namespace UnityEditor.Sequences
 
                 if (isSearching)
                 {
-                    evt.PreventDefault();
+#if !UNITY_2023_2_OR_NEWER
+                    evt.PreventDefault(); // Obsolete in 2023.2+
+#endif
                     evt.StopImmediatePropagation();
                     searchField.value = string.Empty;
                 }
