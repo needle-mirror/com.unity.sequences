@@ -357,7 +357,7 @@ namespace UnityEditor.Sequences
                 if (data.asset == null)
                     viewController.TryRemoveItem(id, false);
             }
-            viewController.RebuildTree();
+            RebuildTree();
             RefreshItems();
         }
 

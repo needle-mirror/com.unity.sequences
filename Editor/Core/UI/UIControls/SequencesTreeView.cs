@@ -486,5 +486,14 @@ namespace UnityEditor.Sequences
             }
             return null;
         }
+
+        internal void RebuildTree()
+        {
+#if UNITY_2023_3_OR_NEWER
+            return;
+#else
+            viewController.RebuildTree();
+#endif
+        }
     }
 }

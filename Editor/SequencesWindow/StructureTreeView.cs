@@ -102,7 +102,7 @@ namespace UnityEditor.Sequences
                 }
             }
 
-            viewController.RebuildTree();
+            RebuildTree();
             RefreshItems();
         }
 
@@ -456,7 +456,7 @@ namespace UnityEditor.Sequences
                 }
             }
 
-            viewController.RebuildTree();
+            RebuildTree();
             RefreshItems();
         }
 
@@ -471,6 +471,7 @@ namespace UnityEditor.Sequences
 
             var id = sequence.timeline.GetHashCode();
             var parentId = viewController.GetParentId(id);
+            var wasExpanded = viewController.IsExpanded(id);
 
             var removeSuccess = viewController.TryRemoveItem(id, false);
             var childIndex = GetChildIndex(sequence, parentId);
@@ -478,18 +479,22 @@ namespace UnityEditor.Sequences
             var newItemData = GenerateDataItem(sequence);
 
             AddItem(newItemData, parentId, childIndex);
+            // Check if the item being removed was expanded, if true, we re-expand the new copy.
+			if (wasExpanded)
+				viewController.ExpandItem(newItemData.id, false);
         }
 
         void OnSequencesRemoved()
         {
             RemoveBrokenItems();
-            viewController.RebuildTree();
+            RebuildTree();
             RefreshItems();
         }
 
         void RemoveBrokenItems()
         {
-            foreach (var id in viewController.GetRootItemIds())
+            var rootItemIds = viewController.GetRootItemIds().ToArray();
+            foreach (var id in rootItemIds)
             {
                 var itemData = GetItemDataForId(id);
                 if (itemData == null)
@@ -528,8 +533,9 @@ namespace UnityEditor.Sequences
         {
             var legacyMasterSequences = MasterSequenceUtility.GetLegacyMasterSequences().ToList();
             var didRemoveItem = false;
+            var rootItemIds = viewController.GetRootItemIds().ToArray();
 
-            foreach (var id in viewController.GetRootItemIds())
+            foreach (var id in rootItemIds)
             {
                 var itemData = GetItemDataForId(id);
 
@@ -539,7 +545,7 @@ namespace UnityEditor.Sequences
 
             if (didRemoveItem)
             {
-                viewController.RebuildTree();
+                RebuildTree();
                 RefreshItems();
             }
         }
