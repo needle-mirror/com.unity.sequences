@@ -7,7 +7,7 @@ namespace UnityEditor.Sequences
     /// <summary>
     ///
     /// </summary>
-    [FilePath("Library/QuickSequenceAsset.index", FilePathAttribute.Location.ProjectFolder)]
+    [FilePath("Library/SequenceAssetCache.index", FilePathAttribute.Location.ProjectFolder)]
     class SequenceAssetIndexer : ScriptableSingleton<SequenceAssetIndexer>
     {
         [InitializeOnLoadMethod]
@@ -35,6 +35,7 @@ namespace UnityEditor.Sequences
         {
             foreach (GameObject go in SequencesAssetDatabase.FindAllSequenceAssets())
                 instance.AddSequenceAsset(go);
+            instance.Save(true);
         }
 
         [Serializable]

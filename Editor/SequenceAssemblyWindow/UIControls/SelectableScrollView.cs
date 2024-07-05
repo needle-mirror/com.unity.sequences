@@ -3,12 +3,19 @@ using System.Linq;
 
 namespace UnityEngine.UIElements
 {
+#if UNITY_2023_3_OR_NEWER
+    [UxmlElement]
+    partial class SelectableScrollView : ScrollView
+#else
     class SelectableScrollView : ScrollView
+#endif
     {
         public new static readonly string ussClassName = "seq-list-content";
         public static readonly string itemUssClassName = "seq-list-item";
         public static readonly string itemSelectedVariantUssClassName = itemUssClassName + "--selected";
+#if !UNITY_2023_3_OR_NEWER
         public new class UxmlFactory : UxmlFactory<SelectableScrollView, UxmlTraits> {}
+#endif
 
         public static Action<SelectableScrollView, SelectableScrollViewItem> itemSelected;
 

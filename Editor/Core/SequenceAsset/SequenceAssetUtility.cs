@@ -104,8 +104,8 @@ namespace UnityEditor.Sequences
         public static GameObject CreateVariant(GameObject source, string name = null, bool instantiate = false)
         {
             if (!IsSource(source))
-                throw new SequenceAssetException("Invalid source Prefab. It must be a Regular Prefab with the " +
-                    "SequenceAsset component on it.");
+                throw new SequenceAssetException("\"" + source.name + "\" is not a valid source Prefab. It must be a " +
+                    "Regular Prefab with the SequenceAsset component on it.");
 
             var sourceInstance = (GameObject)PrefabUtility.InstantiatePrefab(source);
 
@@ -168,8 +168,8 @@ namespace UnityEditor.Sequences
         public static bool DeleteSourceAsset(GameObject source, bool deleteVariants = true)
         {
             if (!IsSource(source))
-                throw new SequenceAssetException("Invalid Sequence Asset Prefab source. It must have a " +
-                    "'SequenceAsset' component and be a Regular prefab.");
+                throw new SequenceAssetException("\"" + source.name + "\" is not a valid Sequence Asset Prefab source. " +
+                    "It must have a 'SequenceAsset' component and be a Regular prefab.");
 
             var isSuccess = true;
             if (deleteVariants)
@@ -455,8 +455,8 @@ namespace UnityEditor.Sequences
         {
             var sequenceAsset = prefab.GetComponent<SequenceAsset>();
             if (sequenceAsset == null)
-                throw new SequenceAssetException("The specified Prefab is not a Sequence Asset. Sequence " +
-                    "Asset Prefabs must have the 'SequenceAsset' component.)");
+                throw new SequenceAssetException("The specified Prefab \"" + prefab.name + "\" is not a Sequence Asset. " +
+                    "Sequence Asset Prefabs must have the 'SequenceAsset' component.");
 
             return sequenceAsset.type;
         }
@@ -472,8 +472,8 @@ namespace UnityEditor.Sequences
         public static GameObject GetSource(GameObject prefab)
         {
             if (!IsSequenceAsset(prefab))
-                throw new SequenceAssetException("The specified Prefab is not a Sequence Asset or a Variant of one. " +
-                    "It must have a 'SequenceAsset' component.");
+                throw new SequenceAssetException("The specified Prefab \"" + prefab.name + "\" is not a Sequence Asset " +
+                    "or a Variant of one. It must have a 'SequenceAsset' component.");
 
             return PrefabUtility.GetCorrespondingObjectFromOriginalSource(prefab);
         }
@@ -488,8 +488,8 @@ namespace UnityEditor.Sequences
         public static IEnumerable<GameObject> GetVariants(GameObject source)
         {
             if (!IsSource(source))
-                throw new SequenceAssetException("Invalid Sequence Asset source Prefab. It must be a regular " +
-                    "Prefab and have a 'SequenceAsset' component.");
+                throw new SequenceAssetException("\"" + source.name + "\" is not a valid Sequence Asset source Prefab. " +
+                    "It must be a regular Prefab and have a 'SequenceAsset' component.");
 
             var index = SequenceAssetIndexer.instance.GetIndexOf(source);
             return index < 0 ? new GameObject[] {} : SequenceAssetIndexer.instance.indexes[index].variants;
@@ -552,8 +552,8 @@ namespace UnityEditor.Sequences
         internal static GameObject GetAssetFromInstance(GameObject instance)
         {
             if (!IsSequenceAsset(instance))
-                throw new SequenceAssetException("The specified Prefab instance is not a Sequence Asset or a Variant " +
-                    "of one. It must have a 'SequenceAsset' component.");
+                throw new SequenceAssetException("The specified Prefab \"" + instance.name + "\" is not a Sequence Asset" +
+                    " or a Variant of one. It must have a 'SequenceAsset' component.");
 
             if (PrefabUtility.IsPartOfPrefabAsset(instance))
                 return instance;
@@ -612,7 +612,8 @@ namespace UnityEditor.Sequences
         {
             var timeline = sequenceDirector.playableAsset as TimelineAsset;
             if (timeline == null)
-                throw new SequenceAssetException("Invalid Sequence's PlayableDirector. This director doesn't control any timeline.");
+                throw new SequenceAssetException("\"" + sequenceDirector.name + "\"  is not a valid  Sequence's " +
+                    "PlayableDirector. This director doesn't control any timeline.");
 
             foreach (var clip in timeline.GetSequenceAssetClips())
             {

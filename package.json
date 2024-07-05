@@ -2,7 +2,7 @@
   "displayName": "Sequences",
   "name": "com.unity.sequences",
   "unity": "2022.1",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "dependencies": {
     "com.unity.timeline": "1.6.3",
     "com.unity.recorder": "2.5.5",
@@ -11,19 +11,19 @@
   },
   "description": "Efficiently create movies, game cinematics or any other linear content.\nOrganize your project's editorial structure and your creative content, assemble the elements for easy authoring and collaboration, and try out new ideas in a non-destructive way.",
   "relatedPackages": {
-    "com.unity.sequences.tests": "2.1.1"
+    "com.unity.sequences.tests": "2.1.2"
   },
   "_upm": {
-    "changelog": "### Fixed\n* Prevent unexpected path error when switching the Editor from dark theme to light theme."
+    "changelog": "### Changed\n* Renamed the Sequence Asset Indexer file for consistency.\n\n### Fixed\n* Prevent calls to `InitializeWithExistingData()` when there are no sequences in the project."
   },
   "upmCi": {
-    "footprint": "87d75dc630e6582965fdac85ba5c109ac389ea64"
+    "footprint": "bca4731b762699e38f51ab1d61d0eb2eda501c91"
   },
   "documentationUrl": "https://docs.unity3d.com/Packages/com.unity.sequences@2.1/manual/index.html",
   "repository": {
     "url": "https://github.com/Unity-Technologies/com.unity.sequences.git",
     "type": "git",
-    "revision": "15614c605852d6c3143fd62db4ca99e067847e22"
+    "revision": "cb69beaac398c016ae9b3949f505a586c479bff5"
   },
   "samples": [
     {

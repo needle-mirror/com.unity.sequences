@@ -5,13 +5,19 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.Sequences
 {
+#if UNITY_2023_3_OR_NEWER
+    [UxmlElement]
+#endif
     partial class SequenceAssetFoldoutItem : SelectableScrollViewItem, INotifyValueChanged<bool>
     {
+#if !UNITY_2023_3_OR_NEWER
         public new class UxmlFactory : UxmlFactory<SequenceAssetFoldoutItem, UxmlTraits> {}
+#endif
 
         static readonly string ussFoldoutDepthClassName = "unity-foldout--depth-";
         static readonly int ussFoldoutMaxDepth = 4;
 
+#if !UNITY_2023_3_OR_NEWER
         public new class UxmlTraits : BindableElement.UxmlTraits
         {
             UxmlBoolAttributeDescription m_Value = new UxmlBoolAttributeDescription { name = "value", defaultValue = true };
@@ -27,6 +33,7 @@ namespace UnityEditor.Sequences
                 }
             }
         }
+#endif
 
         public event Action<SequenceAssetFoldoutItem, GameObject, GameObject> newVariantSelection;
 
@@ -48,6 +55,9 @@ namespace UnityEditor.Sequences
 
         [SerializeField] bool m_Value;
 
+#if UNITY_2023_3_OR_NEWER
+        [UxmlAttribute]
+#endif
         public bool value
         {
             get => m_Value;

@@ -4,9 +4,16 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.Sequences
 {
+#if UNITY_2023_3_OR_NEWER
+    [UxmlElement]
+    partial class SequenceAssetInstanceItem : SelectableScrollViewItem
+#else
     class SequenceAssetInstanceItem : SelectableScrollViewItem
+#endif
     {
+#if !UNITY_2023_3_OR_NEWER
         public new class UxmlFactory : UxmlFactory<SequenceAssetFoldoutItem, UxmlTraits> {}
+#endif
 
         static readonly string ussClassName = "unity-asset-instance";
 
