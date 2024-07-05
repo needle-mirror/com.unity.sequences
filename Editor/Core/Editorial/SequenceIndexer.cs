@@ -70,6 +70,7 @@ namespace UnityEditor.Sequences
                     instance.TraverseAndProcess(timeline);
             }
 
+            instance.Save(true);
             indexerInitialized?.Invoke();
         }
 
