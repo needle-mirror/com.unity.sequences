@@ -1,5 +1,7 @@
 # Understand Sequence's state
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 ### Instantiating a Sequence in the active Scene
 
 If a Sequence structure (a Master Sequence and its Sequences) in the Sequences window is gray because the Scene that contains it was removed or unloaded, you can create an instance of the Sequence structure in the active Scene. You can use this feature to make orphaned Sequences editable and to move Sequences to a different Scene before you add Sequence Assets or other creative content.

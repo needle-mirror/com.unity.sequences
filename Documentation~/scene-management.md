@@ -1,5 +1,7 @@
 # Scene management
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 ## Setting up Scene activation in a Sequence
 
 To create a new Scene and have it activated during the time of a specific Sequence:

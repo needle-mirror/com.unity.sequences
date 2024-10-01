@@ -1,5 +1,7 @@
 # Hierarchy window
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 From the Sequences package perspective, the Hierarchy window contains all GameObjects that correspond to the sequences of the Editorial structure you created through the [Sequences window](sequences-window.md). It also contains the GameObjects or Prefabs that represent all the creative content you include in each sequence.
 
 ## Editing your Editorial structure

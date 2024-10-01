@@ -1,5 +1,7 @@
 # Create and manage Sequence Assets
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 ## Creating a Sequence Asset
 
 To create a new Sequence Asset:

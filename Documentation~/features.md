@@ -1,5 +1,7 @@
 # Features & integrations
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 The Sequences package includes cinematics-dedicated features and integrates with other features of the Unity Editor. The following table lists the Unity Editor windows that you can use to perform specific tasks through these features.
 
 | **Window** | **Tasks** |

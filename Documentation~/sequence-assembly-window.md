@@ -1,5 +1,7 @@
 # Sequence Assembly window
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 The Sequence Assembly window allows you to populate your Sequences with Sequence Assets and swap Sequence Asset Variants. From this window, you can also create and manage Sequence Assets and Variants in context.
 
 To open the Sequence Assembly window, from the main menu of the Editor, select **Window > Sequencing > Sequence Assembly**.

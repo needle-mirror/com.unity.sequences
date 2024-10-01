@@ -1,5 +1,7 @@
 # Scene Management (sample)
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 Use this sample to practice with Scene Activation tracks and Scene loading features in Sequences.
 
 >**Before you begin:** Make sure to have the [Sequences](sequences-window.md) and [Timeline](timeline-window.md) windows open in the Editor.

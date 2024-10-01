@@ -1,5 +1,7 @@
 # Sequence Assets window
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 Use the Sequence Assets window to create and manage categorized [Sequence Assets and Variants](concepts.md#sequence-assets) that you can use in your Sequences.
 
 To open the Sequence Assets window, from the main menu of the Editor, select **Window > Sequencing > Sequence Assets**.

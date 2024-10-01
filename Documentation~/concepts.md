@@ -1,5 +1,7 @@
 # Concepts and terminology
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 This section describes the main elements involved in a cinematic as they appear
 in the Sequences features, and explains their mutual relationships.
 

@@ -1,5 +1,7 @@
 # Populate Sequences with Sequence Assets
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 ## Adding a Sequence Asset
 
 Use this method to add Sequence Assets that you previously created in your Asset Collections.

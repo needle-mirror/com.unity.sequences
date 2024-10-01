@@ -1,5 +1,7 @@
 # Reference: Components
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 This page lists all components that are available through the Sequences package.
 
 ## Scene Loading Policy

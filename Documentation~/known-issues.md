@@ -1,5 +1,7 @@
 # Known issues and limitations
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 This page lists some known issues and limitations that you might experience with the Sequences package. It also gives basic instructions to help you work around them when possible.
 
 #### All sequences suffixed with _\_Timeline_ in the Sequences window

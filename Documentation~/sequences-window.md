@@ -1,5 +1,7 @@
 # Sequences window
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 Use the Sequences window to create, organize and browse through the [Editorial structure](concepts.md#editorial) of the Sequences you’re working on.
 
 To open the Sequences window, from the main menu of the Editor, select **Window > Sequencing > Sequences**.

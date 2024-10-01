@@ -1,5 +1,7 @@
 # Under the hood
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 The Sequences features automatically create, configure and update for you all the asset files and folders as well as the GameObjects and hierarchy to help you keep your focus on your cinematic creation.
 
 ## Sequences package underlying processes

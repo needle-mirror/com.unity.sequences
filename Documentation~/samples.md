@@ -1,5 +1,7 @@
 # Samples and tutorials
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 ## Included sample
 
 The Sequences package includes a sample that helps you practice with Scene Activation tracks and Scene loading features in Sequences:

@@ -1,5 +1,7 @@
 # Create and manage an editorial structure
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 ## Creating a Sequence
 
 To create a Master Sequence, select the **+** (plus) button at the top left of the Sequences window, then select **Create Master Sequence**.

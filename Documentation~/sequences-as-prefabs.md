@@ -1,5 +1,7 @@
 # Managing Sequences as Prefabs
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 Unity doesn't prevent you from converting a [Sequence GameObject](under-the-hood.md#sequence-gameobjects) of your [Editorial structure](concepts.md#editorial-structure) into a [Prefab](https://docs.unity3d.com/Manual/Prefabs.html). However, this choice comes with a few side effects you should be aware of, mostly because of the inherent characteristics and behaviors of Prefabs in Unity.
 
 

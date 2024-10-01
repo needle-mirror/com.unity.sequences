@@ -1,5 +1,7 @@
 # Export
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 ## Recording a Sequence
 
 You can access the Recorder window directly from a selected Sequence. The FPS rate and the Start-and-End frames of the Sequence are automatically applied to any Recorders created for it. A Recorder can export rendered video, an animation, audio, or a specific render pass.

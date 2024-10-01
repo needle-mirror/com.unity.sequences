@@ -1,5 +1,7 @@
 # Timeline window
 
+[!INCLUDE [banner-message](banner-message.md)]
+
 In the context of the Sequences package, the Timeline window allows you to edit, reorder and trim all Sequences and clips of your cinematic, and play them back for preview purposes.
 
 To open the Timeline window, from the main menu of the Editor, select **Window > Sequencing > Timeline**.
